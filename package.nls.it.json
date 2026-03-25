@@ -1,0 +1,19 @@
+{
+  "aiCommitLite.displayName": "AI Commit Lite",
+  "aiCommitLite.description": "Genera messaggi di commit convenzionali utilizzando l'IA (OpenAI/Azure/DeepSeek/Gemini)",
+  "aiCommitLite.generateCommit": "Genera messaggio di commit con IA",
+  "aiCommitLite.configuration": "Impostazioni AI Commit Lite",
+  "aiCommitLite.apiProvider": "Fornitore di API IA da utilizzare",
+  "aiCommitLite.apiKey": "Chiave API per il fornitore selezionato",
+  "aiCommitLite.apiEndpoint": "URL di base dell'API per fornitori Azure o compatibili con OpenAI. Solitamente dovrebbe terminare con `/v1`. Esempi: `https://api.openai.com/v1`, `https://api.deepseek.com/v1`. Non utilizzare un URL della pagina iniziale o della documentazione del sito web.",
+  "aiCommitLite.model": "Nome del modello da utilizzare (es: gpt-3.5-turbo, gpt-4, deepseek-chat, gemini-pro)",
+  "aiCommitLite.language": "Lingua per i messaggi di commit",
+  "aiCommitLite.useGitmoji": "Includere Gitmoji nei messaggi di commit",
+  "aiCommitLite.customSystemPrompt": "Prompt di sistema personalizzato per l'IA (facoltativo)",
+  "aiCommitLite.conventionalCommits": "Seguire la specifica Conventional Commits",
+  "aiCommitLite.temperature": "Temperatura per la generazione IA (più alto = più creativo)",
+  "aiCommitLite.maxTokens": "Massimo token per risposta IA",
+  "aiCommitLite.contextExcludePatterns": "Modelli Glob per file preparati che devono essere riassunti invece di inviare il diff completo al contesto IA",
+  "aiCommitLite.maxDiffCharacters": "Numero massimo di caratteri diff inviati all'IA dopo il filtraggio e il riepilogo",
+  "aiCommitLite.maxFileDiffCharacters": "Numero massimo di caratteri diff da un singolo file prima del troncamento"
+}

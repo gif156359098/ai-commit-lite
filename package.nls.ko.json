@@ -1,0 +1,19 @@
+{
+  "aiCommitLite.displayName": "AI Commit Lite",
+  "aiCommitLite.description": "AI를 사용하여 전통적인 커밋 메시지 생성 (OpenAI/Azure/DeepSeek/Gemini)",
+  "aiCommitLite.generateCommit": "AI 커밋 메시지 생성",
+  "aiCommitLite.configuration": "AI Commit Lite 설정",
+  "aiCommitLite.apiProvider": "사용할 AI API 공급자",
+  "aiCommitLite.apiKey": "선택한 공급자의 API 키",
+  "aiCommitLite.apiEndpoint": "Azure 또는 OpenAI 호환 공급자의 API 기본 URL. 일반적으로 `/v1`로 끝납니다. 예: `https://api.openai.com/v1`, `https://api.deepseek.com/v1`. 웹사이트 홈페이지나 문서 페이지 URL은 사용하지 마세요.",
+  "aiCommitLite.model": "사용할 모델 이름 (예: gpt-3.5-turbo, gpt-4, deepseek-chat, gemini-pro)",
+  "aiCommitLite.language": "커밋 메시지의 언어",
+  "aiCommitLite.useGitmoji": "커밋 메시지에 Gitmoji 포함",
+  "aiCommitLite.customSystemPrompt": "AI용 사용자 정의 시스템 프롬프트 (선택 사항)",
+  "aiCommitLite.conventionalCommits": "전통적인 커밋 사양 준수",
+  "aiCommitLite.temperature": "AI 생성 온도 (높을수록 창의적)",
+  "aiCommitLite.maxTokens": "AI 응답의 최대 토큰 수",
+  "aiCommitLite.contextExcludePatterns": "AI 컨텍스트에 전체 diff를 전송하는 대신 요약해야 하는 스테이징된 파일의 Glob 패턴",
+  "aiCommitLite.maxDiffCharacters": "필터링 및 요약 후 AI에 전송할 diff의 최대 문자 수",
+  "aiCommitLite.maxFileDiffCharacters": "잘라내기 전에 단일 파일에서 AI에 전송할 최대 diff 문자 수"
+}

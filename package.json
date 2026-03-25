@@ -1,0 +1,321 @@
+{
+  "name": "ai-commit-lite",
+  "displayName": "%aiCommitLite.displayName%",
+  "description": "%aiCommitLite.description%",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gif156359098/ai-commit-lite.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "l10n": "./package.nls",
+  "contributes": {
+    "icons": {
+      "ai-commit-lite-status-bar": {
+        "description": "AI Commit Lite status bar icon",
+        "default": {
+          "fontPath": "./resources/icons/ai-commit-lite-icons.woff",
+          "fontCharacter": "\\E001"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "ai-commit-lite.generateCommit",
+        "title": "%aiCommitLite.generateCommit%",
+        "category": "AI Commit Lite",
+        "icon": {
+          "light": "resources/light/generate-commit.svg",
+          "dark": "resources/dark/generate-commit.svg"
+        }
+      },
+      {
+        "command": "ai-commit-lite.switchProfile",
+        "title": "%aiCommitLite.switchProfile%",
+        "category": "AI Commit Lite"
+      },
+      {
+        "command": "ai-commit-lite.addProfile",
+        "title": "%aiCommitLite.addProfile%",
+        "category": "AI Commit Lite"
+      },
+      {
+        "command": "ai-commit-lite.editProfile",
+        "title": "%aiCommitLite.editProfile%",
+        "category": "AI Commit Lite"
+      },
+      {
+        "command": "ai-commit-lite.deleteProfile",
+        "title": "%aiCommitLite.deleteProfile%",
+        "category": "AI Commit Lite"
+      },
+      {
+        "command": "ai-commit-lite.openProfileManager",
+        "title": "%aiCommitLite.openProfileManager%",
+        "category": "AI Commit Lite"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "ai-commit-lite.generateCommit",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "%aiCommitLite.configuration%",
+      "properties": {
+        "aiCommitLite.language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "zh-cn",
+            "ja",
+            "ko",
+            "es",
+            "fr",
+            "de",
+            "ru",
+            "pt",
+            "it"
+          ],
+          "default": "en",
+          "order": 1,
+          "description": "%aiCommitLite.language%"
+        },
+        "aiCommitLite.useGitmoji": {
+          "type": "boolean",
+          "default": true,
+          "order": 2,
+          "description": "%aiCommitLite.useGitmoji%"
+        },
+        "aiCommitLite.customSystemPrompt": {
+          "type": "string",
+          "default": "",
+          "order": 3,
+          "description": "%aiCommitLite.customSystemPrompt%"
+        },
+        "aiCommitLite.conventionalCommits": {
+          "type": "boolean",
+          "default": true,
+          "order": 4,
+          "description": "%aiCommitLite.conventionalCommits%"
+        },
+        "aiCommitLite.commitMessageStyle": {
+          "type": "string",
+          "enum": [
+            "detailed",
+            "concise"
+          ],
+          "default": "detailed",
+          "order": 5,
+          "description": "%aiCommitLite.commitMessageStyle%"
+        },
+        "aiCommitLite.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 2,
+          "order": 6,
+          "description": "%aiCommitLite.temperature%"
+        },
+        "aiCommitLite.maxTokens": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 100,
+          "maximum": 4000,
+          "order": 7,
+          "description": "%aiCommitLite.maxTokens%"
+        },
+        "aiCommitLite.maxDiffCharacters": {
+          "type": "number",
+          "default": 24000,
+          "minimum": 4000,
+          "maximum": 200000,
+          "order": 8,
+          "description": "%aiCommitLite.maxDiffCharacters%"
+        },
+        "aiCommitLite.maxFileDiffCharacters": {
+          "type": "number",
+          "default": 8000,
+          "minimum": 1000,
+          "maximum": 50000,
+          "order": 9,
+          "description": "%aiCommitLite.maxFileDiffCharacters%"
+        },
+        "aiCommitLite.profiles": {
+          "type": "array",
+          "default": [],
+          "order": 10,
+          "description": "%aiCommitLite.profiles%",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for this profile"
+              },
+              "label": {
+                "type": "string",
+                "description": "Display name shown in settings and quick pick"
+              },
+              "provider": {
+                "type": "string",
+                "enum": ["openai", "azure", "deepseek", "gemini", "anthropic", "cohere", "mistral", "dashscope", "openai-compatible", "custom"],
+                "description": "AI provider type"
+              },
+              "model": {
+                "type": "string",
+                "description": "Model name to use"
+              },
+              "baseUrl": {
+                "type": "string",
+                "description": "Provider API base URL"
+              }
+            },
+            "required": ["id", "label", "provider", "model"]
+          }
+        },
+        "aiCommitLite.activeProfile": {
+          "type": "string",
+          "default": "",
+          "order": 11,
+          "description": "%aiCommitLite.activeProfile%"
+        },
+        "aiCommitLite.enableAutoFallback": {
+          "type": "boolean",
+          "default": true,
+          "order": 12,
+          "description": "%aiCommitLite.enableAutoFallback%"
+        },
+        "aiCommitLite.profileFallbackOrder": {
+          "type": "array",
+          "default": [],
+          "order": 13,
+          "description": "%aiCommitLite.profileFallbackOrder%",
+          "items": {
+            "type": "string"
+          }
+        },
+        "aiCommitLite.contextExcludePatterns": {
+          "type": "array",
+          "order": 14,
+          "default": [
+            "**/package-lock.json",
+            "**/npm-shrinkwrap.json",
+            "**/pnpm-lock.yaml",
+            "**/yarn.lock",
+            "**/bun.lockb",
+            "**/Cargo.lock",
+            "**/composer.lock",
+            "**/Gemfile.lock",
+            "**/Pipfile.lock",
+            "**/poetry.lock",
+            "**/Podfile.lock",
+            "**/packages.lock.json",
+            "**/*.min.js",
+            "**/*.min.css",
+            "**/*.map",
+            "**/*.png",
+            "**/*.jpg",
+            "**/*.jpeg",
+            "**/*.gif",
+            "**/*.webp",
+            "**/*.ico",
+            "**/*.pdf",
+            "**/*.zip",
+            "**/*.7z",
+            "**/*.rar",
+            "**/*.tar",
+            "**/*.gz",
+            "**/*.mp3",
+            "**/*.mp4",
+            "**/*.mov",
+            "**/*.avi",
+            "**/*.woff",
+            "**/*.woff2",
+            "**/*.ttf",
+            "**/*.eot",
+            "**/*.exe",
+            "**/*.dll",
+            "**/*.so",
+            "**/*.dylib",
+            "**/*.jar",
+            "**/*.apk",
+            "**/*.ipa",
+            "**/*.aab",
+            "**/*.uasset",
+            "**/*.umap",
+            "**/*.ubulk",
+            "**/*.uexp",
+            "**/*.utoc",
+            "**/*.ucas",
+            "**/*.pak",
+            "**/DerivedDataCache/**",
+            "**/Binaries/**",
+            "**/Intermediate/**",
+            "**/Saved/**",
+            "**/Library/**",
+            "**/Temp/**",
+            "**/Obj/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/coverage/**",
+            "**/.next/**",
+            "**/.nuxt/**"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "%aiCommitLite.contextExcludePatterns%"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "ai-commit-lite.generateCommit",
+        "key": "ctrl+shift+g ctrl+shift+c",
+        "mac": "cmd+shift+g cmd+shift+c"
+      }
+    ]
+  },
+  "scripts": {
+    "watch": "webpack --mode development --watch",
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --mode production",
+    "compile:test": "tsc -p tsconfig.test.json",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts",
+    "test": "npm run compile:test && node --test \"out-test/test/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.3.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "license": "MIT",
+  "publisher": "ai-commit-lite"
+}
+

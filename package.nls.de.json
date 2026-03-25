@@ -1,0 +1,19 @@
+{
+  "aiCommitLite.displayName": "AI Commit Lite",
+  "aiCommitLite.description": "Generieren Sie konventionelle Commit-Nachrichten mit KI (OpenAI/Azure/DeepSeek/Gemini)",
+  "aiCommitLite.generateCommit": "KI-Commit-Nachricht generieren",
+  "aiCommitLite.configuration": "AI Commit Lite-Einstellungen",
+  "aiCommitLite.apiProvider": "Zu verwendender KI-API-Anbieter",
+  "aiCommitLite.apiKey": "API-Schlüssel für den ausgewählten Anbieter",
+  "aiCommitLite.apiEndpoint": "API-Basis-URL für Azure- oder OpenAI-kompatible Anbieter. Sollte normalerweise mit `/v1` enden. Beispiele: `https://api.openai.com/v1`, `https://api.deepseek.com/v1`. Verwenden Sie keine URL der Website-Startseite oder Dokumentationsseite.",
+  "aiCommitLite.model": "Zu verwendender Modellname (z. B. gpt-3.5-turbo, gpt-4, deepseek-chat, gemini-pro)",
+  "aiCommitLite.language": "Sprache für Commit-Nachrichten",
+  "aiCommitLite.useGitmoji": "Gitmoji in Commit-Nachrichten einschließen",
+  "aiCommitLite.customSystemPrompt": "Benutzerdefinierter System-Prompt für KI (optional)",
+  "aiCommitLite.conventionalCommits": "Conventional-Commits-Spezifikation befolgen",
+  "aiCommitLite.temperature": "Temperatur für KI-Generierung (höher = kreativer)",
+  "aiCommitLite.maxTokens": "Maximale Token für KI-Antwort",
+  "aiCommitLite.contextExcludePatterns": "Glob-Muster für bereitgestellte Dateien, die zusammengefasst werden sollen, anstatt den vollständigen Diff an den KI-Kontext zu senden",
+  "aiCommitLite.maxDiffCharacters": "Maximale Anzahl an Diff-Zeichen, die nach Filterung und Zusammenfassung an die KI gesendet werden",
+  "aiCommitLite.maxFileDiffCharacters": "Maximale Anzahl an Diff-Zeichen aus einer einzelnen Datei vor dem Abschneiden"
+}

@@ -1,0 +1,11 @@
+node_modules
+*.vsix
+out
+out-test
+dist
+*.log
+.DS_Store
+*.tsbuildinfo
+.vscode-test/
+.nyc_output/
+coverage/
