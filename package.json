@@ -2,7 +2,7 @@
   "name": "ai-commit-lite",
   "displayName": "%aiCommitLite.displayName%",
   "description": "%aiCommitLite.description%",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "vscode": "^1.80.0"
   },
   "categories": [
-    "Other"
+    "AI"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -173,7 +173,18 @@
               },
               "provider": {
                 "type": "string",
-                "enum": ["openai", "azure", "deepseek", "gemini", "anthropic", "cohere", "mistral", "dashscope", "openai-compatible", "custom"],
+                "enum": [
+                  "openai",
+                  "azure",
+                  "deepseek",
+                  "gemini",
+                  "anthropic",
+                  "cohere",
+                  "mistral",
+                  "dashscope",
+                  "openai-compatible",
+                  "custom"
+                ],
                 "description": "AI provider type"
               },
               "model": {
@@ -185,7 +196,12 @@
                 "description": "Provider API base URL"
               }
             },
-            "required": ["id", "label", "provider", "model"]
+            "required": [
+              "id",
+              "label",
+              "provider",
+              "model"
+            ]
           }
         },
         "aiCommitLite.activeProfile": {
@@ -316,6 +332,5 @@
     "axios": "^1.6.0"
   },
   "license": "MIT",
-  "publisher": "ai-commit-lite"
+  "publisher": "shibiao"
 }
-
