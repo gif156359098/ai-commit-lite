@@ -23,8 +23,17 @@ import {
 import { ensureProfilesForCommand } from './profileCommandGate';
 import { isQuotaError } from './quotaError';
 
+let isGenerating = false;
+
 export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<void> {
   return async () => {
+    if (isGenerating) {
+      vscode.window.showWarningMessage(t('commitGenerationInProgress'));
+      return;
+    }
+
+    isGenerating = true;
+
     try {
       const hasProfiles = await ensureProfilesForCommand(extensionUri);
       if (!hasProfiles) {
@@ -56,11 +65,16 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
       await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: t(getCommitProgressTitleDescriptor().key),
-        cancellable: false
-      }, async (progress: vscode.Progress<{ increment: number; message: string }>) => {
+        cancellable: true
+      }, async (progress: vscode.Progress<{ increment: number; message: string }>, token: vscode.CancellationToken) => {
         try {
           reportCommitProgress(progress, 'collecting', 20);
-          const result = await generateCommitMessageWithAutoFallback(progress);
+          const result = await generateCommitMessageWithAutoFallback(progress, token);
+
+          if (token.isCancellationRequested) {
+            return;
+          }
+
           await fillSourceControlInputBox(result.commitMessage);
 
           reportCommitProgress(progress, 'complete', 100);
@@ -69,6 +83,9 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
 
           vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
         } catch (error: any) {
+          if (token.isCancellationRequested) {
+            return;
+          }
           const descriptor = getCommitGenerationErrorDescriptor(error.message);
           vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
         }
@@ -76,16 +93,23 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
     } catch (error: any) {
       const descriptor = getUnexpectedCommandErrorDescriptor(error.message);
       vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
+    } finally {
+      isGenerating = false;
     }
   };
 }
 
 async function generateCommitMessageWithAutoFallback(
-  progress: vscode.Progress<{ increment: number; message: string }>
+  progress: vscode.Progress<{ increment: number; message: string }>,
+  token: vscode.CancellationToken
 ): Promise<CommitGenerationResult> {
   const attemptedProfileIds = new Set<string>();
 
   while (true) {
+    if (token.isCancellationRequested) {
+      throw new Error('Cancelled');
+    }
+
     const config = await getEffectiveConfig();
     const currentProfile = config.profile;
     attemptedProfileIds.add(currentProfile.id);
@@ -98,7 +122,13 @@ async function generateCommitMessageWithAutoFallback(
     );
 
     try {
-      return await generateCommitMessageFromPrepared(preparedGeneration);
+      const abortController = new AbortController();
+      token.onCancellationRequested(() => {
+        abortController.abort();
+        preparedGeneration.provider.cancel();
+      });
+
+      return await generateCommitMessageFromPrepared(preparedGeneration, abortController.signal);
     } catch (error: any) {
       if (!isQuotaError(error)) {
         throw error;

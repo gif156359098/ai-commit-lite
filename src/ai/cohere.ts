@@ -14,9 +14,10 @@ export class CohereProvider extends BaseAIProvider {
     super(apiKey, model, apiEndpoint);
   }
 
-  async generateCommitMessage(diff: string, context: CommitContext): Promise<string> {
+  async generateCommitMessage(diff: string, context: CommitContext, abortSignal?: AbortSignal): Promise<string> {
     const systemPrompt = this.buildSystemPrompt(context);
     const userPrompt = this.buildUserPrompt(diff, context);
+    const cancelTokenSource = this.createCancelToken();
 
     try {
       const response = await this.client.post(`${this.apiEndpoint}/v2/chat`, {
@@ -28,11 +29,16 @@ export class CohereProvider extends BaseAIProvider {
         ],
         temperature: context.temperature,
         max_tokens: context.maxTokens
+      }, {
+        cancelToken: cancelTokenSource.token,
+        signal: abortSignal
       });
 
       const message = extractOpenAICompatibleMessage(response.data, this.apiEndpoint, context.maxTokens);
+      this.clearCancelToken();
       return cleanCommitMessage(message);
     } catch (error: any) {
+      this.clearCancelToken();
       throw new Error(`Cohere API error: ${getProviderErrorMessage(error, this.apiEndpoint)}`);
     }
   }

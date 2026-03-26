@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, CancelTokenSource } from 'axios';
 import { CommitMessageStyle } from '../config/settingsTypes';
 import {
   buildSystemPrompt,
@@ -6,7 +6,12 @@ import {
 } from './promptBuilder';
 
 export interface AIProvider {
-  generateCommitMessage(diff: string, context: CommitContext): Promise<string>;
+  generateCommitMessage(
+    diff: string,
+    context: CommitContext,
+    abortSignal?: AbortSignal
+  ): Promise<string>;
+  cancel(): void;
 }
 
 export interface CommitContext {
@@ -25,6 +30,7 @@ export abstract class BaseAIProvider implements AIProvider {
   protected apiKey: string;
   protected model: string;
   protected apiEndpoint: string;
+  private cancelTokenSource: CancelTokenSource | null = null;
 
   constructor(apiKey: string, model: string, apiEndpoint: string = '') {
     this.apiKey = apiKey;
@@ -38,7 +44,27 @@ export abstract class BaseAIProvider implements AIProvider {
     });
   }
 
-  abstract generateCommitMessage(diff: string, context: CommitContext): Promise<string>;
+  abstract generateCommitMessage(
+    diff: string,
+    context: CommitContext,
+    abortSignal?: AbortSignal
+  ): Promise<string>;
+
+  cancel(): void {
+    if (this.cancelTokenSource) {
+      this.cancelTokenSource.cancel('Request cancelled by user');
+      this.cancelTokenSource = null;
+    }
+  }
+
+  protected createCancelToken(): CancelTokenSource {
+    this.cancelTokenSource = axios.CancelToken.source();
+    return this.cancelTokenSource;
+  }
+
+  protected clearCancelToken(): void {
+    this.cancelTokenSource = null;
+  }
 
   protected buildOpenAICompatibleChatPayload(
     systemPrompt: string,

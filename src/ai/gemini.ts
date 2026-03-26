@@ -17,9 +17,10 @@ export class GeminiProvider extends BaseAIProvider {
     });
   }
 
-  async generateCommitMessage(diff: string, context: CommitContext): Promise<string> {
+  async generateCommitMessage(diff: string, context: CommitContext, abortSignal?: AbortSignal): Promise<string> {
     const systemPrompt = this.buildSystemPrompt(context);
     const userPrompt = this.buildUserPrompt(diff, context);
+    const cancelTokenSource = this.createCancelToken();
 
     try {
       const response = await this.client.post(
@@ -37,12 +38,18 @@ export class GeminiProvider extends BaseAIProvider {
             temperature: context.temperature,
             maxOutputTokens: context.maxTokens
           }
+        },
+        {
+          cancelToken: cancelTokenSource.token,
+          signal: abortSignal
         }
       );
 
       const message = extractGeminiMessage(response.data);
+      this.clearCancelToken();
       return cleanCommitMessage(message);
     } catch (error: any) {
+      this.clearCancelToken();
       throw new Error(`Gemini API error: ${getProviderErrorMessage(error)}`);
     }
   }

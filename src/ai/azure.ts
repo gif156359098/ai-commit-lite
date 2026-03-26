@@ -14,16 +14,19 @@ export class AzureOpenAIProvider extends BaseAIProvider {
     super(apiKey, model, apiEndpoint);
   }
 
-  async generateCommitMessage(diff: string, context: CommitContext): Promise<string> {
+  async generateCommitMessage(diff: string, context: CommitContext, abortSignal?: AbortSignal): Promise<string> {
     const systemPrompt = this.buildSystemPrompt(context);
     const userPrompt = this.buildUserPrompt(diff, context);
+    const cancelTokenSource = this.createCancelToken();
 
     try {
       const requestUrl = `${this.apiEndpoint}/openai/deployments/${this.model}/chat/completions?api-version=2023-05-15`;
       const requestConfig = {
         headers: {
           'api-key': this.apiKey
-        }
+        },
+        cancelToken: cancelTokenSource.token,
+        signal: abortSignal
       };
       const response = await this.client.post(
         requestUrl,
@@ -73,8 +76,10 @@ export class AzureOpenAIProvider extends BaseAIProvider {
         );
       }
 
+      this.clearCancelToken();
       return cleanCommitMessage(message);
     } catch (error: any) {
+      this.clearCancelToken();
       throw new Error(`Azure OpenAI API error: ${getProviderErrorMessage(error, this.apiEndpoint)}`);
     }
   }

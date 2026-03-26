@@ -10,7 +10,8 @@ export interface PostProcessCommitMessageOptions {
 }
 
 export async function postProcessCommitMessage(
-  options: PostProcessCommitMessageOptions
+  options: PostProcessCommitMessageOptions,
+  abortSignal?: AbortSignal
 ): Promise<string> {
   const { provider, context, preparedDiff } = options;
   let commitMessage = options.commitMessage;
@@ -23,7 +24,8 @@ export async function postProcessCommitMessage(
       {
         ...context,
         formatRepairDraft: commitMessage
-      }
+      },
+      abortSignal
     );
 
     if (isDetailedCommitMessage(repairedCommitMessage)) {

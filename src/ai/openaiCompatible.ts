@@ -34,10 +34,11 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
     return this.defaultEndpoint;
   }
 
-  async generateCommitMessage(diff: string, context: CommitContext): Promise<string> {
+  async generateCommitMessage(diff: string, context: CommitContext, abortSignal?: AbortSignal): Promise<string> {
     const systemPrompt = this.buildSystemPrompt(context);
     const userPrompt = this.buildUserPrompt(diff, context);
     const endpoint = this.resolveOpenAICompatibleEndpoint(this.getDefaultEndpoint());
+    const cancelTokenSource = this.createCancelToken();
 
     try {
       const response = await this.client.post(
@@ -47,7 +48,11 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
           userPrompt,
           context,
           context.maxTokens
-        )
+        ),
+        {
+          cancelToken: cancelTokenSource.token,
+          signal: abortSignal
+        }
       );
 
       let message: string;
@@ -68,7 +73,11 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
             userPrompt,
             context,
             retryMaxTokens
-          )
+          ),
+          {
+            cancelToken: cancelTokenSource.token,
+            signal: abortSignal
+          }
         );
 
         message = extractOpenAICompatibleMessage(
@@ -78,8 +87,10 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
         );
       }
 
+      this.clearCancelToken();
       return cleanCommitMessage(message);
     } catch (error: any) {
+      this.clearCancelToken();
       throw new Error(`${this.getProviderName()} API error: ${getProviderErrorMessage(error, endpoint)}`);
     }
   }

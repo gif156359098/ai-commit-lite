@@ -108,6 +108,7 @@
   "providerDashscopeDescription": "Alibaba Cloud DashScope for Qwen models with a compatible endpoint.",
   "providerDashscopeAudience": "Best if you use Qwen through DashScope and may need a regional endpoint.",
   "providerOpenaiCompatibleDescription": "Any provider that exposes an OpenAI-compatible chat completions API.",
-  "providerOpenaiCompatibleAudience": "Best for third-party gateways, proxy services, or self-hosted compatible endpoints."
+  "providerOpenaiCompatibleAudience": "Best for third-party gateways, proxy services, or self-hosted compatible endpoints.",
+  "commitGenerationInProgress": "Commit message generation is already in progress. Please wait..."
 }
 

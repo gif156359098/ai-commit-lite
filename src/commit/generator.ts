@@ -62,16 +62,17 @@ export async function prepareCommitGeneration(
 }
 
 export async function generateCommitMessageFromPrepared(
-  preparedGeneration: PreparedCommitGeneration
+  preparedGeneration: PreparedCommitGeneration,
+  abortSignal?: AbortSignal
 ): Promise<CommitGenerationResult> {
   const { context, preparedDiff, provider } = preparedGeneration;
-  const initialCommitMessage = await provider.generateCommitMessage(preparedDiff.prompt, context);
+  const initialCommitMessage = await provider.generateCommitMessage(preparedDiff.prompt, context, abortSignal);
   const commitMessage = await postProcessCommitMessage({
     provider,
     context,
     preparedDiff,
     commitMessage: initialCommitMessage
-  });
+  }, abortSignal);
 
   return {
     commitMessage,
