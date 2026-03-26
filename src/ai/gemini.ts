@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import { BaseAIProvider, CommitContext } from './providers';
 import { cleanCommitMessage, extractGeminiMessage, getProviderErrorMessage } from './response';
+import { isCancellationError } from '../utils/cancellation';
 
 export class GeminiProvider extends BaseAIProvider {
   constructor(
@@ -50,6 +51,10 @@ export class GeminiProvider extends BaseAIProvider {
       return cleanCommitMessage(message);
     } catch (error: any) {
       this.clearCancelToken();
+      if (isCancellationError(error)) {
+        throw error;
+      }
+
       throw new Error(`Gemini API error: ${getProviderErrorMessage(error)}`);
     }
   }

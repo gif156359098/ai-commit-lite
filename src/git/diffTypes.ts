@@ -27,11 +27,16 @@ export interface DiffContextOptions {
   maxFileDiffCharacters: number;
 }
 
+export interface DiffContextFilteredFile {
+  file: string;
+  reason: string;
+}
+
 export interface DiffContextReport {
   totalFiles: number;
-  includedDiffFiles: number;
-  filteredFiles: number;
-  truncatedFiles: number;
-  summarizedFiles: number;
+  includedFiles: string[];
+  filteredFiles: DiffContextFilteredFile[];
+  truncatedFiles: string[];
+  summarizedFiles: string[];
   totalPromptCharacters: number;
 }

@@ -4,6 +4,7 @@ import {
   extractOpenAICompatibleMessage,
   getProviderErrorMessage
 } from './response';
+import { isCancellationError } from '../utils/cancellation';
 
 export class CohereProvider extends BaseAIProvider {
   constructor(
@@ -39,6 +40,10 @@ export class CohereProvider extends BaseAIProvider {
       return cleanCommitMessage(message);
     } catch (error: any) {
       this.clearCancelToken();
+      if (isCancellationError(error)) {
+        throw error;
+      }
+
       throw new Error(`Cohere API error: ${getProviderErrorMessage(error, this.apiEndpoint)}`);
     }
   }

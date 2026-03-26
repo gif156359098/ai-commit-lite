@@ -25,24 +25,26 @@ export function buildPreparedDiffContext(
   const summary = generateSummary(files);
   const report: DiffContextReport = {
     totalFiles: files.length,
-    includedDiffFiles: 0,
-    filteredFiles: 0,
-    truncatedFiles: 0,
-    summarizedFiles: 0,
+    includedFiles: [],
+    filteredFiles: [],
+    truncatedFiles: [],
+    summarizedFiles: [],
     totalPromptCharacters: 0
   };
 
   const orderedFiles = prioritizeFiles(files);
   const includedEntries: FileContextEntry[] = [];
+  const filteredEntries: FileContextEntry[] = [];
   const summarizedEntries: FileContextEntry[] = [];
   let totalDiffCharacters = 0;
 
   for (const file of orderedFiles) {
     if (matchesAnyGlob(file.path, options.excludePatterns)) {
-      report.filteredFiles += 1;
-      summarizedEntries.push({
+      const reason = 'filtered by contextExcludePatterns';
+      report.filteredFiles.push({ file: file.path, reason });
+      filteredEntries.push({
         file,
-        note: 'summary only: filtered by contextExcludePatterns'
+        note: `summary only: ${reason}`
       });
       continue;
     }
@@ -50,7 +52,7 @@ export function buildPreparedDiffContext(
     const patch = (patchMap.get(file.path) || '').trim();
 
     if (!patch) {
-      report.summarizedFiles += 1;
+      report.summarizedFiles.push(file.path);
       summarizedEntries.push({
         file,
         note: 'summary only: patch content not available'
@@ -64,12 +66,12 @@ export function buildPreparedDiffContext(
     if (preparedPatch.length > options.maxFileDiffCharacters) {
       preparedPatch = truncatePatch(preparedPatch, options.maxFileDiffCharacters);
       truncated = true;
-      report.truncatedFiles += 1;
+      report.truncatedFiles.push(file.path);
     }
 
     const remainingCharacters = options.maxDiffCharacters - totalDiffCharacters;
     if (remainingCharacters < MIN_REMAINING_DIFF_CHARACTERS || preparedPatch.length > remainingCharacters) {
-      report.summarizedFiles += 1;
+      report.summarizedFiles.push(file.path);
       summarizedEntries.push({
         file,
         note: 'summary only: omitted because the total AI context limit was reached'
@@ -78,7 +80,7 @@ export function buildPreparedDiffContext(
     }
 
     totalDiffCharacters += preparedPatch.length;
-    report.includedDiffFiles += 1;
+    report.includedFiles.push(file.path);
     includedEntries.push({
       file,
       patch: preparedPatch,
@@ -86,7 +88,12 @@ export function buildPreparedDiffContext(
     });
   }
 
-  const prompt = buildPrompt(summary, files, includedEntries, summarizedEntries);
+  const prompt = buildPrompt(
+    summary,
+    files,
+    includedEntries,
+    [...filteredEntries, ...summarizedEntries]
+  );
   report.totalPromptCharacters = prompt.length;
 
   return {

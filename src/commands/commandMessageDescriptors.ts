@@ -17,9 +17,9 @@ export function getCommitGenerationSuccessDescriptor(
   return {
     key: 'commitMessageFilledOptimized',
     params: {
-      filtered: report.filteredFiles,
-      truncated: report.truncatedFiles,
-      summarized: report.summarizedFiles
+      filtered: report.filteredFiles.length,
+      truncated: report.truncatedFiles.length,
+      summarized: report.summarizedFiles.length
     }
   };
 }
@@ -125,7 +125,7 @@ export function getProfileSwitchErrorDescriptor(message: string): LocalizedMessa
 }
 
 export function hasDiffContextOptimization(report: DiffContextReport): boolean {
-  return report.filteredFiles > 0
-    || report.truncatedFiles > 0
-    || report.summarizedFiles > 0;
+  return report.filteredFiles.length > 0
+    || report.truncatedFiles.length > 0
+    || report.summarizedFiles.length > 0;
 }

@@ -5,6 +5,7 @@ import {
   getProviderErrorMessage,
   shouldRetryOpenAICompatibleMessage
 } from './response';
+import { isCancellationError } from '../utils/cancellation';
 
 export interface OpenAICompatibleProviderOptions {
   providerName: string;
@@ -91,6 +92,10 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
       return cleanCommitMessage(message);
     } catch (error: any) {
       this.clearCancelToken();
+      if (isCancellationError(error)) {
+        throw error;
+      }
+
       throw new Error(`${this.getProviderName()} API error: ${getProviderErrorMessage(error, endpoint)}`);
     }
   }

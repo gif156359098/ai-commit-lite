@@ -5,6 +5,7 @@ import {
   getProviderErrorMessage,
   shouldRetryOpenAICompatibleMessage
 } from './response';
+import { isCancellationError } from '../utils/cancellation';
 
 export class AzureOpenAIProvider extends BaseAIProvider {
   constructor(apiKey: string, model: string, apiEndpoint: string) {
@@ -80,6 +81,10 @@ export class AzureOpenAIProvider extends BaseAIProvider {
       return cleanCommitMessage(message);
     } catch (error: any) {
       this.clearCancelToken();
+      if (isCancellationError(error)) {
+        throw error;
+      }
+
       throw new Error(`Azure OpenAI API error: ${getProviderErrorMessage(error, this.apiEndpoint)}`);
     }
   }

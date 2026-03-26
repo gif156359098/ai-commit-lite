@@ -6,6 +6,7 @@ import {
   extractOpenAICompatibleMessage,
   getProviderErrorMessage
 } from './response';
+import { isCancellationError } from '../utils/cancellation';
 
 export class AnthropicProvider extends BaseAIProvider {
   constructor(
@@ -47,6 +48,10 @@ export class AnthropicProvider extends BaseAIProvider {
       return cleanCommitMessage(message);
     } catch (error: any) {
       this.clearCancelToken();
+      if (isCancellationError(error)) {
+        throw error;
+      }
+
       throw new Error(`Anthropic API error: ${getProviderErrorMessage(error, this.apiEndpoint)}`);
     }
   }

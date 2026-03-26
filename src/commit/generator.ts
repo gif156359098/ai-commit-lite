@@ -32,7 +32,8 @@ export async function generateCommitMessage(
 }
 
 export async function prepareCommitGeneration(
-  config: AICommitConfigWithProfile
+  config: AICommitConfigWithProfile,
+  abortSignal?: AbortSignal
 ): Promise<PreparedCommitGeneration> {
   const context: CommitContext = {
     language: config.language,
@@ -48,7 +49,7 @@ export async function prepareCommitGeneration(
     excludePatterns: config.contextExcludePatterns,
     maxDiffCharacters: config.maxDiffCharacters,
     maxFileDiffCharacters: config.maxFileDiffCharacters
-  });
+  }, abortSignal);
 
   if (!preparedDiff.prompt || preparedDiff.prompt.trim().length === 0) {
     throw new Error(t('noStagedChanges'));
