@@ -11,6 +11,14 @@ export function buildClientPreludeScript(): string {
     const setFormError = (message) => { $('formError').textContent = message || ''; $('formError').classList.toggle('active', Boolean(message)); };
     const openModal = () => { $('formModal').classList.add('active'); $('formModal').setAttribute('aria-hidden', 'false'); $('label').focus(); };
     const hideForm = () => { $('formModal').classList.remove('active'); $('formModal').setAttribute('aria-hidden', 'true'); setFormError(''); };
+    
+    // SVG Icons
+    const icons = {
+      check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+      edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+      trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+      star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
+    };
   `;
 }
 
@@ -23,21 +31,37 @@ export function buildClientRenderScript(): string {
         return;
       }
       $('emptyState').classList.remove('active');
-      $('profilesContainer').innerHTML = state.profiles.map((profile) => (
-        '<article class="card ' + (state.activeProfileId === profile.id ? 'active' : '') + '">' +
-          '<div class="top"><div><h3 class="name">' + escapeText(profile.label) + '</h3><div class="provider-name">' + escapeText(profile.providerLabel) + '</div></div><div class="pill">' + escapeText(state.activeProfileId === profile.id ? state.i18n.currentProfile : (profile.hasApiKey ? state.i18n.secretStoredStatus : state.i18n.secretMissingStatus)) + '</div></div>' +
-          '<div class="desc">' + escapeText(profile.providerDescription) + '</div>' +
-          '<div class="meta"><div class="row"><div class="label">' + escapeText(state.i18n.model) + '</div><div class="value">' + escapeText(profile.model) + '</div></div>' +
-          (profile.baseUrl ? '<div class="row"><div class="label">' + escapeText(state.i18n.apiEndpoint) + '</div><div class="value">' + escapeText(profile.baseUrl) + '</div></div>' : '') +
-          '</div>' +
-          '<div class="notes"><div class="note"><div class="note-label">' + escapeText(state.i18n.providerAudienceLabel) + '</div><div class="note-value">' + escapeText(profile.providerAudienceHint) + '</div></div><div class="note"><div class="note-label">' + escapeText(state.i18n.providerEndpointRuleLabel) + '</div><div class="note-value">' + escapeText(profile.endpointHint) + '</div></div></div>' +
-          '<div class="actions">' +
-            (state.activeProfileId !== profile.id ? '<button class="btn primary small" data-action="switch" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.useThisProfile) + '</button>' : '') +
-            '<button class="btn small" data-action="edit" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.editAction) + '</button>' +
-            '<button class="btn danger small" data-action="delete" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.deleteAction) + '</button>' +
-          '</div>' +
-        '</article>'
-      )).join('');
+      $('profilesContainer').innerHTML = state.profiles.map((profile) => {
+        const isActive = state.activeProfileId === profile.id;
+        const pillText = isActive ? state.i18n.currentProfile : (profile.hasApiKey ? state.i18n.secretStoredStatus : state.i18n.secretMissingStatus);
+        const pillIcon = isActive ? icons.check : '';
+        
+        return (
+          '<article class="card ' + (isActive ? 'active' : '') + '">' +
+            '<div class="card-header">' +
+              '<div class="card-title-group">' +
+                '<h3 class="name">' + escapeText(profile.label) + '</h3>' +
+                '<div class="provider-name">' + escapeText(profile.providerLabel) + '</div>' +
+              '</div>' +
+              '<div class="pill">' + pillIcon + escapeText(pillText) + '</div>' +
+            '</div>' +
+            
+            '<div class="desc">' + escapeText(profile.providerDescription) + '</div>' +
+            
+            '<div class="meta-grid">' +
+              '<div class="label">' + escapeText(state.i18n.model) + '</div>' +
+              '<div class="value">' + escapeText(profile.model) + '</div>' +
+              (profile.baseUrl ? '<div class="label">' + escapeText(state.i18n.apiEndpoint) + '</div><div class="value">' + escapeText(profile.baseUrl) + '</div>' : '') +
+            '</div>' +
+            
+            '<div class="card-actions">' +
+              (isActive ? '' : '<button class="btn primary" style="margin-right: auto" data-action="switch" data-profile-id="' + escapeText(profile.id) + '">' + icons.star + escapeText(state.i18n.useThisProfile) + '</button>') +
+              '<button class="icon-btn" title="' + escapeText(state.i18n.editAction) + '" data-action="edit" data-profile-id="' + escapeText(profile.id) + '">' + icons.edit + '</button>' +
+              '<button class="icon-btn danger" title="' + escapeText(state.i18n.deleteAction) + '" data-action="delete" data-profile-id="' + escapeText(profile.id) + '">' + icons.trash + '</button>' +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
     }
 
     function renderProviders() {
@@ -46,8 +70,6 @@ export function buildClientRenderScript(): string {
         '<button type="button" class="provider ' + (provider.type === selected.type ? 'active' : '') + '" data-provider-type="' + escapeText(provider.type) + '">' +
           '<div class="provider-title">' + escapeText(provider.label) + '</div>' +
           '<div class="provider-desc">' + escapeText(provider.description) + '</div>' +
-          '<div class="provider-aud">' + escapeText(provider.audienceHint) + '</div>' +
-          '<div class="provider-end">' + escapeText(provider.endpointHint) + '</div>' +
         '</button>'
       )).join('');
     }
