@@ -116,6 +116,17 @@ git add .
 | `aiCommitLite.contextExcludePatterns` | 内置默认值 | 分析时排除的文件模式 |
 | `aiCommitLite.enableAutoFallback` | `true` | 是否自动回退 |
 | `aiCommitLite.profileFallbackOrder` | `[]` | 回退顺序 |
+| `aiCommitLite.profiles` | `[]` | Profile 元数据列表 |
+| `aiCommitLite.activeProfile` | `""` | 当前激活的 Profile ID |
+
+## 常用命令
+
+- `AI Commit Lite: Generate Commit`
+- `AI Commit Lite: Switch Profile`
+- `AI Commit Lite: Add Profile`
+- `AI Commit Lite: Edit Profile`
+- `AI Commit Lite: Delete Profile`
+- `AI Commit Lite: Open Profile Manager`
 
 ## 故障排查
 
@@ -146,15 +157,21 @@ git add .
 
 ## 开发
 
+#### 环境要求
+
+- Node.js 18+
+- VS Code 1.80+
+
+#### 常用命令
+
 ```bash
 npm run compile
 npm run watch
 npm run lint
-npm test
 npm run package
 ```
 
-当前仓库已经内置 `npm test`，会先编译测试目标，再运行 Node 原生测试。
+注意：当前仓库没有内置测试脚本。
 
 ## License
 

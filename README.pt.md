@@ -116,6 +116,17 @@ Se o modelo não seguir o formato detalhado, a extensão tenta uma correção au
 | `aiCommitLite.contextExcludePatterns` | valores padrão integrados | Padrões excluídos da análise de diff |
 | `aiCommitLite.enableAutoFallback` | `true` | Ativar fallback automático |
 | `aiCommitLite.profileFallbackOrder` | `[]` | Ordem de fallback |
+| `aiCommitLite.profiles` | `[]` | Metadados dos perfis armazenados |
+| `aiCommitLite.activeProfile` | `""` | ID do perfil ativo |
+
+## Comandos
+
+- `AI Commit Lite: Generate Commit`
+- `AI Commit Lite: Switch Profile`
+- `AI Commit Lite: Add Profile`
+- `AI Commit Lite: Edit Profile`
+- `AI Commit Lite: Delete Profile`
+- `AI Commit Lite: Open Profile Manager`
 
 ## Solução de problemas
 
@@ -146,15 +157,21 @@ Ative `aiCommitLite.enableAutoFallback` e configure `aiCommitLite.profileFallbac
 
 ## Desenvolvimento
 
+#### Requisitos
+
+- Node.js 18+
+- VS Code 1.80+
+
+#### Comandos
+
 ```bash
 npm run compile
 npm run watch
 npm run lint
-npm test
 npm run package
 ```
 
-Nota: o repositório inclui `npm test`, que primeiro compila os destinos de teste e depois executa os testes nativos do Node.
+Nota: o repositório não inclui atualmente um script de teste integrado.
 
 ## License
 

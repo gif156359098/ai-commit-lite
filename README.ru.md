@@ -116,6 +116,17 @@ git add .
 | `aiCommitLite.contextExcludePatterns` | встроенные значения по умолчанию | Шаблоны, исключаемые из анализа diff |
 | `aiCommitLite.enableAutoFallback` | `true` | Включить автоматический fallback |
 | `aiCommitLite.profileFallbackOrder` | `[]` | Порядок fallback |
+| `aiCommitLite.profiles` | `[]` | Сохраненные метаданные профилей |
+| `aiCommitLite.activeProfile` | `""` | ID активного профиля |
+
+## Команды
+
+- `AI Commit Lite: Generate Commit`
+- `AI Commit Lite: Switch Profile`
+- `AI Commit Lite: Add Profile`
+- `AI Commit Lite: Edit Profile`
+- `AI Commit Lite: Delete Profile`
+- `AI Commit Lite: Open Profile Manager`
 
 ## Устранение неполадок
 
@@ -146,15 +157,21 @@ git add .
 
 ## Разработка
 
+#### Требования
+
+- Node.js 18+
+- VS Code 1.80+
+
+#### Команды
+
 ```bash
 npm run compile
 npm run watch
 npm run lint
-npm test
 npm run package
 ```
 
-Примечание: репозиторий включает `npm test`, который сначала компилирует тестовые цели, а затем запускает нативные тесты Node.
+Примечание: репозиторий не включает встроенный тестовый скрипт.
 
 ## License
 

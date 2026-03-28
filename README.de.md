@@ -116,6 +116,17 @@ Wenn ein Modell das detaillierte Format nicht einhält, versucht die Erweiterung
 | `aiCommitLite.contextExcludePatterns` | integrierte Standardwerte | Muster, die von der Diff-Analyse ausgeschlossen werden |
 | `aiCommitLite.enableAutoFallback` | `true` | Automatischen Fallback aktivieren |
 | `aiCommitLite.profileFallbackOrder` | `[]` | Reihenfolge für Fallback |
+| `aiCommitLite.profiles` | `[]` | Gespeicherte Profilmetadaten |
+| `aiCommitLite.activeProfile` | `""` | Aktive Profil-ID |
+
+## Befehle
+
+- `AI Commit Lite: Generate Commit`
+- `AI Commit Lite: Switch Profile`
+- `AI Commit Lite: Add Profile`
+- `AI Commit Lite: Edit Profile`
+- `AI Commit Lite: Delete Profile`
+- `AI Commit Lite: Open Profile Manager`
 
 ## Fehlerbehebung
 

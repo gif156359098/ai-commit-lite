@@ -116,6 +116,17 @@ git add .
 | `aiCommitLite.contextExcludePatterns` | 내장 기본값 | diff 분석에서 제외되는 파일 패턴 |
 | `aiCommitLite.enableAutoFallback` | `true` | 자동 폴백 사용 |
 | `aiCommitLite.profileFallbackOrder` | `[]` | 폴백 순서 |
+| `aiCommitLite.profiles` | `[]` | 저장된 프로필 메타데이터 |
+| `aiCommitLite.activeProfile` | `""` | 활성 프로필 ID |
+
+## 명령어
+
+- `AI Commit Lite: Generate Commit`
+- `AI Commit Lite: Switch Profile`
+- `AI Commit Lite: Add Profile`
+- `AI Commit Lite: Edit Profile`
+- `AI Commit Lite: Delete Profile`
+- `AI Commit Lite: Open Profile Manager`
 
 ## 문제 해결
 
@@ -146,15 +157,21 @@ git add .
 
 ## 개발
 
+#### 요구 사항
+
+- Node.js 18+
+- VS Code 1.80+
+
+#### 명령어
+
 ```bash
 npm run compile
 npm run watch
 npm run lint
-npm test
 npm run package
 ```
 
-참고: 저장소에 `npm test`가 포함되어 있으며, 먼저 테스트 대상을 컴파일한 후 Node 기본 테스트를 실행합니다.
+참고: 현재 저장소에 내장 테스트 스크립트가 포함되어 있지 않습니다.
 
 ## License
 

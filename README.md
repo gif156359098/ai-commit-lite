@@ -17,7 +17,7 @@ Other languages:
 
 ## 简体中文
 
-AI Commit Lite 是一个 VS Code 扩展，用 AI 根据当前 Git 暂存区变更自动生成提交信息。当前版本已经从旧的单配置流升级为基于 `Profile 管理` 的多厂商、多模型工作流，更适合在不同团队、账号和供应商之间快速切换。
+AI Commit Lite 是一个 VS Code 扩展，用 AI 根据当前 Git 暂存区变更自动生成提交信息。基于 `Profile 管理` 的多厂商、多模型工作流，更适合在不同模型和供应商之间快速切换。
 
 ### 功能特性
 
@@ -30,25 +30,6 @@ AI Commit Lite 是一个 VS Code 扩展，用 AI 根据当前 Git 暂存区变�
 - 多语言输出：支持英语、简体中文、日语、韩语、西班牙语、法语、德语、俄语、葡萄牙语、意大利语。
 - Git 差异优化：批量分析暂存变更，减少逐文件串行 diff 带来的等待时间。
 - VS Code 集成：支持命令面板、SCM 标题按钮、状态栏入口和快捷键。
-
-### 安装
-
-#### 方式一：安装 `.vsix`
-
-1. 在 VS Code 中执行 `Extensions: Install from VSIX...`
-2. 选择已打包好的 `.vsix` 文件
-
-#### 方式二：从源码构建
-
-```bash
-git clone https://github.com/gif156359098/ai-commit-lite.git
-cd ai-commit-lite
-npm install
-npm run compile
-npm run package
-```
-
-然后在 VS Code 中安装生成的 `.vsix` 文件。
 
 ### 使用教程
 

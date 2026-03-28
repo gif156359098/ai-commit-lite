@@ -116,6 +116,17 @@ git add .
 | `aiCommitLite.contextExcludePatterns` | 内蔵デフォルト値 | diff 分析から除外するファイルパターン |
 | `aiCommitLite.enableAutoFallback` | `true` | 自動フォールバック |
 | `aiCommitLite.profileFallbackOrder` | `[]` | フォールバック順序 |
+| `aiCommitLite.profiles` | `[]` | 保存されたプロファイルメタデータ |
+| `aiCommitLite.activeProfile` | `""` | アクティブプロファイルID |
+
+## コマンド
+
+- `AI Commit Lite: Generate Commit`
+- `AI Commit Lite: Switch Profile`
+- `AI Commit Lite: Add Profile`
+- `AI Commit Lite: Edit Profile`
+- `AI Commit Lite: Delete Profile`
+- `AI Commit Lite: Open Profile Manager`
 
 ## トラブルシューティング
 
@@ -146,15 +157,21 @@ git add .
 
 ## 開発
 
+#### 必要環境
+
+- Node.js 18+
+- VS Code 1.80+
+
+#### コマンド
+
 ```bash
 npm run compile
 npm run watch
 npm run lint
-npm test
 npm run package
 ```
 
-このリポジトリには `npm test` が含まれており、先にテスト用ビルドを行ってから Node 標準テストを実行します。
+注意: リポジトリには現在、組み込みのテストスクリプトは含まれていません。
 
 ## License
 
