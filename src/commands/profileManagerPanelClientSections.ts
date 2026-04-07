@@ -166,6 +166,12 @@ export function buildClientEventScript(): string {
     $('cancelButton').addEventListener('click', hideForm);
     $('closeButton').addEventListener('click', hideForm);
     $('saveButton').addEventListener('click', saveProfile);
+    $('openSettingsButton').addEventListener('click', () => {
+      vscode.postMessage({ command: 'openSettings' });
+    });
+    $('languageSelect').addEventListener('change', (event) => {
+      vscode.postMessage({ command: 'updateLanguage', language: event.target.value });
+    });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && $('formModal').classList.contains('active')) { hideForm(); }
     });

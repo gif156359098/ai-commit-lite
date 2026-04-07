@@ -1,6 +1,7 @@
 import { ModelProfile } from '../types/profile';
 import {
   BuildWebviewHtmlData,
+  LanguageOption,
   PanelProfileView,
   PanelProviderView,
   ProfileManagerPanelAction,
@@ -16,6 +17,8 @@ export interface BuildProfileManagerPanelWebviewDataArgs {
   providers: PanelProviderView[];
   profiles: ModelProfile[];
   hasProfileApiKey: (profileId: string) => Promise<boolean>;
+  currentLanguage: string;
+  languageOptions: LanguageOption[];
 }
 
 export async function buildProfileManagerPanelWebviewData(
@@ -35,7 +38,9 @@ export async function buildProfileManagerPanelWebviewData(
     initialAction: args.initialAction,
     i18n: args.i18n,
     providers: args.providers,
-    profiles: panelProfiles
+    profiles: panelProfiles,
+    currentLanguage: args.currentLanguage,
+    languageOptions: args.languageOptions
   };
 }
 

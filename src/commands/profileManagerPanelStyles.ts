@@ -71,6 +71,22 @@ export function buildProfileManagerPanelStyles(): string {
     /* 工具栏 */
     .toolbar { display: flex; justify-content: space-between; align-items: center; }
     .toolbar-count { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
+    .toolbar-actions { display: flex; align-items: center; gap: 12px; }
+    
+    /* 语言选择器 */
+    .language-select-wrapper { display: flex; align-items: center; gap: 8px; }
+    .language-label { font-size: 0.85rem; color: var(--muted); }
+    .language-select {
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      min-width: 120px;
+    }
+    .language-select:focus { outline: none; border-color: var(--accent); }
 
     /* 通用按钮 */
     .btn { 

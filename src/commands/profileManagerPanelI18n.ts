@@ -1,7 +1,7 @@
 import { ProviderDefinition } from '../ai/providerRegistry';
 import { t } from '../i18n';
 import { getProviderEndpointHintKey } from './profileManagerPanelProviderHints';
-import { PanelProviderView, WebviewI18n } from './profileManagerPanelTypes';
+import { LanguageOption, PanelProviderView, WebviewI18n } from './profileManagerPanelTypes';
 
 export function buildI18n(profileCount: number): WebviewI18n {
   return {
@@ -49,9 +49,24 @@ export function buildI18n(profileCount: number): WebviewI18n {
     connectionDetailsSectionTitle: t('connectionDetailsSectionTitle'),
     closeAction: t('closeAction'),
     secretStoredStatus: t('secretStoredStatus'),
-    secretMissingStatus: t('secretMissingStatus')
+    secretMissingStatus: t('secretMissingStatus'),
+    openSettingsAction: t('openSettingsAction'),
+    languageSetting: t('languageSetting')
   };
 }
+
+export const LANGUAGE_OPTIONS: LanguageOption[] = [
+  { value: 'en', label: 'English' },
+  { value: 'zh-cn', label: '简体中文' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'ru', label: 'Русский' },
+  { value: 'pt', label: 'Português' },
+  { value: 'it', label: 'Italiano' }
+];
 
 export function toPanelProviderView(provider: ProviderDefinition): PanelProviderView {
   return {

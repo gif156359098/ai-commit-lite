@@ -79,6 +79,13 @@ export interface WebviewI18n {
   closeAction: string;
   secretStoredStatus: string;
   secretMissingStatus: string;
+  openSettingsAction: string;
+  languageSetting: string;
+}
+
+export interface LanguageOption {
+  value: string;
+  label: string;
 }
 
 export interface BuildWebviewHtmlData {
@@ -90,4 +97,6 @@ export interface BuildWebviewHtmlData {
   i18n: WebviewI18n;
   providers: PanelProviderView[];
   profiles: PanelProfileView[];
+  currentLanguage: string;
+  languageOptions: LanguageOption[];
 }

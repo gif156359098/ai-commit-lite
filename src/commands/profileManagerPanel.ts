@@ -13,12 +13,14 @@ import {
   switchProfile,
   updateProfile
 } from '../config/profileManager';
+import { readAICommitConfigValue, updateAICommitConfigValue } from '../config/workspaceConfig';
 import { getLocale, t } from '../i18n';
 import {
   buildProfileManagerPanelWebviewData,
   buildI18n,
   buildWebviewHtml,
-  toPanelProviderView
+  toPanelProviderView,
+  LANGUAGE_OPTIONS
 } from './profileManagerPanelView';
 import {
   LocalizedMessageDescriptor,
@@ -97,7 +99,7 @@ export class ProfileManagerPanel {
 
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
     this.panel.webview.onDidReceiveMessage(
-      async (message: { command?: string; data?: ProfileFormData; profileId?: string }) => {
+      async (message: { command?: string; data?: ProfileFormData; profileId?: string; language?: string }) => {
         switch (message.command) {
           case 'saveProfile':
             if (message.data) {
@@ -112,6 +114,14 @@ export class ProfileManagerPanel {
           case 'switchProfile':
             if (message.profileId) {
               await this.handleSwitchProfile(message.profileId);
+            }
+            break;
+          case 'openSettings':
+            await this.handleOpenSettings();
+            break;
+          case 'updateLanguage':
+            if (message.language) {
+              await this.handleUpdateLanguage(message.language);
             }
             break;
           default:
@@ -172,12 +182,22 @@ export class ProfileManagerPanel {
     );
   }
 
+  private async handleOpenSettings(): Promise<void> {
+    await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCommitLite');
+  }
+
+  private async handleUpdateLanguage(language: string): Promise<void> {
+    await updateAICommitConfigValue('language', language);
+    await this.update();
+  }
+
   private async update(): Promise<void> {
     this.panel.title = t('profileManagerTitle');
     const profiles = getProfiles();
     const i18n = buildI18n(profiles.length);
     const activeProfile = getActiveProfile();
     const providers = getProviderDefinitions().map((provider) => toPanelProviderView(provider));
+    const currentLanguage = readAICommitConfigValue('language', 'en');
     const webviewData = await buildProfileManagerPanelWebviewData({
       cspSource: this.panel.webview.cspSource,
       locale: getLocale(),
@@ -186,7 +206,9 @@ export class ProfileManagerPanel {
       i18n,
       providers,
       profiles,
-      hasProfileApiKey
+      hasProfileApiKey,
+      currentLanguage,
+      languageOptions: LANGUAGE_OPTIONS
     });
 
     this.panel.webview.html = buildWebviewHtml(webviewData);

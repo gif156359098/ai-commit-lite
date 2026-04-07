@@ -308,6 +308,7 @@
     ]
   },
   "scripts": {
+    "install:npm": "npm install",
     "watch": "webpack --mode development --watch",
     "vscode:prepublish": "npm run compile",
     "compile": "webpack --mode production",
@@ -317,16 +318,16 @@
     "test": "npm run compile:test && node --test \"out-test/test/**/*.test.js\""
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.39",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.50.0",
     "ts-loader": "^9.5.0",
-    "typescript": "^5.3.0",
+    "typescript": "^6.0.2",
+    "vsce": "^2.15.0",
     "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.0",
-    "vsce": "^2.15.0"
+    "webpack-cli": "^5.1.0"
   },
   "dependencies": {
     "axios": "^1.6.0"

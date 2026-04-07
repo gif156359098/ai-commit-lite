@@ -117,6 +117,8 @@
   "providerDashscopeAudience": "适合通过 DashScope 使用 Qwen，且可能需要区域端点的用户。",
   "providerOpenaiCompatibleDescription": "任何提供 OpenAI 兼容 Chat Completions 接口的服务商。",
   "providerOpenaiCompatibleAudience": "适合第三方网关、代理服务，或自托管的兼容端点。",
-  "commitGenerationInProgress": "正在生成提交信息，请稍候..."
+  "commitGenerationInProgress": "正在生成提交信息，请稍候...",
+  "openSettingsAction": "打开设置",
+  "languageSetting": "提交消息语言"
 }
 

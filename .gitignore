@@ -9,3 +9,5 @@ dist
 .vscode-test/
 .nyc_output/
 coverage/
+.opencode/
+scripts/
