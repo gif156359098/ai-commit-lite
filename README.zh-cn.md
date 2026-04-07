@@ -168,10 +168,11 @@ git add .
 npm run compile
 npm run watch
 npm run lint
+npm test
 npm run package
 ```
 
-注意：当前仓库没有内置测试脚本。
+说明：当前仓库已经内置 `npm test`，会先编译测试目标，再运行 Node 原生测试。
 
 ## License
 

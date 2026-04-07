@@ -168,10 +168,11 @@ Attiva `aiCommitLite.enableAutoFallback` e configura `aiCommitLite.profileFallba
 npm run compile
 npm run watch
 npm run lint
+npm test
 npm run package
 ```
 
-Nota: il repository non include attualmente uno script di test integrato.
+Nota: il repository include `npm test`, che prima compila i target di test e poi esegue i test nativi di Node.
 
 ## License
 

@@ -168,10 +168,11 @@ git add .
 npm run compile
 npm run watch
 npm run lint
+npm test
 npm run package
 ```
 
-注意: リポジトリには現在、組み込みのテストスクリプトは含まれていません。
+注意: リポジトリには `npm test` が含まれており、先にテスト対象をコンパイルしてから Node ネイティブテストを実行します。
 
 ## License
 

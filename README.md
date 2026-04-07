@@ -346,10 +346,11 @@ Run `git add` first so your target files are in the staging area.
 npm run compile
 npm run watch
 npm run lint
+npm test
 npm run package
 ```
 
-Note: the repository does not currently include a built-in test script.
+Note: the repository includes `npm test`, which compiles the test targets first and then runs Node-native tests.
 
 ### License
 

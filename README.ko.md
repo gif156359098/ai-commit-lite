@@ -168,10 +168,11 @@ git add .
 npm run compile
 npm run watch
 npm run lint
+npm test
 npm run package
 ```
 
-참고: 현재 저장소에 내장 테스트 스크립트가 포함되어 있지 않습니다.
+참고: 이 저장소에는 `npm test`가 포함되어 있으며, 먼저 테스트 대상을 컴파일한 다음 Node 네이티브 테스트를 실행합니다.
 
 ## License
 
