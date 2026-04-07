@@ -165,11 +165,11 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique identifier for this profile"
+                "description": "%aiCommitLite.profiles.idDescription%"
               },
               "label": {
                 "type": "string",
-                "description": "Display name shown in settings and quick pick"
+                "description": "%aiCommitLite.profiles.labelDescription%"
               },
               "provider": {
                 "type": "string",
@@ -185,15 +185,15 @@
                   "openai-compatible",
                   "custom"
                 ],
-                "description": "AI provider type"
+                "description": "%aiCommitLite.profiles.providerDescription%"
               },
               "model": {
                 "type": "string",
-                "description": "Model name to use"
+                "description": "%aiCommitLite.profiles.modelDescription%"
               },
               "baseUrl": {
                 "type": "string",
-                "description": "Provider API base URL"
+                "description": "%aiCommitLite.profiles.baseUrlDescription%"
               }
             },
             "required": [

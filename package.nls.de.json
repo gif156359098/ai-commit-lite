@@ -15,5 +15,20 @@
   "aiCommitLite.maxTokens": "Maximale Token für KI-Antwort",
   "aiCommitLite.contextExcludePatterns": "Glob-Muster für bereitgestellte Dateien, die zusammengefasst werden sollen, anstatt den vollständigen Diff an den KI-Kontext zu senden",
   "aiCommitLite.maxDiffCharacters": "Maximale Anzahl an Diff-Zeichen, die nach Filterung und Zusammenfassung an die KI gesendet werden",
-  "aiCommitLite.maxFileDiffCharacters": "Maximale Anzahl an Diff-Zeichen aus einer einzelnen Datei vor dem Abschneiden"
+  "aiCommitLite.maxFileDiffCharacters": "Maximale Anzahl an Diff-Zeichen aus einer einzelnen Datei vor dem Abschneiden",
+  "aiCommitLite.openProfileManager": "Profilverwaltung offnen",
+  "aiCommitLite.addProfile": "Neues Profil hinzufugen",
+  "aiCommitLite.editProfile": "Profil bearbeiten",
+  "aiCommitLite.commitMessageStyle": "Bevorzugter Commit-Message-Stil (`detailed` fugt Aufzahlungsdetails hinzu, `concise` belasst es bei einer einzelnen Betreffzeile)",
+  "aiCommitLite.profileFallbackOrder": "Bevorzugte Fallback-Reihenfolge, wenn das aktuelle Profil fehlschlagt",
+  "aiCommitLite.deleteProfile": "Profil loschen",
+  "aiCommitLite.profiles": "Anbieterprofile fur die Commit-Generierung",
+  "aiCommitLite.activeProfile": "ID des aktuell aktiven Profils",
+  "aiCommitLite.switchProfile": "Profil wechseln",
+  "aiCommitLite.enableAutoFallback": "Automatischen Fallback bei uberschrittenem Kontingent aktivieren",
+  "aiCommitLite.profiles.idDescription": "Eindeutige Kennung für dieses Profil",
+  "aiCommitLite.profiles.labelDescription": "Anzeigename in Einstellungen und Quick Pick",
+  "aiCommitLite.profiles.providerDescription": "Typ des KI-Anbieters",
+  "aiCommitLite.profiles.modelDescription": "Name des zu verwendenden Modells",
+  "aiCommitLite.profiles.baseUrlDescription": "API-Basis-URL des Anbieters"
 }

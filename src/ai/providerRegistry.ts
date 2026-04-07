@@ -17,11 +17,13 @@ export interface ProviderDefinition {
   audienceHintKey: MessageKey;
   defaultModel: string;
   modelPlaceholder: string;
+  modelPlaceholderKey?: MessageKey;
   modelInputKind: ProviderModelInputKind;
   baseUrlMode: ProviderBaseUrlMode;
   endpointHintMode: ProviderEndpointHintMode;
   defaultBaseUrl?: string;
   baseUrlPlaceholder?: string;
+  baseUrlPlaceholderKey?: MessageKey;
 }
 
 const PROVIDER_DEFINITIONS: Record<NormalizedAIProviderType, ProviderDefinition> = {
@@ -43,11 +45,12 @@ const PROVIDER_DEFINITIONS: Record<NormalizedAIProviderType, ProviderDefinition>
     descriptionKey: 'providerAzureDescription',
     audienceHintKey: 'providerAzureAudience',
     defaultModel: '',
-    modelPlaceholder: 'your-deployment-name',
+    modelPlaceholder: '',
+    modelPlaceholderKey: 'providerAzureDeploymentPlaceholder',
     modelInputKind: 'deployment',
     baseUrlMode: 'required',
     endpointHintMode: 'azure-resource',
-    baseUrlPlaceholder: 'https://your-resource.openai.azure.com'
+    baseUrlPlaceholderKey: 'providerAzureBaseUrlPlaceholder'
   },
   deepseek: {
     type: 'deepseek',
@@ -128,11 +131,12 @@ const PROVIDER_DEFINITIONS: Record<NormalizedAIProviderType, ProviderDefinition>
     descriptionKey: 'providerOpenaiCompatibleDescription',
     audienceHintKey: 'providerOpenaiCompatibleAudience',
     defaultModel: '',
-    modelPlaceholder: 'your-model-name',
+    modelPlaceholder: '',
+    modelPlaceholderKey: 'providerOpenaiCompatibleModelPlaceholder',
     modelInputKind: 'model',
     baseUrlMode: 'required',
     endpointHintMode: 'custom-required',
-    baseUrlPlaceholder: 'https://api.example.com/v1'
+    baseUrlPlaceholderKey: 'providerOpenaiCompatibleBaseUrlPlaceholder'
   }
 };
 

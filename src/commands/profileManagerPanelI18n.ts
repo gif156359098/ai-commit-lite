@@ -76,10 +76,14 @@ export function toPanelProviderView(provider: ProviderDefinition): PanelProvider
     audienceHint: t(provider.audienceHintKey),
     endpointHint: t(getProviderEndpointHintKey(provider.endpointHintMode)),
     defaultModel: provider.defaultModel,
-    modelPlaceholder: provider.modelPlaceholder,
+    modelPlaceholder: provider.modelPlaceholderKey
+      ? t(provider.modelPlaceholderKey)
+      : provider.modelPlaceholder,
     modelInputKind: provider.modelInputKind,
     baseUrlMode: provider.baseUrlMode,
     defaultBaseUrl: provider.defaultBaseUrl || '',
-    baseUrlPlaceholder: provider.baseUrlPlaceholder || provider.defaultBaseUrl || ''
+    baseUrlPlaceholder: provider.baseUrlPlaceholderKey
+      ? t(provider.baseUrlPlaceholderKey)
+      : (provider.baseUrlPlaceholder || provider.defaultBaseUrl || '')
   };
 }

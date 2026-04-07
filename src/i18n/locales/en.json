@@ -119,6 +119,9 @@
   "providerOpenaiCompatibleAudience": "Best for third-party gateways, proxy services, or self-hosted compatible endpoints.",
   "commitGenerationInProgress": "Commit message generation is already in progress. Please wait...",
   "openSettingsAction": "Open Settings",
-  "languageSetting": "Commit Message Language"
+  "languageSetting": "Commit Message Language",
+  "providerAzureDeploymentPlaceholder": "your-deployment-name",
+  "providerAzureBaseUrlPlaceholder": "https://your-resource.openai.azure.com",
+  "providerOpenaiCompatibleModelPlaceholder": "your-model-name",
+  "providerOpenaiCompatibleBaseUrlPlaceholder": "https://api.example.com/v1"
 }
-

@@ -25,6 +25,10 @@
   "aiCommitLite.profiles": "Provider profiles for commit generation",
   "aiCommitLite.activeProfile": "Currently active profile ID",
   "aiCommitLite.enableAutoFallback": "Enable automatic fallback when quota exceeded",
-  "aiCommitLite.profileFallbackOrder": "Preferred fallback order when current profile fails"
+  "aiCommitLite.profileFallbackOrder": "Preferred fallback order when current profile fails",
+  "aiCommitLite.profiles.idDescription": "Unique identifier for this profile",
+  "aiCommitLite.profiles.labelDescription": "Display name shown in settings and quick pick",
+  "aiCommitLite.profiles.providerDescription": "AI provider type",
+  "aiCommitLite.profiles.modelDescription": "Model name to use",
+  "aiCommitLite.profiles.baseUrlDescription": "Provider API base URL"
 }
-

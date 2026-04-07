@@ -15,5 +15,20 @@
   "aiCommitLite.maxTokens": "AI 응답의 최대 토큰 수",
   "aiCommitLite.contextExcludePatterns": "AI 컨텍스트에 전체 diff를 전송하는 대신 요약해야 하는 스테이징된 파일의 Glob 패턴",
   "aiCommitLite.maxDiffCharacters": "필터링 및 요약 후 AI에 전송할 diff의 최대 문자 수",
-  "aiCommitLite.maxFileDiffCharacters": "잘라내기 전에 단일 파일에서 AI에 전송할 최대 diff 문자 수"
+  "aiCommitLite.maxFileDiffCharacters": "잘라내기 전에 단일 파일에서 AI에 전송할 최대 diff 문자 수",
+  "aiCommitLite.openProfileManager": "프로필 관리자 열기",
+  "aiCommitLite.addProfile": "새 프로필 추가",
+  "aiCommitLite.editProfile": "프로필 편집",
+  "aiCommitLite.commitMessageStyle": "선호하는 커밋 메시지 스타일(`detailed`는 글머리표 세부 정보를 추가하고, `concise`는 제목 한 줄만 유지합니다)",
+  "aiCommitLite.profileFallbackOrder": "현재 프로필이 실패할 때 선호하는 폴백 순서",
+  "aiCommitLite.deleteProfile": "프로필 삭제",
+  "aiCommitLite.profiles": "커밋 생성을 위한 공급자 프로필",
+  "aiCommitLite.activeProfile": "현재 활성 프로필 ID",
+  "aiCommitLite.switchProfile": "프로필 전환",
+  "aiCommitLite.enableAutoFallback": "할당량 초과 시 자동 폴백 사용",
+  "aiCommitLite.profiles.idDescription": "이 프로필의 고유 식별자",
+  "aiCommitLite.profiles.labelDescription": "설정 및 빠른 선택에 표시되는 이름",
+  "aiCommitLite.profiles.providerDescription": "AI 제공자 유형",
+  "aiCommitLite.profiles.modelDescription": "사용할 모델 이름",
+  "aiCommitLite.profiles.baseUrlDescription": "제공자 API 기본 URL"
 }

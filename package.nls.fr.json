@@ -15,5 +15,20 @@
   "aiCommitLite.maxTokens": "Nombre maximum de tokens pour la réponse IA",
   "aiCommitLite.contextExcludePatterns": "Modèles Glob pour les fichiers mis en stage qui doivent être résumés au lieu d'envoyer le diff complet au contexte IA",
   "aiCommitLite.maxDiffCharacters": "Nombre maximum de caractères de diff envoyés à l'IA après filtrage et résumé",
-  "aiCommitLite.maxFileDiffCharacters": "Nombre maximum de caractères de diff d'un seul fichier avant troncature"
+  "aiCommitLite.maxFileDiffCharacters": "Nombre maximum de caractères de diff d'un seul fichier avant troncature",
+  "aiCommitLite.openProfileManager": "Ouvrir le gestionnaire de profils",
+  "aiCommitLite.addProfile": "Ajouter un nouveau profil",
+  "aiCommitLite.editProfile": "Modifier le profil",
+  "aiCommitLite.commitMessageStyle": "Style de message de commit prefere (`detailed` ajoute des details sous forme de puces, `concise` conserve une seule ligne de sujet)",
+  "aiCommitLite.profileFallbackOrder": "Ordre de basculement prefere lorsque le profil actuel echoue",
+  "aiCommitLite.deleteProfile": "Supprimer le profil",
+  "aiCommitLite.profiles": "Profils de fournisseur pour la generation des commits",
+  "aiCommitLite.activeProfile": "ID du profil actuellement actif",
+  "aiCommitLite.switchProfile": "Changer de profil",
+  "aiCommitLite.enableAutoFallback": "Activer le basculement automatique lorsque le quota est depasse",
+  "aiCommitLite.profiles.idDescription": "Identifiant unique de ce profil",
+  "aiCommitLite.profiles.labelDescription": "Nom affiché dans les paramètres et le sélecteur rapide",
+  "aiCommitLite.profiles.providerDescription": "Type de fournisseur d'IA",
+  "aiCommitLite.profiles.modelDescription": "Nom du modèle à utiliser",
+  "aiCommitLite.profiles.baseUrlDescription": "URL de base de l'API du fournisseur"
 }

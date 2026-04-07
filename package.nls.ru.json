@@ -15,5 +15,20 @@
   "aiCommitLite.maxTokens": "Максимальное количество токенов для ответа ИИ",
   "aiCommitLite.contextExcludePatterns": "Glob-шаблоны для проиндексированных файлов, которые должны быть суммированы вместо отправки полного diff в контекст ИИ",
   "aiCommitLite.maxDiffCharacters": "Максимальное количество символов diff, отправляемых в ИИ после фильтрации и суммирования",
-  "aiCommitLite.maxFileDiffCharacters": "Максимальное количество символов diff из одного файла до усечения"
+  "aiCommitLite.maxFileDiffCharacters": "Максимальное количество символов diff из одного файла до усечения",
+  "aiCommitLite.openProfileManager": "Открыть менеджер профилей",
+  "aiCommitLite.addProfile": "Добавить новый профиль",
+  "aiCommitLite.editProfile": "Изменить профиль",
+  "aiCommitLite.commitMessageStyle": "Предпочитаемый стиль сообщения коммита (`detailed` добавляет маркированные детали, `concise` оставляет только одну строку темы)",
+  "aiCommitLite.profileFallbackOrder": "Предпочтительный порядок резервного перехода, если текущий профиль завершается ошибкой",
+  "aiCommitLite.deleteProfile": "Удалить профиль",
+  "aiCommitLite.profiles": "Профили провайдеров для генерации сообщений коммитов",
+  "aiCommitLite.activeProfile": "ID текущего активного профиля",
+  "aiCommitLite.switchProfile": "Переключить профиль",
+  "aiCommitLite.enableAutoFallback": "Включить автоматический резервный переход при превышении квоты",
+  "aiCommitLite.profiles.idDescription": "Уникальный идентификатор этого профиля",
+  "aiCommitLite.profiles.labelDescription": "Отображаемое имя в настройках и быстром выборе",
+  "aiCommitLite.profiles.providerDescription": "Тип провайдера ИИ",
+  "aiCommitLite.profiles.modelDescription": "Имя используемой модели",
+  "aiCommitLite.profiles.baseUrlDescription": "Базовый URL API провайдера"
 }

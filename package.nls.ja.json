@@ -20,5 +20,15 @@
   "aiCommitLite.profiles": "コミット生成用のモデルプロファイル",
   "aiCommitLite.activeProfile": "現在アクティブなプロファイルID",
   "aiCommitLite.enableAutoFallback": "クォータ超過時の自動フォールバックを有効にする",
-  "aiCommitLite.profileFallbackOrder": "現在のプロファイルが失敗した場合の優先フォールバック順序"
+  "aiCommitLite.profileFallbackOrder": "現在のプロファイルが失敗した場合の優先フォールバック順序",
+  "aiCommitLite.addProfile": "新しいプロファイルを追加",
+  "aiCommitLite.commitMessageStyle": "コミットメッセージのスタイル（`detailed` は箇条書きの詳細を追加し、`concise` は件名1行のみにします）",
+  "aiCommitLite.deleteProfile": "プロファイルを削除",
+  "aiCommitLite.openProfileManager": "プロファイル管理を開く",
+  "aiCommitLite.editProfile": "プロファイルを編集",
+  "aiCommitLite.profiles.idDescription": "このプロファイルの一意の識別子",
+  "aiCommitLite.profiles.labelDescription": "設定やクイックピックに表示される名前",
+  "aiCommitLite.profiles.providerDescription": "AI プロバイダーの種類",
+  "aiCommitLite.profiles.modelDescription": "使用するモデル名",
+  "aiCommitLite.profiles.baseUrlDescription": "プロバイダーの API ベース URL"
 }

@@ -15,5 +15,20 @@
   "aiCommitLite.maxTokens": "Máximo de tokens para resposta da IA",
   "aiCommitLite.contextExcludePatterns": "Padrões Glob para arquivos preparados que devem ser resumidos em vez de enviar o diff completo para o contexto da IA",
   "aiCommitLite.maxDiffCharacters": "Número máximo de caracteres de diff enviados à IA após filtragem e resumo",
-  "aiCommitLite.maxFileDiffCharacters": "Número máximo de caracteres de diff de um único arquivo antes do truncamento"
+  "aiCommitLite.maxFileDiffCharacters": "Número máximo de caracteres de diff de um único arquivo antes do truncamento",
+  "aiCommitLite.openProfileManager": "Abrir gerenciador de perfis",
+  "aiCommitLite.addProfile": "Adicionar novo perfil",
+  "aiCommitLite.editProfile": "Editar perfil",
+  "aiCommitLite.commitMessageStyle": "Estilo preferido da mensagem de commit (`detailed` adiciona detalhes em marcadores, `concise` mantem apenas uma linha de assunto)",
+  "aiCommitLite.profileFallbackOrder": "Ordem de fallback preferida quando o perfil atual falhar",
+  "aiCommitLite.deleteProfile": "Excluir perfil",
+  "aiCommitLite.profiles": "Perfis de provedor para geracao de commits",
+  "aiCommitLite.activeProfile": "ID do perfil atualmente ativo",
+  "aiCommitLite.switchProfile": "Alternar perfil",
+  "aiCommitLite.enableAutoFallback": "Habilitar fallback automatico quando a cota for excedida",
+  "aiCommitLite.profiles.idDescription": "Identificador único deste perfil",
+  "aiCommitLite.profiles.labelDescription": "Nome exibido nas configurações e na seleção rápida",
+  "aiCommitLite.profiles.providerDescription": "Tipo de provedor de IA",
+  "aiCommitLite.profiles.modelDescription": "Nome do modelo a ser usado",
+  "aiCommitLite.profiles.baseUrlDescription": "URL base da API do provedor"
 }
