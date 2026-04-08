@@ -86,6 +86,13 @@ git add .
 
 如果模型没有按详细版格式输出，扩展会自动再做一次格式修正。
 
+### 6. 管理回退优先级
+
+- 你可以直接在 `Profile Manager` 的卡片上设置回退优先级，不必再手动编辑数组。
+- `aiCommitLite.enableAutoFallback` 仍用于控制是否启用自动回退。
+- `aiCommitLite.profileFallbackOrder` 现在表示“优先级列表”：已列出的 Profile 会优先尝试，未列出的其余 Profile 会自动追加在后面。
+- 当主 Profile 限流或额度耗尽时，扩展会按这个优先级顺序尝试备用 Profile。
+
 ## 支持的供应商
 
 | 供应商 | 说明 | 自定义 Endpoint |
@@ -115,7 +122,7 @@ git add .
 | `aiCommitLite.maxFileDiffCharacters` | `8000` | 单文件 diff 上限 |
 | `aiCommitLite.contextExcludePatterns` | 内置默认值 | 分析时排除的文件模式 |
 | `aiCommitLite.enableAutoFallback` | `true` | 是否自动回退 |
-| `aiCommitLite.profileFallbackOrder` | `[]` | 回退顺序 |
+| `aiCommitLite.profileFallbackOrder` | `[]` | 自动回退优先级列表（未列出的 Profile 会自动追加） |
 | `aiCommitLite.profiles` | `[]` | Profile 元数据列表 |
 | `aiCommitLite.activeProfile` | `""` | 当前激活的 Profile ID |
 

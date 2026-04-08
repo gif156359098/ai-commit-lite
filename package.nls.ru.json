@@ -20,7 +20,7 @@
   "aiCommitLite.addProfile": "Добавить новый профиль",
   "aiCommitLite.editProfile": "Изменить профиль",
   "aiCommitLite.commitMessageStyle": "Предпочитаемый стиль сообщения коммита (`detailed` добавляет маркированные детали, `concise` оставляет только одну строку темы)",
-  "aiCommitLite.profileFallbackOrder": "Предпочтительный порядок резервного перехода, если текущий профиль завершается ошибкой",
+  "aiCommitLite.profileFallbackOrder": "Предпочтительный список приоритетов резервных профилей. Сначала пробуются указанные профили, а остальные автоматически добавляются в конец.",
   "aiCommitLite.deleteProfile": "Удалить профиль",
   "aiCommitLite.profiles": "Профили провайдеров для генерации сообщений коммитов",
   "aiCommitLite.activeProfile": "ID текущего активного профиля",

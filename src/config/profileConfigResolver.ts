@@ -1,4 +1,5 @@
 import { ModelProfile, ProfileConfig } from '../types/profile';
+import { sanitizeProfileFallbackOrder } from './profileManagerHelpers';
 import { WorkspaceConfigReader } from './workspaceConfig';
 
 export function resolveProfileConfig(
@@ -9,6 +10,9 @@ export function resolveProfileConfig(
     profiles,
     activeProfile: readValue('activeProfile', ''),
     enableAutoFallback: readValue('enableAutoFallback', true),
-    profileFallbackOrder: [...readValue('profileFallbackOrder', [] as string[])]
+    profileFallbackOrder: sanitizeProfileFallbackOrder(
+      profiles,
+      [...readValue('profileFallbackOrder', [] as string[])]
+    )
   };
 }

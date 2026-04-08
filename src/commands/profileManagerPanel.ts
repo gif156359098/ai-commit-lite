@@ -5,14 +5,19 @@ import {
 } from '../ai/providerRegistry';
 import {
   addProfile,
+  clearFallbackPriority,
   deleteProfile,
   getActiveProfile,
+  getProfileConfig,
   getProfiles,
   hasProfileApiKey,
+  moveFallbackProfile,
+  prioritizeFallbackProfile,
   storeProfileApiKey,
   switchProfile,
   updateProfile
 } from '../config/profileManager';
+import { FallbackMoveDirection } from '../config/profileManagerHelpers';
 import { readAICommitConfigValue, updateAICommitConfigValue } from '../config/workspaceConfig';
 import { getLocale, t } from '../i18n';
 import {
@@ -52,6 +57,14 @@ const profileManagerPanelOperationDeps: ProfileManagerPanelOperationDeps = {
   storeProfileApiKey,
   now: () => Date.now()
 };
+
+interface ProfileManagerPanelMessage {
+  command?: string;
+  data?: ProfileFormData;
+  profileId?: string;
+  language?: string;
+  direction?: FallbackMoveDirection;
+}
 
 export class ProfileManagerPanel {
   public static currentPanel: ProfileManagerPanel | undefined;
@@ -99,7 +112,7 @@ export class ProfileManagerPanel {
 
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
     this.panel.webview.onDidReceiveMessage(
-      async (message: { command?: string; data?: ProfileFormData; profileId?: string; language?: string }) => {
+      async (message: ProfileManagerPanelMessage) => {
         switch (message.command) {
           case 'saveProfile':
             if (message.data) {
@@ -114,6 +127,21 @@ export class ProfileManagerPanel {
           case 'switchProfile':
             if (message.profileId) {
               await this.handleSwitchProfile(message.profileId);
+            }
+            break;
+          case 'prioritizeFallbackProfile':
+            if (message.profileId) {
+              await this.handlePrioritizeFallbackProfile(message.profileId);
+            }
+            break;
+          case 'moveFallbackProfile':
+            if (message.profileId && message.direction) {
+              await this.handleMoveFallbackProfile(message.profileId, message.direction);
+            }
+            break;
+          case 'clearFallbackPriority':
+            if (message.profileId) {
+              await this.handleClearFallbackPriority(message.profileId);
             }
             break;
           case 'openSettings':
@@ -182,6 +210,21 @@ export class ProfileManagerPanel {
     );
   }
 
+  private async handlePrioritizeFallbackProfile(profileId: string): Promise<void> {
+    await this.runFallbackOrderOperation(() => prioritizeFallbackProfile(profileId));
+  }
+
+  private async handleMoveFallbackProfile(
+    profileId: string,
+    direction: FallbackMoveDirection
+  ): Promise<void> {
+    await this.runFallbackOrderOperation(() => moveFallbackProfile(profileId, direction));
+  }
+
+  private async handleClearFallbackPriority(profileId: string): Promise<void> {
+    await this.runFallbackOrderOperation(() => clearFallbackPriority(profileId));
+  }
+
   private async handleOpenSettings(): Promise<void> {
     await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCommitLite');
   }
@@ -193,7 +236,8 @@ export class ProfileManagerPanel {
 
   private async update(): Promise<void> {
     this.panel.title = t('profileManagerTitle');
-    const profiles = getProfiles();
+    const profileConfig = getProfileConfig();
+    const profiles = profileConfig.profiles;
     const i18n = buildI18n(profiles.length);
     const activeProfile = getActiveProfile();
     const providers = getProviderDefinitions().map((provider) => toPanelProviderView(provider));
@@ -208,7 +252,9 @@ export class ProfileManagerPanel {
       profiles,
       hasProfileApiKey,
       currentLanguage,
-      languageOptions: LANGUAGE_OPTIONS
+      languageOptions: LANGUAGE_OPTIONS,
+      autoFallbackEnabled: profileConfig.enableAutoFallback,
+      profileFallbackOrder: profileConfig.profileFallbackOrder
     });
 
     this.panel.webview.html = buildWebviewHtml(webviewData);
@@ -231,5 +277,22 @@ export class ProfileManagerPanel {
       vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
     }
   }
-}
 
+  private async runFallbackOrderOperation(operation: () => Promise<void>): Promise<void> {
+    try {
+      await operation();
+      this.pendingAction = 'default';
+      await this.update();
+    } catch (error: unknown) {
+      const descriptor = getProfileManagerPanelOperationErrorDescriptor(
+        error,
+        (message: string) => ({
+          key: 'failedToUpdateFallbackOrder',
+          params: { message }
+        })
+      );
+      void this.panel.webview.postMessage({ command: 'fallbackActionSettled' });
+      vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
+    }
+  }
+}

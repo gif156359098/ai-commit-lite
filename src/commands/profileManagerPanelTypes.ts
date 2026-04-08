@@ -17,6 +17,9 @@ export interface PanelProfileView extends ModelProfile {
   providerDescription: string;
   providerAudienceHint: string;
   endpointHint: string;
+  fallbackPriority: number | null;
+  hasExplicitFallbackPriority: boolean;
+  isSkippedWhileActive: boolean;
 }
 
 export interface PanelProviderView {
@@ -81,6 +84,15 @@ export interface WebviewI18n {
   secretMissingStatus: string;
   openSettingsAction: string;
   languageSetting: string;
+  fallbackOrderLabel: string;
+  fallbackPriorityValue: string;
+  defaultFallbackOrder: string;
+  skippedWhileActive: string;
+  prioritizeFallbackAction: string;
+  moveFallbackEarlierAction: string;
+  moveFallbackLaterAction: string;
+  useDefaultFallbackOrderAction: string;
+  autoFallbackDisabledNotice: string;
 }
 
 export interface LanguageOption {
@@ -99,4 +111,5 @@ export interface BuildWebviewHtmlData {
   profiles: PanelProfileView[];
   currentLanguage: string;
   languageOptions: LanguageOption[];
+  autoFallbackEnabled: boolean;
 }

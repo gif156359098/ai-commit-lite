@@ -123,5 +123,15 @@
   "providerAzureDeploymentPlaceholder": "你的部署名称",
   "providerAzureBaseUrlPlaceholder": "https://your-resource.openai.azure.com",
   "providerOpenaiCompatibleModelPlaceholder": "你的模型名称",
-  "providerOpenaiCompatibleBaseUrlPlaceholder": "https://api.example.com/v1"
+  "providerOpenaiCompatibleBaseUrlPlaceholder": "https://api.example.com/v1",
+  "fallbackOrderLabel": "回退优先级",
+  "fallbackPriorityValue": "回退 #{priority}",
+  "defaultFallbackOrder": "默认顺序",
+  "skippedWhileActive": "当前激活时跳过",
+  "prioritizeFallbackAction": "设为优先",
+  "moveFallbackEarlierAction": "前移",
+  "moveFallbackLaterAction": "后移",
+  "useDefaultFallbackOrderAction": "使用默认顺序",
+  "autoFallbackDisabledNotice": "自动回退已关闭。优先级仍会保存，但在设置中启用前不会自动切换到备用 Profile。",
+  "failedToUpdateFallbackOrder": "更新回退顺序失败：{message}"
 }

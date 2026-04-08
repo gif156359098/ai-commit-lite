@@ -3,6 +3,8 @@ import { ModelProfile } from '../types/profile';
 
 const DEFAULT_FAILURE_COOLDOWN_MS = 60 * 60 * 1000;
 
+export type FallbackMoveDirection = 'up' | 'down';
+
 export function normalizeProfile(profile: ModelProfile): ModelProfile | null {
   if (!profile || !profile.id || !profile.label || !profile.provider || !profile.model) {
     return null;
@@ -47,18 +49,85 @@ export function resolveActiveProfile(
   return profiles.find((profile) => profile.id === activeProfileId) || profiles[0];
 }
 
+export function sanitizeProfileFallbackOrder(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[]
+): string[] {
+  const validProfileIds = new Set(profiles.map((profile) => profile.id));
+  const seenProfileIds = new Set<string>();
+
+  return profileFallbackOrder.filter((profileId) => {
+    if (!validProfileIds.has(profileId) || seenProfileIds.has(profileId)) {
+      return false;
+    }
+
+    seenProfileIds.add(profileId);
+    return true;
+  });
+}
+
 export function buildFallbackOrder(
   profiles: ModelProfile[],
   currentProfileId: string,
   profileFallbackOrder: string[]
 ): string[] {
-  if (profileFallbackOrder.length > 0) {
-    return profileFallbackOrder.filter((profileId) => profileId !== currentProfileId);
+  const explicitFallbackOrder = sanitizeProfileFallbackOrder(profiles, profileFallbackOrder)
+    .filter((profileId) => profileId !== currentProfileId);
+  const explicitProfileIds = new Set(explicitFallbackOrder);
+  const remainingProfileIds = profiles
+    .map((profile) => profile.id)
+    .filter((profileId) => profileId !== currentProfileId && !explicitProfileIds.has(profileId));
+
+  return [...explicitFallbackOrder, ...remainingProfileIds];
+}
+
+export function prioritizeProfileInFallbackOrder(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[],
+  profileId: string
+): string[] {
+  const sanitizedOrder = sanitizeProfileFallbackOrder(profiles, profileFallbackOrder);
+  const validProfileIds = new Set(profiles.map((profile) => profile.id));
+
+  if (!validProfileIds.has(profileId) || sanitizedOrder.includes(profileId)) {
+    return sanitizedOrder;
   }
 
-  return profiles
-    .map((profile) => profile.id)
-    .filter((profileId) => profileId !== currentProfileId);
+  return [...sanitizedOrder, profileId];
+}
+
+export function moveProfileInFallbackOrder(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[],
+  profileId: string,
+  direction: FallbackMoveDirection
+): string[] {
+  const sanitizedOrder = sanitizeProfileFallbackOrder(profiles, profileFallbackOrder);
+  const currentIndex = sanitizedOrder.indexOf(profileId);
+
+  if (currentIndex === -1) {
+    return sanitizedOrder;
+  }
+
+  const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+  if (targetIndex < 0 || targetIndex >= sanitizedOrder.length) {
+    return sanitizedOrder;
+  }
+
+  const nextOrder = [...sanitizedOrder];
+  [nextOrder[currentIndex], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[currentIndex]];
+  return nextOrder;
+}
+
+export function clearProfileFromFallbackOrder(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[],
+  profileId: string
+): string[] {
+  return sanitizeProfileFallbackOrder(
+    profiles,
+    profileFallbackOrder.filter((candidateProfileId) => candidateProfileId !== profileId)
+  );
 }
 
 export function filterProfileIdsByCooldown(

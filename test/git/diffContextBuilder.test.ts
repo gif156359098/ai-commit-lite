@@ -65,10 +65,12 @@ test('buildPreparedDiffContext tracks filtered, truncated, and summarized files'
     maxFileDiffCharacters: 120
   });
 
-  assert.equal(preparedDiff.report.includedDiffFiles, 2);
-  assert.equal(preparedDiff.report.filteredFiles, 1);
-  assert.equal(preparedDiff.report.truncatedFiles, 2);
-  assert.equal(preparedDiff.report.summarizedFiles, 1);
+  assert.deepEqual(preparedDiff.report.includedFiles, ['src/a.ts', 'src/b.ts']);
+  assert.deepEqual(preparedDiff.report.filteredFiles, [
+    { file: 'package-lock.json', reason: 'filtered by contextExcludePatterns' }
+  ]);
+  assert.deepEqual(preparedDiff.report.truncatedFiles, ['src/a.ts', 'src/b.ts']);
+  assert.deepEqual(preparedDiff.report.summarizedFiles, ['src/c.ts']);
   assert.match(preparedDiff.prompt, /summary only: filtered by contextExcludePatterns/);
   assert.match(preparedDiff.prompt, /summary only: omitted because the total AI context limit was reached/);
   assert.match(preparedDiff.raw, /diff truncated to fit the per-file AI context limit/);

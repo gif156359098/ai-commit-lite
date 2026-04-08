@@ -20,7 +20,7 @@
   "aiCommitLite.addProfile": "Neues Profil hinzufugen",
   "aiCommitLite.editProfile": "Profil bearbeiten",
   "aiCommitLite.commitMessageStyle": "Bevorzugter Commit-Message-Stil (`detailed` fugt Aufzahlungsdetails hinzu, `concise` belasst es bei einer einzelnen Betreffzeile)",
-  "aiCommitLite.profileFallbackOrder": "Bevorzugte Fallback-Reihenfolge, wenn das aktuelle Profil fehlschlagt",
+  "aiCommitLite.profileFallbackOrder": "Bevorzugte Fallback-Prioritätenliste. Die aufgeführten Profile werden zuerst versucht, alle übrigen Profile werden automatisch hinten angehängt.",
   "aiCommitLite.deleteProfile": "Profil loschen",
   "aiCommitLite.profiles": "Anbieterprofile fur die Commit-Generierung",
   "aiCommitLite.activeProfile": "ID des aktuell aktiven Profils",

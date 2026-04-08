@@ -1,3 +1,4 @@
+import { sanitizeProfileFallbackOrder } from '../config/profileManagerHelpers';
 import { ModelProfile } from '../types/profile';
 import {
   BuildWebviewHtmlData,
@@ -19,15 +20,20 @@ export interface BuildProfileManagerPanelWebviewDataArgs {
   hasProfileApiKey: (profileId: string) => Promise<boolean>;
   currentLanguage: string;
   languageOptions: LanguageOption[];
+  autoFallbackEnabled: boolean;
+  profileFallbackOrder: string[];
 }
 
 export async function buildProfileManagerPanelWebviewData(
   args: BuildProfileManagerPanelWebviewDataArgs
 ): Promise<BuildWebviewHtmlData> {
+  const explicitFallbackOrder = sanitizeProfileFallbackOrder(args.profiles, args.profileFallbackOrder);
   const panelProfiles = await buildPanelProfileViews(
     args.profiles,
     args.providers,
-    args.hasProfileApiKey
+    args.hasProfileApiKey,
+    args.activeProfile?.id || '',
+    explicitFallbackOrder
   );
 
   return {
@@ -40,14 +46,17 @@ export async function buildProfileManagerPanelWebviewData(
     providers: args.providers,
     profiles: panelProfiles,
     currentLanguage: args.currentLanguage,
-    languageOptions: args.languageOptions
+    languageOptions: args.languageOptions,
+    autoFallbackEnabled: args.autoFallbackEnabled
   };
 }
 
 export async function buildPanelProfileViews(
   profiles: ModelProfile[],
   providers: PanelProviderView[],
-  hasProfileApiKey: (profileId: string) => Promise<boolean>
+  hasProfileApiKey: (profileId: string) => Promise<boolean>,
+  activeProfileId: string,
+  explicitFallbackOrder: string[]
 ): Promise<PanelProfileView[]> {
   const providerMap = new Map(providers.map((provider) => [provider.type, provider]));
 
@@ -61,7 +70,9 @@ export async function buildPanelProfileViews(
       return buildPanelProfileView(
         profile,
         provider,
-        await hasProfileApiKey(profile.id)
+        await hasProfileApiKey(profile.id),
+        activeProfileId,
+        explicitFallbackOrder
       );
     })
   );
@@ -70,14 +81,21 @@ export async function buildPanelProfileViews(
 export function buildPanelProfileView(
   profile: ModelProfile,
   provider: PanelProviderView,
-  hasApiKey: boolean
+  hasApiKey: boolean,
+  activeProfileId: string,
+  explicitFallbackOrder: string[]
 ): PanelProfileView {
+  const explicitFallbackIndex = explicitFallbackOrder.indexOf(profile.id);
+
   return {
     ...profile,
     hasApiKey,
     providerLabel: provider.label,
     providerDescription: provider.description,
     providerAudienceHint: provider.audienceHint,
-    endpointHint: provider.endpointHint
+    endpointHint: provider.endpointHint,
+    fallbackPriority: explicitFallbackIndex === -1 ? null : explicitFallbackIndex + 1,
+    hasExplicitFallbackPriority: explicitFallbackIndex !== -1,
+    isSkippedWhileActive: profile.id === activeProfileId
   };
 }

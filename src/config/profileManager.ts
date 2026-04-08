@@ -5,10 +5,15 @@ import { getConfig } from './settings';
 import { ModelProfile, ProfileConfig, AICommitConfigWithProfile } from '../types/profile';
 import {
   buildFallbackOrder,
+  clearProfileFromFallbackOrder,
+  FallbackMoveDirection,
   filterProfileIdsByCooldown,
+  moveProfileInFallbackOrder,
   normalizeProfile,
+  prioritizeProfileInFallbackOrder,
   resolveActiveProfile,
-  resolveNextActiveProfileId
+  resolveNextActiveProfileId,
+  sanitizeProfileFallbackOrder
 } from './profileManagerHelpers';
 import {
   readAICommitConfigValue,
@@ -59,7 +64,7 @@ export function getActiveProfile(): ModelProfile | null {
 
 export async function switchProfile(profileId: string): Promise<void> {
   const profiles = getProfiles();
-  const profile = profiles.find(p => p.id === profileId);
+  const profile = profiles.find((item) => item.id === profileId);
   if (!profile) {
     throw new Error(t('invalidProfile', { error: `Profile with ID ${profileId} not found` }));
   }
@@ -110,7 +115,7 @@ export async function handleQuotaExceeded(currentProfileId: string): Promise<Mod
   const viableProfiles = await filterOutRecentlyFailedProfiles(orderedIds);
 
   for (const profileId of viableProfiles) {
-    const profile = profiles.find(p => p.id === profileId);
+    const profile = profiles.find((item) => item.id === profileId);
     if (profile) {
       const apiKey = await getProfileApiKey(profile.id);
       if (apiKey) {
@@ -123,10 +128,46 @@ export async function handleQuotaExceeded(currentProfileId: string): Promise<Mod
   return null;
 }
 
+export async function prioritizeFallbackProfile(profileId: string): Promise<void> {
+  const profiles = getProfiles();
+  assertProfileExists(profileId, profiles);
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+
+  await updateProfileFallbackOrder(
+    profiles,
+    prioritizeProfileInFallbackOrder(profiles, profileFallbackOrder, profileId)
+  );
+}
+
+export async function moveFallbackProfile(
+  profileId: string,
+  direction: FallbackMoveDirection
+): Promise<void> {
+  const profiles = getProfiles();
+  assertProfileExists(profileId, profiles);
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+
+  await updateProfileFallbackOrder(
+    profiles,
+    moveProfileInFallbackOrder(profiles, profileFallbackOrder, profileId, direction)
+  );
+}
+
+export async function clearFallbackPriority(profileId: string): Promise<void> {
+  const profiles = getProfiles();
+  assertProfileExists(profileId, profiles);
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+
+  await updateProfileFallbackOrder(
+    profiles,
+    clearProfileFromFallbackOrder(profiles, profileFallbackOrder, profileId)
+  );
+}
+
 export async function addProfile(profile: ModelProfile): Promise<void> {
   const normalizedProfile = normalizeProfileOrThrow(profile);
   const { profiles, activeProfile } = getProfileConfig();
-  if (profiles.some(p => p.id === normalizedProfile.id)) {
+  if (profiles.some((item) => item.id === normalizedProfile.id)) {
     throw new Error(t('invalidProfile', { error: `Profile with ID ${normalizedProfile.id} already exists` }));
   }
 
@@ -154,10 +195,14 @@ export async function updateProfile(profile: ModelProfile): Promise<void> {
 }
 
 export async function deleteProfile(profileId: string): Promise<void> {
-  const { profiles, activeProfile } = getProfileConfig();
-  const updatedProfiles = profiles.filter(p => p.id !== profileId);
+  const { profiles, activeProfile, profileFallbackOrder } = getProfileConfig();
+  const updatedProfiles = profiles.filter((profile) => profile.id !== profileId);
 
   await updateAICommitConfigValue('profiles', updatedProfiles);
+  await updateProfileFallbackOrder(
+    updatedProfiles,
+    clearProfileFromFallbackOrder(updatedProfiles, profileFallbackOrder, profileId)
+  );
 
   const nextActiveProfileId = resolveNextActiveProfileId(updatedProfiles, profileId, activeProfile);
   if (nextActiveProfileId !== activeProfile) {
@@ -199,6 +244,22 @@ async function filterOutRecentlyFailedProfiles(profileIds: string[]): Promise<st
   return filterProfileIdsByCooldown(profileIds, lastFailureTimes);
 }
 
+async function updateProfileFallbackOrder(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[]
+): Promise<void> {
+  await updateAICommitConfigValue(
+    'profileFallbackOrder',
+    sanitizeProfileFallbackOrder(profiles, profileFallbackOrder)
+  );
+}
+
+function assertProfileExists(profileId: string, profiles: ModelProfile[]): void {
+  if (!profiles.some((profile) => profile.id === profileId)) {
+    throw new Error(t('invalidProfile', { error: `Profile with ID ${profileId} not found` }));
+  }
+}
+
 function normalizeProfileOrThrow(profile: ModelProfile): ModelProfile {
   const normalizedProfile = normalizeProfile(profile);
 
@@ -208,4 +269,3 @@ function normalizeProfileOrThrow(profile: ModelProfile): ModelProfile {
 
   return normalizedProfile;
 }
-

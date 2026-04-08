@@ -20,7 +20,7 @@
   "aiCommitLite.addProfile": "새 프로필 추가",
   "aiCommitLite.editProfile": "프로필 편집",
   "aiCommitLite.commitMessageStyle": "선호하는 커밋 메시지 스타일(`detailed`는 글머리표 세부 정보를 추가하고, `concise`는 제목 한 줄만 유지합니다)",
-  "aiCommitLite.profileFallbackOrder": "현재 프로필이 실패할 때 선호하는 폴백 순서",
+  "aiCommitLite.profileFallbackOrder": "선호하는 폴백 우선순위 목록입니다. 목록에 있는 프로필을 먼저 시도하고, 나머지 프로필은 자동으로 뒤에 추가됩니다.",
   "aiCommitLite.deleteProfile": "프로필 삭제",
   "aiCommitLite.profiles": "커밋 생성을 위한 공급자 프로필",
   "aiCommitLite.activeProfile": "현재 활성 프로필 ID",

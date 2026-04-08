@@ -50,31 +50,60 @@ const i18n: WebviewI18n = {
   connectionDetailsSectionTitle: 'Connection details',
   closeAction: 'Close',
   secretStoredStatus: 'Stored',
-  secretMissingStatus: 'Missing'
+  secretMissingStatus: 'Missing',
+  openSettingsAction: 'Open settings',
+  languageSetting: 'Language',
+  fallbackOrderLabel: 'Fallback order',
+  fallbackPriorityValue: 'Fallback #{priority}',
+  defaultFallbackOrder: 'Default order',
+  skippedWhileActive: 'Skipped while active',
+  prioritizeFallbackAction: 'Prioritize',
+  moveFallbackEarlierAction: 'Move earlier',
+  moveFallbackLaterAction: 'Move later',
+  useDefaultFallbackOrderAction: 'Use default order',
+  autoFallbackDisabledNotice: 'Automatic fallback is off.'
 };
 
 test('buildProfileManagerPanelBodyMarkup keeps required panel hooks', () => {
-  const markup = buildProfileManagerPanelBodyMarkup(i18n, 3, 'Main profile', escapeHtml);
+  const markup = buildProfileManagerPanelBodyMarkup(
+    i18n,
+    3,
+    'Main profile',
+    'en',
+    [{ value: 'en', label: 'English' }],
+    false,
+    escapeHtml
+  );
 
   assert.match(markup, /id="profilesContainer"/);
   assert.match(markup, /id="providerPicker"/);
   assert.match(markup, /id="formModal"/);
   assert.match(markup, /id="emptyStateAddButton"/);
   assert.match(markup, /aria-labelledby="formTitle"/);
+  assert.match(markup, /Automatic fallback is off\./);
 });
 
 test('buildProfileManagerPanelBodyMarkup escapes user-visible content', () => {
-  const markup = buildProfileManagerPanelBodyMarkup(i18n, 1, '</script><b>active</b>', escapeHtml);
+  const markup = buildProfileManagerPanelBodyMarkup(
+    i18n,
+    1,
+    '</script><b>active</b>',
+    'en',
+    [{ value: 'en', label: 'English' }],
+    true,
+    escapeHtml
+  );
 
   assert.match(markup, /Profile &lt;Manager&gt;/);
   assert.match(markup, /&lt;\/script&gt;&lt;b&gt;active&lt;\/b&gt;/);
   assert.doesNotMatch(markup, /<h1 class="title">Profile <Manager><\/h1>/);
 });
 
-test('buildProfileManagerPanelStyles exposes modal and provider layout rules', () => {
+test('buildProfileManagerPanelStyles exposes fallback and status-note rules', () => {
   const styles = buildProfileManagerPanelStyles();
 
-  assert.match(styles, /\.overlay\{display:none;/);
-  assert.match(styles, /\.modal-grid\{display:grid;/);
-  assert.match(styles, /\.providers\{display:flex;flex-direction:column;/);
+  assert.match(styles, /\.overlay\s*\{/);
+  assert.match(styles, /\.providers\s*\{/);
+  assert.match(styles, /\.fallback-block\s*\{/);
+  assert.match(styles, /\.status-note\s*\{/);
 });

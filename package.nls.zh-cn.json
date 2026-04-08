@@ -25,7 +25,7 @@
   "aiCommitLite.profiles": "用于提交生成的服务商配置文件",
   "aiCommitLite.activeProfile": "当前激活的配置文件 ID",
   "aiCommitLite.enableAutoFallback": "启用配额耗尽时的自动回退",
-  "aiCommitLite.profileFallbackOrder": "当前配置文件失败时的首选回退顺序",
+  "aiCommitLite.profileFallbackOrder": "首选的回退优先级列表。已列出的 Profile 会优先尝试，其余 Profile 会自动追加到后面。",
   "aiCommitLite.profiles.idDescription": "此配置文件的唯一标识符",
   "aiCommitLite.profiles.labelDescription": "显示在设置和快速选择中的名称",
   "aiCommitLite.profiles.providerDescription": "AI 提供商类型",

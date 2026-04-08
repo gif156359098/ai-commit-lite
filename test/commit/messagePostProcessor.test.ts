@@ -18,6 +18,8 @@ class FakeProvider implements AIProvider {
     this.calls.push({ diff, context });
     return this.response;
   }
+
+  cancel(): void {}
 }
 
 function createContext(overrides: Partial<CommitContext> = {}): CommitContext {
@@ -50,10 +52,10 @@ function createPreparedDiff(fileCount: number = 2): PreparedGitDiff {
     prompt: 'staged changes',
     report: {
       totalFiles: fileCount,
-      includedDiffFiles: fileCount,
-      filteredFiles: 0,
-      truncatedFiles: 0,
-      summarizedFiles: 0,
+      includedFiles: files.map((file) => file.path),
+      filteredFiles: [],
+      truncatedFiles: [],
+      summarizedFiles: [],
       totalPromptCharacters: 120
     }
   };

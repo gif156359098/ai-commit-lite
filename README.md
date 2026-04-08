@@ -81,10 +81,10 @@ git add .
 #### 6. 管理多个供应商和回退顺序
 
 - 你可以为不同账号、不同团队、不同模型各建一个 Profile。
-- 打开 `AI Commit Lite` 设置后，可以配置：
-  - `aiCommitLite.enableAutoFallback`
-  - `aiCommitLite.profileFallbackOrder`
-- 当主 Profile 限流或额度耗尽时，扩展会按顺序尝试备用 Profile。
+- 你可以直接在 `Profile Manager` 的卡片上设置回退优先级，不必再手动编辑数组。
+- `aiCommitLite.enableAutoFallback` 仍用于控制是否启用自动回退。
+- `aiCommitLite.profileFallbackOrder` 现在表示“优先级列表”：已列出的 Profile 会优先尝试，未列出的其余 Profile 会自动追加在后面。
+- 当主 Profile 限流或额度耗尽时，扩展会按这个优先级顺序尝试备用 Profile。
 
 ### 支持的供应商
 
@@ -115,7 +115,7 @@ git add .
 | `aiCommitLite.maxFileDiffCharacters` | `8000` | 单文件 diff 上限 |
 | `aiCommitLite.contextExcludePatterns` | 内置默认值 | 分析时排除的文件模式 |
 | `aiCommitLite.enableAutoFallback` | `true` | 是否自动切换备用 Profile |
-| `aiCommitLite.profileFallbackOrder` | `[]` | 自动回退顺序 |
+| `aiCommitLite.profileFallbackOrder` | `[]` | 自动回退优先级列表（未列出的 Profile 会自动追加） |
 | `aiCommitLite.profiles` | `[]` | Profile 元数据列表 |
 | `aiCommitLite.activeProfile` | `""` | 当前激活的 Profile ID |
 
@@ -262,10 +262,10 @@ Set `aiCommitLite.commitMessageStyle` in VS Code settings:
 #### 6. Manage multiple vendors and fallback order
 
 - Create separate profiles for different teams, accounts, or model vendors.
-- Use these settings for fallback control:
-  - `aiCommitLite.enableAutoFallback`
-  - `aiCommitLite.profileFallbackOrder`
-- When the primary profile hits a quota or rate limit, the extension can switch to a backup profile automatically.
+- You can adjust fallback priority directly on the profile cards in `Profile Manager` instead of editing an array by hand.
+- `aiCommitLite.enableAutoFallback` still controls whether automatic fallback is enabled.
+- `aiCommitLite.profileFallbackOrder` now behaves as a priority list: listed profiles are tried first, and any remaining profiles are appended automatically.
+- When the primary profile hits a quota or rate limit, the extension follows that priority order for backup profiles.
 
 ### Supported Providers
 
@@ -296,7 +296,7 @@ Set `aiCommitLite.commitMessageStyle` in VS Code settings:
 | `aiCommitLite.maxFileDiffCharacters` | `8000` | Per-file diff budget |
 | `aiCommitLite.contextExcludePatterns` | built-in defaults | Patterns excluded from diff analysis |
 | `aiCommitLite.enableAutoFallback` | `true` | Enable automatic profile fallback |
-| `aiCommitLite.profileFallbackOrder` | `[]` | Ordered fallback profile list |
+| `aiCommitLite.profileFallbackOrder` | `[]` | Fallback priority list. Unlisted profiles are appended automatically |
 | `aiCommitLite.profiles` | `[]` | Stored profile metadata |
 | `aiCommitLite.activeProfile` | `""` | Active profile ID |
 

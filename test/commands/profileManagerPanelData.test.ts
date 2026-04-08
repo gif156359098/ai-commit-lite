@@ -81,16 +81,27 @@ const i18n: WebviewI18n = {
   connectionDetailsSectionTitle: 'Connection details',
   closeAction: 'Close',
   secretStoredStatus: 'Stored',
-  secretMissingStatus: 'Missing'
+  secretMissingStatus: 'Missing',
+  openSettingsAction: 'Open settings',
+  languageSetting: 'Language',
+  fallbackOrderLabel: 'Fallback order',
+  fallbackPriorityValue: 'Fallback #{priority}',
+  defaultFallbackOrder: 'Default order',
+  skippedWhileActive: 'Skipped while active',
+  prioritizeFallbackAction: 'Prioritize',
+  moveFallbackEarlierAction: 'Move earlier',
+  moveFallbackLaterAction: 'Move later',
+  useDefaultFallbackOrderAction: 'Use default order',
+  autoFallbackDisabledNotice: 'Automatic fallback is off.'
 };
 
-test('buildPanelProfileView merges profile, provider copy, and key state', () => {
+test('buildPanelProfileView merges provider and fallback metadata', () => {
   const profile = buildPanelProfileView({
     id: 'demo',
     label: 'Demo',
     provider: 'openai',
     model: 'gpt-4.1-mini'
-  }, openaiProvider, true);
+  }, openaiProvider, true, 'demo', ['demo', 'other']);
 
   assert.deepEqual(profile, {
     id: 'demo',
@@ -101,7 +112,10 @@ test('buildPanelProfileView merges profile, provider copy, and key state', () =>
     providerLabel: 'OpenAI',
     providerDescription: 'Official OpenAI API',
     providerAudienceHint: 'Best for direct OpenAI usage',
-    endpointHint: 'Built-in endpoint'
+    endpointHint: 'Built-in endpoint',
+    fallbackPriority: 1,
+    hasExplicitFallbackPriority: true,
+    isSkippedWhileActive: true
   });
 });
 
@@ -120,19 +134,25 @@ test('buildPanelProfileViews resolves provider metadata and api key state for ev
   const views = await buildPanelProfileViews(
     profiles,
     [openaiProvider, compatibleProvider],
-    async (profileId) => profileId === 'openai-1'
+    async (profileId) => profileId === 'openai-1',
+    'openai-1',
+    ['compat-1']
   );
 
   assert.equal(views[0].hasApiKey, true);
   assert.equal(views[0].providerLabel, 'OpenAI');
+  assert.equal(views[0].hasExplicitFallbackPriority, false);
+  assert.equal(views[0].isSkippedWhileActive, true);
   assert.equal(views[1].hasApiKey, false);
   assert.equal(views[1].providerLabel, 'OpenAI-Compatible');
   assert.equal(views[1].endpointHint, 'Custom endpoint required');
+  assert.equal(views[1].fallbackPriority, 1);
 });
 
-test('buildProfileManagerPanelWebviewData assembles active profile and fallback labels correctly', async () => {
+test('buildProfileManagerPanelWebviewData assembles active profile and fallback settings', async () => {
   const profiles: ModelProfile[] = [
-    { id: 'openai-1', label: 'Primary', provider: 'openai', model: 'gpt-4.1-mini' }
+    { id: 'openai-1', label: 'Primary', provider: 'openai', model: 'gpt-4.1-mini' },
+    { id: 'openai-2', label: 'Backup', provider: 'openai', model: 'gpt-4.1-mini' }
   ];
 
   const webviewData = await buildProfileManagerPanelWebviewData({
@@ -143,14 +163,19 @@ test('buildProfileManagerPanelWebviewData assembles active profile and fallback 
     i18n,
     providers: [openaiProvider],
     profiles,
-    hasProfileApiKey: async () => true
+    hasProfileApiKey: async () => true,
+    currentLanguage: 'en',
+    languageOptions: [{ value: 'en', label: 'English' }],
+    autoFallbackEnabled: false,
+    profileFallbackOrder: ['openai-2', 'missing']
   });
 
   assert.equal(webviewData.activeProfileId, 'openai-1');
   assert.equal(webviewData.activeProfileLabel, 'Primary');
   assert.equal(webviewData.initialAction, 'edit');
-  assert.equal(webviewData.profiles.length, 1);
-  assert.equal(webviewData.profiles[0].providerDescription, 'Official OpenAI API');
+  assert.equal(webviewData.profiles.length, 2);
+  assert.equal(webviewData.profiles[1].fallbackPriority, 1);
+  assert.equal(webviewData.autoFallbackEnabled, false);
 
   const emptyData = await buildProfileManagerPanelWebviewData({
     cspSource: 'vscode-webview://test',
@@ -160,7 +185,11 @@ test('buildProfileManagerPanelWebviewData assembles active profile and fallback 
     i18n,
     providers: [openaiProvider],
     profiles: [],
-    hasProfileApiKey: async () => false
+    hasProfileApiKey: async () => false,
+    currentLanguage: 'en',
+    languageOptions: [{ value: 'en', label: 'English' }],
+    autoFallbackEnabled: true,
+    profileFallbackOrder: []
   });
 
   assert.equal(emptyData.activeProfileId, '');

@@ -11,8 +11,23 @@ export function buildClientPreludeScript(): string {
     const setFormError = (message) => { $('formError').textContent = message || ''; $('formError').classList.toggle('active', Boolean(message)); };
     const openModal = () => { $('formModal').classList.add('active'); $('formModal').setAttribute('aria-hidden', 'false'); $('label').focus(); };
     const hideForm = () => { $('formModal').classList.remove('active'); $('formModal').setAttribute('aria-hidden', 'true'); setFormError(''); };
-    
-    // SVG Icons
+    let fallbackBusy = false;
+    const syncFallbackControlState = () => {
+      document.querySelectorAll('[data-fallback-control="true"]').forEach((button) => {
+        const boundaryLocked = button.getAttribute('data-disabled') === 'true';
+        button.disabled = fallbackBusy || boundaryLocked;
+      });
+    };
+    const setFallbackBusy = (busy) => {
+      fallbackBusy = busy;
+      syncFallbackControlState();
+    };
+    const postFallbackAction = (message) => {
+      if (fallbackBusy) { return; }
+      setFallbackBusy(true);
+      vscode.postMessage(message);
+    };
+
     const icons = {
       check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
       edit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
@@ -24,6 +39,33 @@ export function buildClientPreludeScript(): string {
 
 export function buildClientRenderScript(): string {
   return `
+    function formatFallbackPriority(profile) {
+      if (profile.hasExplicitFallbackPriority) {
+        return state.i18n.fallbackPriorityValue.replace('{priority}', String(profile.fallbackPriority));
+      }
+
+      return state.i18n.defaultFallbackOrder;
+    }
+
+    function buildFallbackControls(profile, explicitFallbackCount) {
+      if (state.profiles.length < 2) {
+        return '';
+      }
+
+      if (!profile.hasExplicitFallbackPriority) {
+        return '<button class="chip-btn" data-fallback-control="true" data-disabled="false" data-action="prioritizeFallback" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.prioritizeFallbackAction) + '</button>';
+      }
+
+      const isFirst = profile.fallbackPriority === 1;
+      const isLast = profile.fallbackPriority === explicitFallbackCount;
+
+      return [
+        '<button class="chip-btn" data-fallback-control="true" data-disabled="' + (isFirst ? 'true' : 'false') + '" data-action="moveFallbackEarlier" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.moveFallbackEarlierAction) + '</button>',
+        '<button class="chip-btn" data-fallback-control="true" data-disabled="' + (isLast ? 'true' : 'false') + '" data-action="moveFallbackLater" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.moveFallbackLaterAction) + '</button>',
+        '<button class="chip-btn" data-fallback-control="true" data-disabled="false" data-action="clearFallbackPriority" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.useDefaultFallbackOrderAction) + '</button>'
+      ].join('');
+    }
+
     function renderProfiles() {
       if (state.profiles.length === 0) {
         $('emptyState').classList.add('active');
@@ -31,11 +73,23 @@ export function buildClientRenderScript(): string {
         return;
       }
       $('emptyState').classList.remove('active');
+      const explicitFallbackCount = state.profiles.filter((profile) => profile.hasExplicitFallbackPriority).length;
       $('profilesContainer').innerHTML = state.profiles.map((profile) => {
         const isActive = state.activeProfileId === profile.id;
         const pillText = isActive ? state.i18n.currentProfile : (profile.hasApiKey ? state.i18n.secretStoredStatus : state.i18n.secretMissingStatus);
         const pillIcon = isActive ? icons.check : '';
-        
+        const fallbackNote = profile.isSkippedWhileActive ? '<span class="fallback-note">' + escapeText(state.i18n.skippedWhileActive) + '</span>' : '';
+        const fallbackSection = state.profiles.length < 2 ? '' : (
+          '<div class="fallback-block">' +
+            '<div class="fallback-heading">' + escapeText(state.i18n.fallbackOrderLabel) + '</div>' +
+            '<div class="fallback-row">' +
+              '<span class="fallback-badge ' + (profile.hasExplicitFallbackPriority ? 'explicit' : 'default') + '">' + escapeText(formatFallbackPriority(profile)) + '</span>' +
+              fallbackNote +
+            '</div>' +
+            '<div class="fallback-actions">' + buildFallbackControls(profile, explicitFallbackCount) + '</div>' +
+          '</div>'
+        );
+
         return (
           '<article class="card ' + (isActive ? 'active' : '') + '">' +
             '<div class="card-header">' +
@@ -45,15 +99,13 @@ export function buildClientRenderScript(): string {
               '</div>' +
               '<div class="pill">' + pillIcon + escapeText(pillText) + '</div>' +
             '</div>' +
-            
             '<div class="desc">' + escapeText(profile.providerDescription) + '</div>' +
-            
             '<div class="meta-grid">' +
               '<div class="label">' + escapeText(state.i18n.model) + '</div>' +
               '<div class="value">' + escapeText(profile.model) + '</div>' +
               (profile.baseUrl ? '<div class="label">' + escapeText(state.i18n.apiEndpoint) + '</div><div class="value">' + escapeText(profile.baseUrl) + '</div>' : '') +
             '</div>' +
-            
+            fallbackSection +
             '<div class="card-actions">' +
               (isActive ? '' : '<button class="btn primary" style="margin-right: auto" data-action="switch" data-profile-id="' + escapeText(profile.id) + '">' + icons.star + escapeText(state.i18n.useThisProfile) + '</button>') +
               '<button class="icon-btn" title="' + escapeText(state.i18n.editAction) + '" data-action="edit" data-profile-id="' + escapeText(profile.id) + '">' + icons.edit + '</button>' +
@@ -62,6 +114,7 @@ export function buildClientRenderScript(): string {
           '</article>'
         );
       }).join('');
+      syncFallbackControlState();
     }
 
     function renderProviders() {
@@ -153,9 +206,13 @@ export function buildClientEventScript(): string {
       const action = target.getAttribute('data-action');
       const profileId = target.getAttribute('data-profile-id');
       if (!profileId) { return; }
-      if (action === 'switch') { vscode.postMessage({ command: 'switchProfile', profileId }); }
-      if (action === 'edit') { showEditForm(profileId); }
-      if (action === 'delete') { vscode.postMessage({ command: 'deleteProfile', profileId }); }
+      if (action === 'switch') { vscode.postMessage({ command: 'switchProfile', profileId }); return; }
+      if (action === 'edit') { showEditForm(profileId); return; }
+      if (action === 'delete') { vscode.postMessage({ command: 'deleteProfile', profileId }); return; }
+      if (action === 'prioritizeFallback') { postFallbackAction({ command: 'prioritizeFallbackProfile', profileId }); return; }
+      if (action === 'moveFallbackEarlier') { postFallbackAction({ command: 'moveFallbackProfile', profileId, direction: 'up' }); return; }
+      if (action === 'moveFallbackLater') { postFallbackAction({ command: 'moveFallbackProfile', profileId, direction: 'down' }); return; }
+      if (action === 'clearFallbackPriority') { postFallbackAction({ command: 'clearFallbackPriority', profileId }); }
     });
     $('providerPicker').addEventListener('click', (event) => {
       const target = event.target.closest('[data-provider-type]');
@@ -171,6 +228,11 @@ export function buildClientEventScript(): string {
     });
     $('languageSelect').addEventListener('change', (event) => {
       vscode.postMessage({ command: 'updateLanguage', language: event.target.value });
+    });
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.command === 'fallbackActionSettled') {
+        setFallbackBusy(false);
+      }
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && $('formModal').classList.contains('active')) { hideForm(); }

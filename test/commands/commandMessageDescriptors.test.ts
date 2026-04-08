@@ -21,10 +21,10 @@ import type { DiffContextReport } from '../../src/git/diff';
 function createReport(overrides: Partial<DiffContextReport> = {}): DiffContextReport {
   return {
     totalFiles: 3,
-    includedDiffFiles: 3,
-    filteredFiles: 0,
-    truncatedFiles: 0,
-    summarizedFiles: 0,
+    includedFiles: ['src/a.ts', 'src/b.ts', 'src/c.ts'],
+    filteredFiles: [],
+    truncatedFiles: [],
+    summarizedFiles: [],
     totalPromptCharacters: 120,
     ...overrides
   };
@@ -39,19 +39,19 @@ test('getCommitGenerationSuccessDescriptor returns the plain success message whe
 
 test('getCommitGenerationSuccessDescriptor returns the optimized success message with counts', () => {
   const descriptor = getCommitGenerationSuccessDescriptor(createReport({
-    filteredFiles: 2,
-    summarizedFiles: 1
+    filteredFiles: [{ file: 'package-lock.json', reason: 'filtered by contextExcludePatterns' }],
+    summarizedFiles: ['src/large.ts']
   }));
 
   assert.deepEqual(descriptor, {
     key: 'commitMessageFilledOptimized',
     params: {
-      filtered: 2,
+      filtered: 1,
       truncated: 0,
       summarized: 1
     }
   });
-  assert.equal(hasDiffContextOptimization(createReport({ truncatedFiles: 1 })), true);
+  assert.equal(hasDiffContextOptimization(createReport({ truncatedFiles: ['src/a.ts'] })), true);
 });
 
 test('profile-related success descriptors map to the expected message keys', () => {

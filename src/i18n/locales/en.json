@@ -123,5 +123,15 @@
   "providerAzureDeploymentPlaceholder": "your-deployment-name",
   "providerAzureBaseUrlPlaceholder": "https://your-resource.openai.azure.com",
   "providerOpenaiCompatibleModelPlaceholder": "your-model-name",
-  "providerOpenaiCompatibleBaseUrlPlaceholder": "https://api.example.com/v1"
+  "providerOpenaiCompatibleBaseUrlPlaceholder": "https://api.example.com/v1",
+  "fallbackOrderLabel": "Fallback Priority",
+  "fallbackPriorityValue": "Fallback #{priority}",
+  "defaultFallbackOrder": "Default order",
+  "skippedWhileActive": "Skipped while active",
+  "prioritizeFallbackAction": "Prioritize",
+  "moveFallbackEarlierAction": "Move earlier",
+  "moveFallbackLaterAction": "Move later",
+  "useDefaultFallbackOrderAction": "Use default order",
+  "autoFallbackDisabledNotice": "Automatic fallback is off. Priorities are saved, but no backup profile will be used until you enable it in Settings.",
+  "failedToUpdateFallbackOrder": "Failed to update fallback order: {message}"
 }

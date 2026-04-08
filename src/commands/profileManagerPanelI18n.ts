@@ -51,7 +51,16 @@ export function buildI18n(profileCount: number): WebviewI18n {
     secretStoredStatus: t('secretStoredStatus'),
     secretMissingStatus: t('secretMissingStatus'),
     openSettingsAction: t('openSettingsAction'),
-    languageSetting: t('languageSetting')
+    languageSetting: t('languageSetting'),
+    fallbackOrderLabel: t('fallbackOrderLabel'),
+    fallbackPriorityValue: t('fallbackPriorityValue'),
+    defaultFallbackOrder: t('defaultFallbackOrder'),
+    skippedWhileActive: t('skippedWhileActive'),
+    prioritizeFallbackAction: t('prioritizeFallbackAction'),
+    moveFallbackEarlierAction: t('moveFallbackEarlierAction'),
+    moveFallbackLaterAction: t('moveFallbackLaterAction'),
+    useDefaultFallbackOrderAction: t('useDefaultFallbackOrderAction'),
+    autoFallbackDisabledNotice: t('autoFallbackDisabledNotice')
   };
 }
 

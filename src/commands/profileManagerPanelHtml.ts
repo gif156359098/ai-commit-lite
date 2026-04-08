@@ -4,7 +4,19 @@ import { buildProfileManagerPanelStyles } from './profileManagerPanelStyles';
 import { BuildWebviewHtmlData } from './profileManagerPanelTypes';
 
 export function buildWebviewHtml(data: BuildWebviewHtmlData): string {
-  const { cspSource, locale, activeProfileLabel, activeProfileId, initialAction, i18n, providers, profiles, currentLanguage, languageOptions } = data;
+  const {
+    cspSource,
+    locale,
+    activeProfileLabel,
+    activeProfileId,
+    initialAction,
+    i18n,
+    providers,
+    profiles,
+    currentLanguage,
+    languageOptions,
+    autoFallbackEnabled
+  } = data;
   const nonce = getNonce();
   const state = serializeForWebviewScript({
     activeProfileId,
@@ -14,7 +26,8 @@ export function buildWebviewHtml(data: BuildWebviewHtmlData): string {
     providers,
     profiles,
     currentLanguage,
-    languageOptions
+    languageOptions,
+    autoFallbackEnabled
   });
 
   return `<!DOCTYPE html>
@@ -27,7 +40,7 @@ export function buildWebviewHtml(data: BuildWebviewHtmlData): string {
   <style>${buildProfileManagerPanelStyles()}</style>
 </head>
 <body>
-${buildProfileManagerPanelBodyMarkup(i18n, profiles.length, activeProfileLabel, currentLanguage, languageOptions, escapeHtml)}
+${buildProfileManagerPanelBodyMarkup(i18n, profiles.length, activeProfileLabel, currentLanguage, languageOptions, autoFallbackEnabled, escapeHtml)}
   <script nonce="${nonce}">
     const state = ${state};
 ${buildClientScript()}

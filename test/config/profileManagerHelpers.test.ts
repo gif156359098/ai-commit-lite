@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   buildFallbackOrder,
+  clearProfileFromFallbackOrder,
   filterProfileIdsByCooldown,
+  moveProfileInFallbackOrder,
   normalizeProfile,
+  prioritizeProfileInFallbackOrder,
   resolveActiveProfile,
-  resolveNextActiveProfileId
+  resolveNextActiveProfileId,
+  sanitizeProfileFallbackOrder
 } from '../../src/config/profileManagerHelpers';
 import { ModelProfile } from '../../src/types/profile';
 
@@ -56,11 +60,39 @@ test('resolveActiveProfile returns requested profile or falls back to first', ()
   assert.equal(resolveActiveProfile([], 'missing'), null);
 });
 
-test('buildFallbackOrder respects configured order and excludes current profile', () => {
+test('sanitizeProfileFallbackOrder removes duplicates and invalid profile ids', () => {
   const profiles = [createProfile('a'), createProfile('b'), createProfile('c')];
 
-  assert.deepEqual(buildFallbackOrder(profiles, 'b', ['c', 'b', 'a']), ['c', 'a']);
-  assert.deepEqual(buildFallbackOrder(profiles, 'b', []), ['a', 'c']);
+  assert.deepEqual(
+    sanitizeProfileFallbackOrder(profiles, ['c', 'missing', 'a', 'c', 'b']),
+    ['c', 'a', 'b']
+  );
+});
+
+test('buildFallbackOrder prioritizes explicit order, skips current profile, and appends the remaining profiles', () => {
+  const profiles = [createProfile('a'), createProfile('b'), createProfile('c'), createProfile('d')];
+
+  assert.deepEqual(
+    buildFallbackOrder(profiles, 'b', ['c', 'b', 'a']),
+    ['c', 'a', 'd']
+  );
+  assert.deepEqual(buildFallbackOrder(profiles, 'b', []), ['a', 'c', 'd']);
+});
+
+test('prioritize, move, and clear fallback profiles preserve explicit ordering only', () => {
+  const profiles = [createProfile('a'), createProfile('b'), createProfile('c')];
+
+  const prioritized = prioritizeProfileInFallbackOrder(profiles, ['b'], 'c');
+  assert.deepEqual(prioritized, ['b', 'c']);
+
+  const movedUp = moveProfileInFallbackOrder(profiles, ['a', 'b', 'c'], 'c', 'up');
+  assert.deepEqual(movedUp, ['a', 'c', 'b']);
+
+  const movedDown = moveProfileInFallbackOrder(profiles, ['a', 'b', 'c'], 'a', 'down');
+  assert.deepEqual(movedDown, ['b', 'a', 'c']);
+
+  const cleared = clearProfileFromFallbackOrder(profiles, ['a', 'b', 'c'], 'b');
+  assert.deepEqual(cleared, ['a', 'c']);
 });
 
 test('filterProfileIdsByCooldown excludes recently failed profiles only within cooldown', () => {

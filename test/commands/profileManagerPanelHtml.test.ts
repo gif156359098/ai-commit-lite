@@ -25,11 +25,13 @@ test('serializeForWebviewScript neutralizes script-breaking characters', () => {
   assert.match(serialized, /\\u2029/);
 });
 
-test('buildWebviewHtml no longer injects an inline favicon data uri', () => {
+test('buildWebviewHtml serializes fallback settings into the page state', () => {
   const html = buildWebviewHtml(createWebviewHtmlData());
 
   assert.doesNotMatch(html, /<link rel="icon"/);
   assert.match(html, /<title>Profile Manager<\/title>/);
+  assert.match(html, /"autoFallbackEnabled":false/);
+  assert.match(html, /"fallbackPriority":1/);
 });
 
 function createWebviewHtmlData(): BuildWebviewHtmlData {
@@ -84,9 +86,36 @@ function createWebviewHtmlData(): BuildWebviewHtmlData {
       connectionDetailsSectionTitle: 'Connection details',
       closeAction: 'Close',
       secretStoredStatus: 'Stored',
-      secretMissingStatus: 'Missing'
+      secretMissingStatus: 'Missing',
+      openSettingsAction: 'Open settings',
+      languageSetting: 'Language',
+      fallbackOrderLabel: 'Fallback order',
+      fallbackPriorityValue: 'Fallback #{priority}',
+      defaultFallbackOrder: 'Default order',
+      skippedWhileActive: 'Skipped while active',
+      prioritizeFallbackAction: 'Prioritize',
+      moveFallbackEarlierAction: 'Move earlier',
+      moveFallbackLaterAction: 'Move later',
+      useDefaultFallbackOrderAction: 'Use default order',
+      autoFallbackDisabledNotice: 'Automatic fallback is off.'
     },
     providers: [],
-    profiles: []
+    profiles: [{
+      id: 'profile-2',
+      label: 'Backup',
+      provider: 'openai',
+      model: 'gpt-4.1-mini',
+      hasApiKey: true,
+      providerLabel: 'OpenAI',
+      providerDescription: 'Official OpenAI API',
+      providerAudienceHint: 'Direct',
+      endpointHint: 'Built-in',
+      fallbackPriority: 1,
+      hasExplicitFallbackPriority: true,
+      isSkippedWhileActive: false
+    }],
+    currentLanguage: 'en',
+    languageOptions: [{ value: 'en', label: 'English' }],
+    autoFallbackEnabled: false
   };
 }

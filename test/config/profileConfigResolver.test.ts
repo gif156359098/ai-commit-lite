@@ -18,7 +18,7 @@ test('resolveProfileConfig uses reader values and preserves profiles', () => {
     const values: Record<string, unknown> = {
       activeProfile: 'b',
       enableAutoFallback: false,
-      profileFallbackOrder: ['b', 'a']
+      profileFallbackOrder: ['b', 'missing', 'a', 'b']
     };
 
     return (key in values ? values[key] : defaultValue) as typeof defaultValue;
@@ -42,8 +42,7 @@ test('resolveProfileConfig falls back to defaults and clones fallback order arra
 
   assert.equal(profileConfig.activeProfile, '');
   assert.equal(profileConfig.enableAutoFallback, true);
-  assert.deepEqual(profileConfig.profileFallbackOrder, ['x', 'y']);
-
-  profileConfig.profileFallbackOrder.push('z');
+  assert.deepEqual(profileConfig.profileFallbackOrder, []);
+  assert.notEqual(profileConfig.profileFallbackOrder, fallbackOrder);
   assert.deepEqual(fallbackOrder, ['x', 'y']);
 });
