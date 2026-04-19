@@ -54,7 +54,12 @@ export function buildClientRenderScript(): string {
       panelTitle.textContent = state.i18n.fallbackPanelTitle;
 
       const explicitFallbackCount = state.profiles.filter((p) => p.hasExplicitFallbackPriority).length;
-      const explicitProfiles = state.profiles.filter((p) => p.hasExplicitFallbackPriority).sort((a, b) => a.fallbackPriority - b.fallbackPriority);
+      const explicitProfiles = state.profiles.filter((p) => p.hasExplicitFallbackPriority).sort((a, b) => {
+        const aActive = a.id === state.activeProfileId ? 0 : 1;
+        const bActive = b.id === state.activeProfileId ? 0 : 1;
+        if (aActive !== bActive) { return aActive - bActive; }
+        return a.fallbackPriority - b.fallbackPriority;
+      });
       const defaultProfiles = state.profiles.filter((p) => !p.hasExplicitFallbackPriority);
 
       const arrowUpIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
