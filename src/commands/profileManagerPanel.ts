@@ -283,6 +283,7 @@ export class ProfileManagerPanel {
       await operation();
       this.pendingAction = 'default';
       await this.update();
+      void this.panel.webview.postMessage({ command: 'fallbackActionSettled' });
     } catch (error: unknown) {
       const descriptor = getProfileManagerPanelOperationErrorDescriptor(
         error,

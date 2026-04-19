@@ -133,5 +133,11 @@
   "moveFallbackLaterAction": "后移",
   "useDefaultFallbackOrderAction": "使用默认顺序",
   "autoFallbackDisabledNotice": "自动回退已关闭。优先级仍会保存，但在设置中启用前不会自动切换到备用 Profile。",
-  "failedToUpdateFallbackOrder": "更新回退顺序失败：{message}"
+  "failedToUpdateFallbackOrder": "更新回退顺序失败：{message}",
+  "fallbackPanelTitle": "回退顺序",
+  "fallbackChipActive": "当前激活",
+  "addToPriorityAction": "加入优先级",
+  "removeFromPriorityAction": "移出优先级",
+  "moveUpAction": "上移",
+  "moveDownAction": "下移"
 }

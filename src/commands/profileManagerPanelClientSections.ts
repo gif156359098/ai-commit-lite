@@ -13,9 +13,8 @@ export function buildClientPreludeScript(): string {
     const hideForm = () => { $('formModal').classList.remove('active'); $('formModal').setAttribute('aria-hidden', 'true'); setFormError(''); };
     let fallbackBusy = false;
     const syncFallbackControlState = () => {
-      document.querySelectorAll('[data-fallback-control="true"]').forEach((button) => {
-        const boundaryLocked = button.getAttribute('data-disabled') === 'true';
-        button.disabled = fallbackBusy || boundaryLocked;
+      document.querySelectorAll('[data-action="moveFallbackEarlier"], [data-action="moveFallbackLater"], [data-action="clearFallbackPriority"]').forEach((button) => {
+        button.disabled = fallbackBusy || button.hasAttribute('disabled');
       });
     };
     const setFallbackBusy = (busy) => {
@@ -39,56 +38,99 @@ export function buildClientPreludeScript(): string {
 
 export function buildClientRenderScript(): string {
   return `
-    function formatFallbackPriority(profile) {
-      if (profile.hasExplicitFallbackPriority) {
-        return state.i18n.fallbackPriorityValue.replace('{priority}', String(profile.fallbackPriority));
-      }
+    function renderFallbackPanel() {
+      const panelTitle = $('fallbackPanelTitle');
+      const panelActions = $('fallbackPanelActions');
+      const fallbackList = $('fallbackList');
+      if (!panelTitle || !fallbackList) { return; }
 
-      return state.i18n.defaultFallbackOrder;
-    }
-
-    function buildFallbackControls(profile, explicitFallbackCount) {
       if (state.profiles.length < 2) {
-        return '';
+        panelTitle.textContent = '';
+        fallbackList.innerHTML = '<span class="fallback-empty">' + escapeText(state.i18n.defaultFallbackOrder) + '</span>';
+        panelActions.innerHTML = '';
+        return;
       }
 
-      if (!profile.hasExplicitFallbackPriority) {
-        return '<button class="chip-btn" data-fallback-control="true" data-disabled="false" data-action="prioritizeFallback" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.prioritizeFallbackAction) + '</button>';
+      panelTitle.textContent = state.i18n.fallbackPanelTitle;
+
+      const explicitFallbackCount = state.profiles.filter((p) => p.hasExplicitFallbackPriority).length;
+      const explicitProfiles = state.profiles.filter((p) => p.hasExplicitFallbackPriority).sort((a, b) => a.fallbackPriority - b.fallbackPriority);
+      const defaultProfiles = state.profiles.filter((p) => !p.hasExplicitFallbackPriority);
+
+      const arrowUpIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+      const arrowDownIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+      fallbackList.innerHTML = explicitProfiles.map((profile, index) => {
+        const isActive = state.activeProfileId === profile.id;
+        const isSkipped = profile.isSkippedWhileActive;
+        const isFirst = profile.fallbackPriority === 1;
+        const isLast = profile.fallbackPriority === explicitFallbackCount;
+        const prevProfile = index > 0 ? explicitProfiles[index - 1] : null;
+        const nextProfile = index < explicitProfiles.length - 1 ? explicitProfiles[index + 1] : null;
+        const blockedBySkippedPrev = prevProfile && prevProfile.isSkippedWhileActive;
+        const blockedBySkippedNext = nextProfile && nextProfile.isSkippedWhileActive;
+        const classes = ['fallback-chip', 'explicit'];
+        if (isActive) { classes.push('active'); }
+        if (isSkipped) { classes.push('skipped'); }
+        const canMoveUp = !isFirst && !isSkipped && !blockedBySkippedPrev;
+        const canMoveDown = !isLast && !isSkipped && !blockedBySkippedNext;
+        const moveButtons = isSkipped ? '' : (
+          '<div class="fallback-chip-move">' +
+            '<button class="fallback-chip-btn" data-action="moveFallbackEarlier" data-profile-id="' + escapeText(profile.id) + '" ' + (canMoveUp ? '' : 'disabled') + ' title="' + escapeText(state.i18n.moveUpAction) + '">' + arrowUpIcon + '</button>' +
+            '<button class="fallback-chip-btn" data-action="moveFallbackLater" data-profile-id="' + escapeText(profile.id) + '" ' + (canMoveDown ? '' : 'disabled') + ' title="' + escapeText(state.i18n.moveDownAction) + '">' + arrowDownIcon + '</button>' +
+          '</div>'
+        );
+        return (
+          '<div class="' + classes.join(' ') + '" data-fallback-chip="true" data-profile-id="' + escapeText(profile.id) + '">' +
+            '<span class="fallback-chip-rank">#' + profile.fallbackPriority + '</span>' +
+            '<span class="fallback-chip-label">' + escapeText(profile.label) + '</span>' +
+            '<span class="fallback-chip-provider">' + escapeText(profile.providerLabel) + '</span>' +
+            (isActive ? '<span class="fallback-chip-badge">' + escapeText(state.i18n.fallbackChipActive) + '</span>' : '') +
+            (isSkipped && !isActive ? '<span class="fallback-chip-badge">' + escapeText(state.i18n.skippedWhileActive) + '</span>' : '') +
+            moveButtons +
+            '<button class="fallback-chip-btn" data-action="clearFallbackPriority" data-profile-id="' + escapeText(profile.id) + '" title="' + escapeText(state.i18n.useDefaultFallbackOrderAction) + '">' +
+              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+            '</button>' +
+          '</div>'
+        );
+      }).join('');
+
+      if (defaultProfiles.length > 0) {
+        fallbackList.innerHTML += defaultProfiles.map((profile) => {
+          const isActive = state.activeProfileId === profile.id;
+          const classes = ['fallback-chip', 'default'];
+          if (isActive) { classes.push('active'); }
+          if (profile.isSkippedWhileActive) { classes.push('skipped'); }
+          return (
+            '<div class="' + classes.join(' ') + '" data-fallback-chip="true" data-profile-id="' + escapeText(profile.id) + '">' +
+              '<span class="fallback-chip-rank">—</span>' +
+              '<span class="fallback-chip-label">' + escapeText(profile.label) + '</span>' +
+              '<span class="fallback-chip-provider">' + escapeText(profile.providerLabel) + '</span>' +
+              (isActive ? '<span class="fallback-chip-badge">' + escapeText(state.i18n.fallbackChipActive) + '</span>' : '') +
+              '<button class="fallback-chip-btn" data-action="prioritizeFallback" data-profile-id="' + escapeText(profile.id) + '" title="' + escapeText(state.i18n.addToPriorityAction) + '">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+              '</button>' +
+            '</div>'
+          );
+        }).join('');
       }
 
-      const isFirst = profile.fallbackPriority === 1;
-      const isLast = profile.fallbackPriority === explicitFallbackCount;
-
-      return [
-        '<button class="chip-btn" data-fallback-control="true" data-disabled="' + (isFirst ? 'true' : 'false') + '" data-action="moveFallbackEarlier" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.moveFallbackEarlierAction) + '</button>',
-        '<button class="chip-btn" data-fallback-control="true" data-disabled="' + (isLast ? 'true' : 'false') + '" data-action="moveFallbackLater" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.moveFallbackLaterAction) + '</button>',
-        '<button class="chip-btn" data-fallback-control="true" data-disabled="false" data-action="clearFallbackPriority" data-profile-id="' + escapeText(profile.id) + '">' + escapeText(state.i18n.useDefaultFallbackOrderAction) + '</button>'
-      ].join('');
+      panelActions.innerHTML = '';
+      syncFallbackControlState();
     }
 
     function renderProfiles() {
       if (state.profiles.length === 0) {
         $('emptyState').classList.add('active');
         $('profilesContainer').innerHTML = '';
+        renderFallbackPanel();
         return;
       }
       $('emptyState').classList.remove('active');
-      const explicitFallbackCount = state.profiles.filter((profile) => profile.hasExplicitFallbackPriority).length;
       $('profilesContainer').innerHTML = state.profiles.map((profile) => {
         const isActive = state.activeProfileId === profile.id;
         const pillText = isActive ? state.i18n.currentProfile : (profile.hasApiKey ? state.i18n.secretStoredStatus : state.i18n.secretMissingStatus);
         const pillIcon = isActive ? icons.check : '';
-        const fallbackNote = profile.isSkippedWhileActive ? '<span class="fallback-note">' + escapeText(state.i18n.skippedWhileActive) + '</span>' : '';
-        const fallbackSection = state.profiles.length < 2 ? '' : (
-          '<div class="fallback-block">' +
-            '<div class="fallback-heading">' + escapeText(state.i18n.fallbackOrderLabel) + '</div>' +
-            '<div class="fallback-row">' +
-              '<span class="fallback-badge ' + (profile.hasExplicitFallbackPriority ? 'explicit' : 'default') + '">' + escapeText(formatFallbackPriority(profile)) + '</span>' +
-              fallbackNote +
-            '</div>' +
-            '<div class="fallback-actions">' + buildFallbackControls(profile, explicitFallbackCount) + '</div>' +
-          '</div>'
-        );
 
         return (
           '<article class="card ' + (isActive ? 'active' : '') + '">' +
@@ -105,7 +147,6 @@ export function buildClientRenderScript(): string {
               '<div class="value">' + escapeText(profile.model) + '</div>' +
               (profile.baseUrl ? '<div class="label">' + escapeText(state.i18n.apiEndpoint) + '</div><div class="value">' + escapeText(profile.baseUrl) + '</div>' : '') +
             '</div>' +
-            fallbackSection +
             '<div class="card-actions">' +
               (isActive ? '' : '<button class="btn primary" style="margin-right: auto" data-action="switch" data-profile-id="' + escapeText(profile.id) + '">' + icons.star + escapeText(state.i18n.useThisProfile) + '</button>') +
               '<button class="icon-btn" title="' + escapeText(state.i18n.editAction) + '" data-action="edit" data-profile-id="' + escapeText(profile.id) + '">' + icons.edit + '</button>' +
@@ -114,7 +155,7 @@ export function buildClientRenderScript(): string {
           '</article>'
         );
       }).join('');
-      syncFallbackControlState();
+      renderFallbackPanel();
     }
 
     function renderProviders() {
@@ -209,6 +250,13 @@ export function buildClientEventScript(): string {
       if (action === 'switch') { vscode.postMessage({ command: 'switchProfile', profileId }); return; }
       if (action === 'edit') { showEditForm(profileId); return; }
       if (action === 'delete') { vscode.postMessage({ command: 'deleteProfile', profileId }); return; }
+    });
+    $('fallbackList').addEventListener('click', (event) => {
+      const target = event.target.closest('[data-action]');
+      if (!target) { return; }
+      const action = target.getAttribute('data-action');
+      const profileId = target.getAttribute('data-profile-id');
+      if (!profileId) { return; }
       if (action === 'prioritizeFallback') { postFallbackAction({ command: 'prioritizeFallbackProfile', profileId }); return; }
       if (action === 'moveFallbackEarlier') { postFallbackAction({ command: 'moveFallbackProfile', profileId, direction: 'up' }); return; }
       if (action === 'moveFallbackLater') { postFallbackAction({ command: 'moveFallbackProfile', profileId, direction: 'down' }); return; }

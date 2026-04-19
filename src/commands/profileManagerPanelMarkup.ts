@@ -63,6 +63,14 @@ export function buildProfileManagerPanelBodyMarkup(
 
     <div class="banner" id="actionBanner"></div>
 
+    <div class="fallback-panel" id="fallbackPanel">
+      <div class="fallback-panel-header">
+        <span class="fallback-panel-title" id="fallbackPanelTitle"></span>
+        <div class="fallback-panel-actions" id="fallbackPanelActions"></div>
+      </div>
+      <div class="fallback-list" id="fallbackList"></div>
+    </div>
+
     <section class="empty" id="emptyState">
       <h2>${escapeHtml(i18n.profileManagerEmptyTitle)}</h2>
       <p>${escapeHtml(i18n.profileManagerEmptyDescription)}</p>

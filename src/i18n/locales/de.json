@@ -133,5 +133,11 @@
   "moveFallbackLaterAction": "Nach unten",
   "useDefaultFallbackOrderAction": "Standardreihenfolge verwenden",
   "autoFallbackDisabledNotice": "Automatischer Fallback ist deaktiviert. Die Prioritäten werden gespeichert, aber es wird kein Ersatzprofil verwendet, bis Sie ihn in den Einstellungen aktivieren.",
-  "failedToUpdateFallbackOrder": "Fallback-Reihenfolge konnte nicht aktualisiert werden: {message}"
+  "failedToUpdateFallbackOrder": "Fallback-Reihenfolge konnte nicht aktualisiert werden: {message}",
+  "fallbackPanelTitle": "Fallback-Reihenfolge",
+  "fallbackChipActive": "Aktiv",
+  "addToPriorityAction": "Zur Priorität hinzufügen",
+  "removeFromPriorityAction": "Aus Priorität entfernen",
+  "moveUpAction": "Nach oben",
+  "moveDownAction": "Nach unten"
 }

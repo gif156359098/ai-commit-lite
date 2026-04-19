@@ -60,7 +60,13 @@ export function buildI18n(profileCount: number): WebviewI18n {
     moveFallbackEarlierAction: t('moveFallbackEarlierAction'),
     moveFallbackLaterAction: t('moveFallbackLaterAction'),
     useDefaultFallbackOrderAction: t('useDefaultFallbackOrderAction'),
-    autoFallbackDisabledNotice: t('autoFallbackDisabledNotice')
+    autoFallbackDisabledNotice: t('autoFallbackDisabledNotice'),
+    fallbackPanelTitle: t('fallbackPanelTitle'),
+    fallbackChipActive: t('fallbackChipActive'),
+    addToPriorityAction: t('addToPriorityAction'),
+    removeFromPriorityAction: t('removeFromPriorityAction'),
+    moveUpAction: t('moveUpAction'),
+    moveDownAction: t('moveDownAction')
   };
 }
 

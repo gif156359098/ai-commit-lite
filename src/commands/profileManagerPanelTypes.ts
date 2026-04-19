@@ -93,6 +93,12 @@ export interface WebviewI18n {
   moveFallbackLaterAction: string;
   useDefaultFallbackOrderAction: string;
   autoFallbackDisabledNotice: string;
+  fallbackPanelTitle: string;
+  fallbackChipActive: string;
+  addToPriorityAction: string;
+  removeFromPriorityAction: string;
+  moveUpAction: string;
+  moveDownAction: string;
 }
 
 export interface LanguageOption {

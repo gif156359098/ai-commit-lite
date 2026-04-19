@@ -133,5 +133,11 @@
   "moveFallbackLaterAction": "後へ移動",
   "useDefaultFallbackOrderAction": "デフォルト順を使用",
   "autoFallbackDisabledNotice": "自動フォールバックはオフです。優先度は保存されますが、設定で有効にするまで予備プロファイルへは自動切り替えされません。",
-  "failedToUpdateFallbackOrder": "フォールバック順序の更新に失敗しました: {message}"
+  "failedToUpdateFallbackOrder": "フォールバック順序の更新に失敗しました: {message}",
+  "fallbackPanelTitle": "フォールバック順序",
+  "fallbackChipActive": "アクティブ",
+  "addToPriorityAction": "優先度に追加",
+  "removeFromPriorityAction": "優先度から削除",
+  "moveUpAction": "上へ移動",
+  "moveDownAction": "下へ移動"
 }

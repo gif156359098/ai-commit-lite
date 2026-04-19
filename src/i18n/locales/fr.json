@@ -133,5 +133,11 @@
   "moveFallbackLaterAction": "Descendre",
   "useDefaultFallbackOrderAction": "Utiliser l'ordre par défaut",
   "autoFallbackDisabledNotice": "Le basculement automatique est désactivé. Les priorités sont enregistrées, mais aucun profil de secours ne sera utilisé tant que vous ne l'aurez pas activé dans les paramètres.",
-  "failedToUpdateFallbackOrder": "Échec de la mise à jour de l'ordre de secours : {message}"
+  "failedToUpdateFallbackOrder": "Échec de la mise à jour de l'ordre de secours : {message}",
+  "fallbackPanelTitle": "Ordre de secours",
+  "fallbackChipActive": "Actif",
+  "addToPriorityAction": "Ajouter à la priorité",
+  "removeFromPriorityAction": "Retirer de la priorité",
+  "moveUpAction": "Monter",
+  "moveDownAction": "Descendre"
 }

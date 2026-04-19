@@ -133,5 +133,11 @@
   "moveFallbackLaterAction": "Mover para baixo",
   "useDefaultFallbackOrderAction": "Usar ordem padrão",
   "autoFallbackDisabledNotice": "O fallback automático está desativado. As prioridades continuam salvas, mas nenhum perfil de backup será usado até você ativá-lo nas Configurações.",
-  "failedToUpdateFallbackOrder": "Falha ao atualizar a ordem de fallback: {message}"
+  "failedToUpdateFallbackOrder": "Falha ao atualizar a ordem de fallback: {message}",
+  "fallbackPanelTitle": "Ordem de fallback",
+  "fallbackChipActive": "Ativo",
+  "addToPriorityAction": "Adicionar à prioridade",
+  "removeFromPriorityAction": "Remover da prioridade",
+  "moveUpAction": "Mover para cima",
+  "moveDownAction": "Mover para baixo"
 }

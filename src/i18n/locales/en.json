@@ -133,5 +133,11 @@
   "moveFallbackLaterAction": "Move later",
   "useDefaultFallbackOrderAction": "Use default order",
   "autoFallbackDisabledNotice": "Automatic fallback is off. Priorities are saved, but no backup profile will be used until you enable it in Settings.",
-  "failedToUpdateFallbackOrder": "Failed to update fallback order: {message}"
+  "failedToUpdateFallbackOrder": "Failed to update fallback order: {message}",
+  "fallbackPanelTitle": "Fallback Order",
+  "fallbackChipActive": "Active",
+  "addToPriorityAction": "Add to priority",
+  "removeFromPriorityAction": "Remove from priority",
+  "moveUpAction": "Move up",
+  "moveDownAction": "Move down"
 }
