@@ -6,11 +6,13 @@ import { ModelProfile, ProfileConfig, AICommitConfigWithProfile } from '../types
 import {
   buildFallbackOrder,
   clearProfileFromFallbackOrder,
+  ensureProfileFirstInFallbackOrder,
   FallbackMoveDirection,
   filterProfileIdsByCooldown,
   moveProfileInFallbackOrder,
   normalizeProfile,
   prioritizeProfileInFallbackOrder,
+  reorderFallbackProfiles as reorderFallbackProfilesHelper,
   resolveActiveProfile,
   resolveNextActiveProfileId,
   sanitizeProfileFallbackOrder
@@ -70,6 +72,10 @@ export async function switchProfile(profileId: string): Promise<void> {
   }
 
   await updateAICommitConfigValue('activeProfile', profileId);
+
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const updatedOrder = ensureProfileFirstInFallbackOrder(profiles, profileFallbackOrder, profileId);
+  await updateProfileFallbackOrder(profiles, updatedOrder);
 }
 
 export async function getEffectiveConfig(): Promise<AICommitConfigWithProfile> {
@@ -156,12 +162,29 @@ export async function moveFallbackProfile(
 export async function clearFallbackPriority(profileId: string): Promise<void> {
   const profiles = getProfiles();
   assertProfileExists(profileId, profiles);
-  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const { profileFallbackOrder, activeProfile } = resolveProfileConfig(profiles, readAICommitConfigValue);
+
+  if (activeProfile && profileId === activeProfile) {
+    return;
+  }
 
   await updateProfileFallbackOrder(
     profiles,
     clearProfileFromFallbackOrder(profiles, profileFallbackOrder, profileId)
   );
+}
+
+export async function reorderFallbackProfiles(newOrder: string[]): Promise<void> {
+  const profiles = getProfiles();
+  const { profileFallbackOrder, activeProfile } = resolveProfileConfig(profiles, readAICommitConfigValue);
+
+  let updatedOrder = reorderFallbackProfilesHelper(profiles, profileFallbackOrder, newOrder);
+
+  if (activeProfile) {
+    updatedOrder = ensureProfileFirstInFallbackOrder(profiles, updatedOrder, activeProfile);
+  }
+
+  await updateProfileFallbackOrder(profiles, updatedOrder);
 }
 
 export async function addProfile(profile: ModelProfile): Promise<void> {

@@ -129,8 +129,6 @@
   "defaultFallbackOrder": "Порядок по умолчанию",
   "skippedWhileActive": "Пропускается, пока профиль активен",
   "prioritizeFallbackAction": "Повысить приоритет",
-  "moveFallbackEarlierAction": "Сдвинуть раньше",
-  "moveFallbackLaterAction": "Сдвинуть позже",
   "useDefaultFallbackOrderAction": "Использовать порядок по умолчанию",
   "autoFallbackDisabledNotice": "Автоматическое резервное переключение отключено. Приоритеты сохраняются, но резервный профиль не будет использоваться, пока вы не включите его в настройках.",
   "failedToUpdateFallbackOrder": "Не удалось обновить порядок резервных профилей: {message}",
@@ -138,6 +136,6 @@
   "fallbackChipActive": "Активен",
   "addToPriorityAction": "Добавить в приоритет",
   "removeFromPriorityAction": "Убрать из приоритета",
-  "moveUpAction": "Выше",
-  "moveDownAction": "Ниже"
+  "fallbackActiveLabel": "В порядке резервного переключения",
+  "fallbackAvailableLabel": "Доступные"
 }

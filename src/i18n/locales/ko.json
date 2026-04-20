@@ -129,8 +129,6 @@
   "defaultFallbackOrder": "기본 순서",
   "skippedWhileActive": "활성 프로필일 때는 건너뜀",
   "prioritizeFallbackAction": "우선순위에 추가",
-  "moveFallbackEarlierAction": "앞으로 이동",
-  "moveFallbackLaterAction": "뒤로 이동",
   "useDefaultFallbackOrderAction": "기본 순서 사용",
   "autoFallbackDisabledNotice": "자동 폴백이 꺼져 있습니다. 우선순위는 저장되지만 설정에서 활성화하기 전까지는 예비 프로필로 자동 전환되지 않습니다.",
   "failedToUpdateFallbackOrder": "폴백 순서 업데이트 실패: {message}",
@@ -138,6 +136,6 @@
   "fallbackChipActive": "활성",
   "addToPriorityAction": "우선순위에 추가",
   "removeFromPriorityAction": "우선순위에서 제거",
-  "moveUpAction": "위로 이동",
-  "moveDownAction": "아래로 이동"
+  "fallbackActiveLabel": "폴백 순서 내",
+  "fallbackAvailableLabel": "추가 가능"
 }

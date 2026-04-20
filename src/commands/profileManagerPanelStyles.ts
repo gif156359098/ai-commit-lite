@@ -173,102 +173,126 @@ export function buildProfileManagerPanelStyles(): string {
     .meta-grid .label { font-size: 0.8rem; color: var(--muted); }
     .meta-grid .value { font-size: 0.85rem; font-weight: 500; word-break: break-all; }
 
-    .fallback-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 16px;
-      border-radius: var(--radius-lg);
-      border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-      background: color-mix(in srgb, var(--bg) 40%, transparent);
-    }
-    .fallback-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .fallback-panel-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .fallback-panel-actions { display: flex; gap: 8px; }
-    .fallback-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-    .fallback-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-      background: color-mix(in srgb, var(--fg) 6%, transparent);
-      color: var(--fg);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .fallback-chip:hover:not(.active):not(.skipped) { background: color-mix(in srgb, var(--fg) 12%, transparent); }
-    .fallback-chip.active {
-      background: color-mix(in srgb, var(--accent) 16%, transparent);
-      border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-      color: var(--accent);
-    }
-    .fallback-chip.explicit {
-      border-style: solid;
-      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-    }
-    .fallback-chip.default { border-style: dashed; opacity: 0.75; }
-    .fallback-chip.skipped { opacity: 0.5; cursor: not-allowed; }
-    .fallback-chip.skipped:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
-    .fallback-chip-rank {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      font-size: 0.72rem;
-      font-weight: 700;
-      background: color-mix(in srgb, var(--fg) 12%, transparent);
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-    .fallback-chip.active .fallback-chip-rank {
-      background: color-mix(in srgb, var(--accent) 25%, transparent);
-      color: var(--accent);
-    }
-    .fallback-chip-label { max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .fallback-chip-provider { font-size: 0.75rem; color: var(--muted); }
-    .fallback-chip.active .fallback-chip-provider { color: var(--accent); opacity: 0.8; }
-    .fallback-chip-badge {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--warning) 20%, transparent);
-      color: var(--warning);
-      font-weight: 600;
-    }
-    .fallback-chip-btn {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: color-mix(in srgb, var(--fg) 10%, transparent);
-      color: var(--muted);
-      flex-shrink: 0;
-      margin-left: 2px;
-    }
-    .fallback-chip-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 18%, transparent); color: var(--fg); }
-    .fallback-chip-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .fallback-chip-btn svg { width: 14px; height: 14px; }
-    .fallback-chip-move { display: flex; gap: 2px; }
-    .fallback-empty { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+.fallback-panel {
+display: flex;
+flex-direction: column;
+gap: 12px;
+padding: 16px;
+border-radius: var(--radius-lg);
+border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+background: color-mix(in srgb, var(--bg) 40%, transparent);
+}
+.fallback-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fallback-panel-title {
+font-size: 0.85rem;
+font-weight: 600;
+color: var(--muted);
+text-transform: uppercase;
+letter-spacing: 0.04em;
+}
+.fallback-zone {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+.fallback-zone-label {
+font-size: 0.78rem;
+font-weight: 500;
+color: var(--muted);
+text-transform: uppercase;
+letter-spacing: 0.03em;
+}
+.fallback-list {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+align-items: center;
+min-height: 36px;
+padding: 4px;
+border-radius: var(--radius-sm);
+border: 1px dashed transparent;
+transition: var(--transition);
+}
+.fallback-list.sortable-drag-over {
+border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+.fallback-chip {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 6px 12px;
+border-radius: 999px;
+font-size: 0.82rem;
+font-weight: 500;
+border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+background: color-mix(in srgb, var(--fg) 6%, transparent);
+color: var(--fg);
+cursor: grab;
+transition: var(--transition);
+user-select: none;
+}
+.fallback-chip:hover:not(.active):not(.no-drag) { background: color-mix(in srgb, var(--fg) 12%, transparent); }
+.fallback-chip.active {
+background: color-mix(in srgb, var(--accent) 16%, transparent);
+border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+color: var(--accent);
+cursor: default;
+}
+.fallback-chip.no-drag { cursor: default; }
+.fallback-chip.sortable-ghost {
+opacity: 0.4;
+}
+.fallback-chip.sortable-chosen {
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.fallback-chip.sortable-drag {
+cursor: grabbing;
+}
+.fallback-chip-rank {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 20px;
+height: 20px;
+border-radius: 50%;
+font-size: 0.72rem;
+font-weight: 700;
+background: color-mix(in srgb, var(--fg) 12%, transparent);
+color: var(--muted);
+flex-shrink: 0;
+}
+.fallback-chip.active .fallback-chip-rank {
+background: color-mix(in srgb, var(--accent) 25%, transparent);
+color: var(--accent);
+}
+.fallback-chip-label { max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fallback-chip-provider { font-size: 0.75rem; color: var(--muted); }
+.fallback-chip.active .fallback-chip-provider { color: var(--accent); opacity: 0.8; }
+.fallback-chip-badge {
+font-size: 0.7rem;
+padding: 2px 6px;
+border-radius: 999px;
+background: color-mix(in srgb, var(--warning) 20%, transparent);
+color: var(--warning);
+font-weight: 600;
+}
+.fallback-chip-btn {
+width: 24px;
+height: 24px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+background: color-mix(in srgb, var(--fg) 10%, transparent);
+color: var(--muted);
+flex-shrink: 0;
+margin-left: 2px;
+}
+.fallback-chip-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 18%, transparent); color: var(--fg); }
+.fallback-chip-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.fallback-chip-btn svg { width: 14px; height: 14px; }
+.fallback-empty { font-size: 0.85rem; color: var(--muted); font-style: italic; }
 
     .card-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; flex-wrap: wrap; }
     .icon-btn {

@@ -129,8 +129,6 @@
   "defaultFallbackOrder": "Ordine predefinito",
   "skippedWhileActive": "Saltato mentre è attivo",
   "prioritizeFallbackAction": "Dai priorità",
-  "moveFallbackEarlierAction": "Sposta prima",
-  "moveFallbackLaterAction": "Sposta dopo",
   "useDefaultFallbackOrderAction": "Usa l'ordine predefinito",
   "autoFallbackDisabledNotice": "Il fallback automatico è disattivato. Le priorità vengono salvate, ma nessun profilo di riserva verrà usato finché non lo abiliti nelle impostazioni.",
   "failedToUpdateFallbackOrder": "Impossibile aggiornare l'ordine di fallback: {message}",
@@ -138,6 +136,6 @@
   "fallbackChipActive": "Attivo",
   "addToPriorityAction": "Aggiungi alla priorità",
   "removeFromPriorityAction": "Rimuovi dalla priorità",
-  "moveUpAction": "Sposta su",
-  "moveDownAction": "Sposta giù"
+  "fallbackActiveLabel": "Nell'ordine di fallback",
+  "fallbackAvailableLabel": "Disponibili"
 }

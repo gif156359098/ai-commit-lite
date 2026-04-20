@@ -57,17 +57,16 @@ export function buildI18n(profileCount: number): WebviewI18n {
     defaultFallbackOrder: t('defaultFallbackOrder'),
     skippedWhileActive: t('skippedWhileActive'),
     prioritizeFallbackAction: t('prioritizeFallbackAction'),
-    moveFallbackEarlierAction: t('moveFallbackEarlierAction'),
-    moveFallbackLaterAction: t('moveFallbackLaterAction'),
+
     useDefaultFallbackOrderAction: t('useDefaultFallbackOrderAction'),
     autoFallbackDisabledNotice: t('autoFallbackDisabledNotice'),
-    fallbackPanelTitle: t('fallbackPanelTitle'),
-    fallbackChipActive: t('fallbackChipActive'),
-    addToPriorityAction: t('addToPriorityAction'),
-    removeFromPriorityAction: t('removeFromPriorityAction'),
-    moveUpAction: t('moveUpAction'),
-    moveDownAction: t('moveDownAction')
-  };
+  fallbackPanelTitle: t('fallbackPanelTitle'),
+  fallbackChipActive: t('fallbackChipActive'),
+  addToPriorityAction: t('addToPriorityAction'),
+  removeFromPriorityAction: t('removeFromPriorityAction'),
+  fallbackActiveLabel: t('fallbackActiveLabel'),
+  fallbackAvailableLabel: t('fallbackAvailableLabel')
+};
 }
 
 export const LANGUAGE_OPTIONS: LanguageOption[] = [

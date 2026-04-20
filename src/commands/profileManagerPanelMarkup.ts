@@ -26,16 +26,16 @@ export function buildProfileManagerPanelBodyMarkup(
         <h1 class="title">${escapeHtml(i18n.title)}</h1>
         <p class="subtitle">${escapeHtml(i18n.subtitle)}</p>
       </div>
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">${escapeHtml(i18n.profilesConfiguredLabel)}</div>
-          <div class="stat-value">${profileCount}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">${escapeHtml(i18n.activeProfileLabel)}</div>
-          <div class="stat-value">${escapeHtml(activeProfileLabel)}</div>
-        </div>
-      </div>
+  <div class="stats">
+  <div class="stat">
+  <div class="stat-label">${escapeHtml(i18n.profilesConfiguredLabel)}</div>
+  <div class="stat-value" id="statProfileCount">${profileCount}</div>
+  </div>
+  <div class="stat">
+  <div class="stat-label">${escapeHtml(i18n.activeProfileLabel)}</div>
+  <div class="stat-value" id="statActiveProfile">${escapeHtml(activeProfileLabel)}</div>
+  </div>
+  </div>
     </section>
 
     <div class="toolbar">
@@ -63,13 +63,19 @@ export function buildProfileManagerPanelBodyMarkup(
 
     <div class="banner" id="actionBanner"></div>
 
-    <div class="fallback-panel" id="fallbackPanel">
-      <div class="fallback-panel-header">
-        <span class="fallback-panel-title" id="fallbackPanelTitle"></span>
-        <div class="fallback-panel-actions" id="fallbackPanelActions"></div>
-      </div>
-      <div class="fallback-list" id="fallbackList"></div>
-    </div>
+<div class="fallback-panel" id="fallbackPanel">
+<div class="fallback-panel-header">
+<span class="fallback-panel-title" id="fallbackPanelTitle"></span>
+</div>
+<div class="fallback-zone" id="fallbackActiveZone">
+<div class="fallback-zone-label" id="fallbackActiveLabel"></div>
+<div class="fallback-list" id="fallbackActiveList"></div>
+</div>
+<div class="fallback-zone" id="fallbackAvailableZone">
+<div class="fallback-zone-label" id="fallbackAvailableLabel"></div>
+<div class="fallback-list" id="fallbackAvailableList"></div>
+</div>
+</div>
 
     <section class="empty" id="emptyState">
       <h2>${escapeHtml(i18n.profileManagerEmptyTitle)}</h2>

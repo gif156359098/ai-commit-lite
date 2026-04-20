@@ -130,6 +130,32 @@ export function clearProfileFromFallbackOrder(
   );
 }
 
+export function reorderFallbackProfiles(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[],
+  newOrder: string[]
+): string[] {
+  const validProfileIds = new Set(profiles.map((profile) => profile.id));
+  const filtered = newOrder.filter((profileId) => validProfileIds.has(profileId));
+  const seen = new Set<string>();
+  const deduped = filtered.filter((profileId) => {
+    if (seen.has(profileId)) { return false; }
+    seen.add(profileId);
+    return true;
+  });
+  return sanitizeProfileFallbackOrder(profiles, deduped);
+}
+
+export function ensureProfileFirstInFallbackOrder(
+  profiles: ModelProfile[],
+  profileFallbackOrder: string[],
+  profileId: string
+): string[] {
+  const sanitized = sanitizeProfileFallbackOrder(profiles, profileFallbackOrder);
+  const withoutProfile = sanitized.filter((id) => id !== profileId);
+  return [profileId, ...withoutProfile];
+}
+
 export function filterProfileIdsByCooldown(
   profileIds: string[],
   lastFailureTimes: Record<string, number>,

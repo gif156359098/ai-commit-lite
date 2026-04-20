@@ -1,9 +1,8 @@
-import { buildClientScript } from './profileManagerPanelClientScript';
 import { buildProfileManagerPanelBodyMarkup } from './profileManagerPanelMarkup';
 import { buildProfileManagerPanelStyles } from './profileManagerPanelStyles';
 import { BuildWebviewHtmlData } from './profileManagerPanelTypes';
 
-export function buildWebviewHtml(data: BuildWebviewHtmlData): string {
+export function buildWebviewHtml(data: BuildWebviewHtmlData, scriptUri: string): string {
   const {
     cspSource,
     locale,
@@ -33,18 +32,18 @@ export function buildWebviewHtml(data: BuildWebviewHtmlData): string {
   return `<!DOCTYPE html>
 <html lang="${locale}">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(i18n.title)}</title>
-  <style>${buildProfileManagerPanelStyles()}</style>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(i18n.title)}</title>
+<style>${buildProfileManagerPanelStyles()}</style>
 </head>
 <body>
 ${buildProfileManagerPanelBodyMarkup(i18n, profiles.length, activeProfileLabel, currentLanguage, languageOptions, autoFallbackEnabled, escapeHtml)}
-  <script nonce="${nonce}">
-    const state = ${state};
-${buildClientScript()}
-  </script>
+<script nonce="${nonce}">
+window.state = ${state};
+</script>
+<script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
 }

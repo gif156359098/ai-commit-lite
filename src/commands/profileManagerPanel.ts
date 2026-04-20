@@ -13,6 +13,7 @@ import {
   hasProfileApiKey,
   moveFallbackProfile,
   prioritizeFallbackProfile,
+  reorderFallbackProfiles,
   storeProfileApiKey,
   switchProfile,
   updateProfile
@@ -43,7 +44,8 @@ import {
 } from './profileManagerPanelOperations';
 import {
   ProfileFormData,
-  ProfileManagerPanelAction
+  ProfileManagerPanelAction,
+  BuildWebviewHtmlData
 } from './profileManagerPanelTypes';
 import { PROFILE_MANAGER_PANEL_ICON_PATHS } from './profileManagerPanelIconPaths';
 
@@ -64,6 +66,7 @@ interface ProfileManagerPanelMessage {
   profileId?: string;
   language?: string;
   direction?: FallbackMoveDirection;
+  newOrder?: string[];
 }
 
 export class ProfileManagerPanel {
@@ -71,6 +74,7 @@ export class ProfileManagerPanel {
   public static readonly viewType = 'aiCommitLite.profileManager';
 
   private readonly panel: vscode.WebviewPanel;
+  private readonly extensionUri: vscode.Uri;
   private readonly disposables: vscode.Disposable[] = [];
   private pendingAction: ProfileManagerPanelAction;
 
@@ -83,7 +87,7 @@ export class ProfileManagerPanel {
     if (ProfileManagerPanel.currentPanel) {
       ProfileManagerPanel.currentPanel.pendingAction = action;
       ProfileManagerPanel.currentPanel.panel.reveal(column);
-      void ProfileManagerPanel.currentPanel.update();
+      void ProfileManagerPanel.currentPanel.pushStateUpdate();
       return;
     }
 
@@ -101,14 +105,15 @@ export class ProfileManagerPanel {
       dark: vscode.Uri.joinPath(extensionUri, ...PROFILE_MANAGER_PANEL_ICON_PATHS.dark)
     };
 
-    ProfileManagerPanel.currentPanel = new ProfileManagerPanel(panel, action);
+    ProfileManagerPanel.currentPanel = new ProfileManagerPanel(panel, extensionUri, action);
   }
 
-  private constructor(panel: vscode.WebviewPanel, initialAction: ProfileManagerPanelAction) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, initialAction: ProfileManagerPanelAction) {
     this.panel = panel;
+    this.extensionUri = extensionUri;
     this.pendingAction = initialAction;
 
-    void this.update();
+    void this.renderInitialHtml();
 
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
     this.panel.webview.onDidReceiveMessage(
@@ -139,11 +144,16 @@ export class ProfileManagerPanel {
               await this.handleMoveFallbackProfile(message.profileId, message.direction);
             }
             break;
-          case 'clearFallbackPriority':
-            if (message.profileId) {
-              await this.handleClearFallbackPriority(message.profileId);
-            }
-            break;
+        case 'clearFallbackPriority':
+          if (message.profileId) {
+            await this.handleClearFallbackPriority(message.profileId);
+          }
+          break;
+        case 'reorderFallbackProfiles':
+          if (message.newOrder) {
+            await this.handleReorderFallbackProfiles(message.newOrder);
+          }
+          break;
           case 'openSettings':
             await this.handleOpenSettings();
             break;
@@ -171,10 +181,18 @@ export class ProfileManagerPanel {
   }
 
   private async handleSaveProfile(data: ProfileFormData): Promise<void> {
-    await this.runPanelOperation(
-      () => saveProfileFromForm(data, profileManagerPanelOperationDeps),
-      getProfileSaveErrorDescriptor
-    );
+    try {
+      const successDescriptor = await saveProfileFromForm(data, profileManagerPanelOperationDeps);
+      this.pendingAction = 'default';
+      vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
+      await this.pushStateUpdate();
+    } catch (error: unknown) {
+      const descriptor = getProfileManagerPanelOperationErrorDescriptor(
+        error,
+        getProfileSaveErrorDescriptor
+      );
+      vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
+    }
   }
 
   private async handleDeleteProfile(profileId: string): Promise<void> {
@@ -197,17 +215,32 @@ export class ProfileManagerPanel {
       return;
     }
 
-    await this.runPanelOperation(
-      () => deleteProfileById(profileId, profileManagerPanelOperationDeps),
-      getProfileDeleteErrorDescriptor
-    );
+    try {
+      const successDescriptor = await deleteProfileById(profileId, profileManagerPanelOperationDeps);
+      this.pendingAction = 'default';
+      vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
+      await this.pushStateUpdate();
+    } catch (error: unknown) {
+      const descriptor = getProfileManagerPanelOperationErrorDescriptor(
+        error,
+        getProfileDeleteErrorDescriptor
+      );
+      vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
+    }
   }
 
   private async handleSwitchProfile(profileId: string): Promise<void> {
-    await this.runPanelOperation(
-      () => switchProfileById(profileId, profileManagerPanelOperationDeps),
-      getProfileSwitchErrorDescriptor
-    );
+    try {
+      await switchProfileById(profileId, profileManagerPanelOperationDeps);
+      this.pendingAction = 'default';
+      await this.pushStateUpdate();
+    } catch (error: unknown) {
+      const descriptor = getProfileManagerPanelOperationErrorDescriptor(
+        error,
+        getProfileSwitchErrorDescriptor
+      );
+      vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
+    }
   }
 
   private async handlePrioritizeFallbackProfile(profileId: string): Promise<void> {
@@ -225,24 +258,42 @@ export class ProfileManagerPanel {
     await this.runFallbackOrderOperation(() => clearFallbackPriority(profileId));
   }
 
+  private async handleReorderFallbackProfiles(newOrder: string[]): Promise<void> {
+    await this.runFallbackOrderOperation(() => reorderFallbackProfiles(newOrder));
+  }
+
   private async handleOpenSettings(): Promise<void> {
     await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCommitLite');
   }
 
   private async handleUpdateLanguage(language: string): Promise<void> {
     await updateAICommitConfigValue('language', language);
-    await this.update();
+    await this.pushStateUpdate();
   }
 
-  private async update(): Promise<void> {
+  private async renderInitialHtml(): Promise<void> {
     this.panel.title = t('profileManagerTitle');
+    const webviewData = await this.buildWebviewData();
+    const scriptUri = this.panel.webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'profileManager.js')
+    );
+    this.panel.webview.html = buildWebviewHtml(webviewData, scriptUri.toString());
+  }
+
+  private async pushStateUpdate(): Promise<void> {
+    this.panel.title = t('profileManagerTitle');
+    const webviewData = await this.buildWebviewData();
+    void this.panel.webview.postMessage({ command: 'stateUpdate', state: webviewData });
+  }
+
+  private async buildWebviewData(): Promise<BuildWebviewHtmlData> {
     const profileConfig = getProfileConfig();
     const profiles = profileConfig.profiles;
     const i18n = buildI18n(profiles.length);
     const activeProfile = getActiveProfile();
     const providers = getProviderDefinitions().map((provider) => toPanelProviderView(provider));
     const currentLanguage = readAICommitConfigValue('language', 'en');
-    const webviewData = await buildProfileManagerPanelWebviewData({
+    return await buildProfileManagerPanelWebviewData({
       cspSource: this.panel.webview.cspSource,
       locale: getLocale(),
       activeProfile,
@@ -256,33 +307,13 @@ export class ProfileManagerPanel {
       autoFallbackEnabled: profileConfig.enableAutoFallback,
       profileFallbackOrder: profileConfig.profileFallbackOrder
     });
-
-    this.panel.webview.html = buildWebviewHtml(webviewData);
-  }
-
-  private async runPanelOperation(
-    operation: () => Promise<LocalizedMessageDescriptor>,
-    fallbackDescriptorFactory: (message: string) => LocalizedMessageDescriptor
-  ): Promise<void> {
-    try {
-      const successDescriptor = await operation();
-      this.pendingAction = 'default';
-      vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
-      await this.update();
-    } catch (error: unknown) {
-      const descriptor = getProfileManagerPanelOperationErrorDescriptor(
-        error,
-        fallbackDescriptorFactory
-      );
-      vscode.window.showErrorMessage(t(descriptor.key, descriptor.params));
-    }
   }
 
   private async runFallbackOrderOperation(operation: () => Promise<void>): Promise<void> {
     try {
       await operation();
       this.pendingAction = 'default';
-      await this.update();
+      await this.pushStateUpdate();
       void this.panel.webview.postMessage({ command: 'fallbackActionSettled' });
     } catch (error: unknown) {
       const descriptor = getProfileManagerPanelOperationErrorDescriptor(
