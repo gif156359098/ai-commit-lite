@@ -6,12 +6,11 @@ import {
   generateCommitMessageFromPrepared,
   prepareCommitGeneration
 } from '../commit/generator';
-import { handleQuotaExceeded, getEffectiveConfig } from '../config/profileManager';
+import { getEffectiveConfig, handleProfileFailure } from '../config/profileManager';
 import { checkHasStagedChanges } from '../git/diff';
 import { t } from '../i18n';
 import { ModelProfile } from '../types/profile';
 import { getCancellationReason, isCancellationError } from '../utils/cancellation';
-import { isQuotaError } from '../commands/quotaError';
 
 export type GenerationSummary = {
   stagedCount: number;
@@ -150,11 +149,7 @@ async function generateWithAutoFallback(
         );
       }
 
-      if (!isQuotaError(error)) {
-        return { type: 'failure', error: error instanceof Error ? error : String(error) };
-      }
-
-      const nextProfile = await handleQuotaExceeded(currentProfile.id);
+      const nextProfile = await handleProfileFailure(currentProfile.id);
       if (!nextProfile || attemptedProfileIds.has(nextProfile.id)) {
         return { type: 'failure', error: error instanceof Error ? error : String(error) };
       }

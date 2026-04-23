@@ -88,36 +88,36 @@ git add .
 
 ### 支持的供应商
 
-| 供应商 | 适用场景 | 是否需要自定义 Endpoint |
-| --- | --- | --- |
-| OpenAI | 直接使用 OpenAI 官方模型 | 否 |
-| Azure OpenAI | 使用 Azure 上部署的 OpenAI 模型 | 是 |
-| DeepSeek | 使用 DeepSeek 官方模型 | 否 |
-| Gemini | 使用 Google Gemini 官方模型 | 否 |
-| Anthropic | 使用 Claude 官方模型 | 否 |
-| Cohere | 使用 Command 等 Cohere 官方模型 | 否 |
-| Mistral | 使用 Mistral 官方模型 | 否 |
-| Qwen / DashScope | 使用阿里云 DashScope 提供的模型 | 否 |
-| OpenAI-Compatible | OpenRouter、SiliconFlow、GLM 兼容网关、自托管兼容服务等 | 是 |
+| 供应商               | 适用场景                                     | 是否需要自定义 Endpoint |
+| ----------------- | ---------------------------------------- | ---------------- |
+| OpenAI            | 直接使用 OpenAI 官方模型                         | 否                |
+| Azure OpenAI      | 使用 Azure 上部署的 OpenAI 模型                  | 是                |
+| DeepSeek          | 使用 DeepSeek 官方模型                         | 否                |
+| Gemini            | 使用 Google Gemini 官方模型                    | 否                |
+| Anthropic         | 使用 Claude 官方模型                           | 否                |
+| Cohere            | 使用 Command 等 Cohere 官方模型                 | 否                |
+| Mistral           | 使用 Mistral 官方模型                          | 否                |
+| Qwen / DashScope  | 使用阿里云 DashScope 提供的模型                    | 否                |
+| OpenAI-Compatible | OpenRouter、SiliconFlow、GLM 兼容网关、自托管兼容服务等 | 是                |
 
 ### 重要设置项
 
-| 设置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `aiCommitLite.language` | `en` | 生成提交信息的语言 |
-| `aiCommitLite.useGitmoji` | `true` | 是否在提交前缀加入 Gitmoji |
-| `aiCommitLite.conventionalCommits` | `true` | 是否遵循 Conventional Commits |
-| `aiCommitLite.commitMessageStyle` | `detailed` | 详细版或简洁版提交格式 |
-| `aiCommitLite.customSystemPrompt` | `""` | 自定义系统提示词 |
-| `aiCommitLite.temperature` | `0.7` | 生成温度 |
-| `aiCommitLite.maxTokens` | `1000` | 模型输出最大 token 数 |
-| `aiCommitLite.maxDiffCharacters` | `24000` | 总体 diff 上下文上限 |
-| `aiCommitLite.maxFileDiffCharacters` | `8000` | 单文件 diff 上限 |
-| `aiCommitLite.contextExcludePatterns` | 内置默认值 | 分析时排除的文件模式 |
-| `aiCommitLite.enableAutoFallback` | `true` | 是否自动切换备用 Profile |
-| `aiCommitLite.profileFallbackOrder` | `[]` | 自动回退优先级列表（未列出的 Profile 会自动追加） |
-| `aiCommitLite.profiles` | `[]` | Profile 元数据列表 |
-| `aiCommitLite.activeProfile` | `""` | 当前激活的 Profile ID |
+| 设置项                                   | 默认值        | 说明                            |
+| ------------------------------------- | ---------- | ----------------------------- |
+| `aiCommitLite.language`               | `en`       | 生成提交信息的语言                     |
+| `aiCommitLite.useGitmoji`             | `true`     | 是否在提交前缀加入 Gitmoji             |
+| `aiCommitLite.conventionalCommits`    | `true`     | 是否遵循 Conventional Commits     |
+| `aiCommitLite.commitMessageStyle`     | `detailed` | 详细版或简洁版提交格式                   |
+| `aiCommitLite.customSystemPrompt`     | `""`       | 自定义系统提示词                      |
+| `aiCommitLite.temperature`            | `0.7`      | 生成温度                          |
+| `aiCommitLite.maxTokens`              | `1000`     | 模型输出最大 token 数                |
+| `aiCommitLite.maxDiffCharacters`      | `24000`    | 总体 diff 上下文上限                 |
+| `aiCommitLite.maxFileDiffCharacters`  | `8000`     | 单文件 diff 上限                   |
+| `aiCommitLite.contextExcludePatterns` | 内置默认值      | 分析时排除的文件模式                    |
+| `aiCommitLite.enableAutoFallback`     | `true`     | 是否自动切换备用 Profile              |
+| `aiCommitLite.profileFallbackOrder`   | `[]`       | 自动回退优先级列表（未列出的 Profile 会自动追加） |
+| `aiCommitLite.profiles`               | `[]`       | Profile 元数据列表                 |
+| `aiCommitLite.activeProfile`          | `""`       | 当前激活的 Profile ID              |
 
 ### 常用命令
 
@@ -269,36 +269,36 @@ Set `aiCommitLite.commitMessageStyle` in VS Code settings:
 
 ### Supported Providers
 
-| Provider | Typical use case | Custom endpoint required |
-| --- | --- | --- |
-| OpenAI | Direct access to official OpenAI models | No |
-| Azure OpenAI | OpenAI models deployed in Azure | Yes |
-| DeepSeek | Official DeepSeek models | No |
-| Gemini | Official Google Gemini models | No |
-| Anthropic | Official Claude models | No |
-| Cohere | Official Cohere / Command models | No |
-| Mistral | Official Mistral models | No |
-| Qwen / DashScope | Models served by Alibaba Cloud DashScope | No |
-| OpenAI-Compatible | OpenRouter, SiliconFlow, compatible GLM gateways, self-hosted compatible services, and similar platforms | Yes |
+| Provider          | Typical use case                                                                                         | Custom endpoint required |
+| ----------------- | -------------------------------------------------------------------------------------------------------- | ------------------------ |
+| OpenAI            | Direct access to official OpenAI models                                                                  | No                       |
+| Azure OpenAI      | OpenAI models deployed in Azure                                                                          | Yes                      |
+| DeepSeek          | Official DeepSeek models                                                                                 | No                       |
+| Gemini            | Official Google Gemini models                                                                            | No                       |
+| Anthropic         | Official Claude models                                                                                   | No                       |
+| Cohere            | Official Cohere / Command models                                                                         | No                       |
+| Mistral           | Official Mistral models                                                                                  | No                       |
+| Qwen / DashScope  | Models served by Alibaba Cloud DashScope                                                                 | No                       |
+| OpenAI-Compatible | OpenRouter, SiliconFlow, compatible GLM gateways, self-hosted compatible services, and similar platforms | Yes                      |
 
 ### Important Settings
 
-| Setting | Default | Description |
-| --- | --- | --- |
-| `aiCommitLite.language` | `en` | Output language for commit messages |
-| `aiCommitLite.useGitmoji` | `true` | Prefix commit messages with Gitmoji |
-| `aiCommitLite.conventionalCommits` | `true` | Follow Conventional Commits |
-| `aiCommitLite.commitMessageStyle` | `detailed` | Detailed or concise output style |
-| `aiCommitLite.customSystemPrompt` | `""` | Custom system prompt |
-| `aiCommitLite.temperature` | `0.7` | Model temperature |
-| `aiCommitLite.maxTokens` | `1000` | Maximum output tokens |
-| `aiCommitLite.maxDiffCharacters` | `24000` | Total diff context budget |
-| `aiCommitLite.maxFileDiffCharacters` | `8000` | Per-file diff budget |
-| `aiCommitLite.contextExcludePatterns` | built-in defaults | Patterns excluded from diff analysis |
-| `aiCommitLite.enableAutoFallback` | `true` | Enable automatic profile fallback |
-| `aiCommitLite.profileFallbackOrder` | `[]` | Fallback priority list. Unlisted profiles are appended automatically |
-| `aiCommitLite.profiles` | `[]` | Stored profile metadata |
-| `aiCommitLite.activeProfile` | `""` | Active profile ID |
+| Setting                               | Default           | Description                                                          |
+| ------------------------------------- | ----------------- | -------------------------------------------------------------------- |
+| `aiCommitLite.language`               | `en`              | Output language for commit messages                                  |
+| `aiCommitLite.useGitmoji`             | `true`            | Prefix commit messages with Gitmoji                                  |
+| `aiCommitLite.conventionalCommits`    | `true`            | Follow Conventional Commits                                          |
+| `aiCommitLite.commitMessageStyle`     | `detailed`        | Detailed or concise output style                                     |
+| `aiCommitLite.customSystemPrompt`     | `""`              | Custom system prompt                                                 |
+| `aiCommitLite.temperature`            | `0.7`             | Model temperature                                                    |
+| `aiCommitLite.maxTokens`              | `1000`            | Maximum output tokens                                                |
+| `aiCommitLite.maxDiffCharacters`      | `24000`           | Total diff context budget                                            |
+| `aiCommitLite.maxFileDiffCharacters`  | `8000`            | Per-file diff budget                                                 |
+| `aiCommitLite.contextExcludePatterns` | built-in defaults | Patterns excluded from diff analysis                                 |
+| `aiCommitLite.enableAutoFallback`     | `true`            | Enable automatic profile fallback                                    |
+| `aiCommitLite.profileFallbackOrder`   | `[]`              | Fallback priority list. Unlisted profiles are appended automatically |
+| `aiCommitLite.profiles`               | `[]`              | Stored profile metadata                                              |
+| `aiCommitLite.activeProfile`          | `""`              | Active profile ID                                                    |
 
 ### Commands
 
@@ -355,4 +355,3 @@ Note: the repository includes `npm test`, which compiles the test targets first 
 ### License
 
 [MIT](LICENSE)
-

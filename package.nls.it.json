@@ -25,7 +25,7 @@
   "aiCommitLite.profiles": "Profili provider per la generazione dei commit",
   "aiCommitLite.activeProfile": "ID del profilo attualmente attivo",
   "aiCommitLite.switchProfile": "Cambia profilo",
-  "aiCommitLite.enableAutoFallback": "Abilita fallback automatico quando la quota e esaurita",
+  "aiCommitLite.enableAutoFallback": "Abilita il fallback automatico quando la richiesta del profilo attivo non riesce",
   "aiCommitLite.profiles.idDescription": "Identificatore univoco di questo profilo",
   "aiCommitLite.profiles.labelDescription": "Nome visualizzato nelle impostazioni e nella selezione rapida",
   "aiCommitLite.profiles.providerDescription": "Tipo di provider IA",

@@ -25,7 +25,7 @@
   "aiCommitLite.profiles": "Anbieterprofile fur die Commit-Generierung",
   "aiCommitLite.activeProfile": "ID des aktuell aktiven Profils",
   "aiCommitLite.switchProfile": "Profil wechseln",
-  "aiCommitLite.enableAutoFallback": "Automatischen Fallback bei uberschrittenem Kontingent aktivieren",
+  "aiCommitLite.enableAutoFallback": "Automatischen Fallback aktivieren, wenn die Anfrage des aktiven Profils fehlschlägt",
   "aiCommitLite.profiles.idDescription": "Eindeutige Kennung für dieses Profil",
   "aiCommitLite.profiles.labelDescription": "Anzeigename in Einstellungen und Quick Pick",
   "aiCommitLite.profiles.providerDescription": "Typ des KI-Anbieters",

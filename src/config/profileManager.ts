@@ -108,7 +108,7 @@ export async function getEffectiveConfig(): Promise<AICommitConfigWithProfile> {
   };
 }
 
-export async function handleQuotaExceeded(currentProfileId: string): Promise<ModelProfile | null> {
+export async function handleProfileFailure(currentProfileId: string): Promise<ModelProfile | null> {
   const { profiles, enableAutoFallback, profileFallbackOrder } = getProfileConfig();
   if (!enableAutoFallback) {
     return null;

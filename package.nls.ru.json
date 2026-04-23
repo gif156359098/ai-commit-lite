@@ -25,7 +25,7 @@
   "aiCommitLite.profiles": "Профили провайдеров для генерации сообщений коммитов",
   "aiCommitLite.activeProfile": "ID текущего активного профиля",
   "aiCommitLite.switchProfile": "Переключить профиль",
-  "aiCommitLite.enableAutoFallback": "Включить автоматический резервный переход при превышении квоты",
+  "aiCommitLite.enableAutoFallback": "Включить автоматическое резервное переключение при сбое запроса активного профиля",
   "aiCommitLite.profiles.idDescription": "Уникальный идентификатор этого профиля",
   "aiCommitLite.profiles.labelDescription": "Отображаемое имя в настройках и быстром выборе",
   "aiCommitLite.profiles.providerDescription": "Тип провайдера ИИ",

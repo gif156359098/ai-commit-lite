@@ -19,7 +19,7 @@
   "aiCommitLite.maxFileDiffCharacters": "切り捨て前に単一ファイルからAIに送信する最大diff文字数",
   "aiCommitLite.profiles": "コミット生成用のモデルプロファイル",
   "aiCommitLite.activeProfile": "現在アクティブなプロファイルID",
-  "aiCommitLite.enableAutoFallback": "クォータ超過時の自動フォールバックを有効にする",
+  "aiCommitLite.enableAutoFallback": "アクティブなプロファイルのリクエストが失敗したときに自動フォールバックを有効にする",
   "aiCommitLite.profileFallbackOrder": "優先するフォールバック順。リスト内のプロファイルが先に試され、残りのプロファイルは自動で後ろに追加されます。",
   "aiCommitLite.addProfile": "新しいプロファイルを追加",
   "aiCommitLite.commitMessageStyle": "コミットメッセージのスタイル（`detailed` は箇条書きの詳細を追加し、`concise` は件名1行のみにします）",

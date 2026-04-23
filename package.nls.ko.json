@@ -25,7 +25,7 @@
   "aiCommitLite.profiles": "커밋 생성을 위한 공급자 프로필",
   "aiCommitLite.activeProfile": "현재 활성 프로필 ID",
   "aiCommitLite.switchProfile": "프로필 전환",
-  "aiCommitLite.enableAutoFallback": "할당량 초과 시 자동 폴백 사용",
+  "aiCommitLite.enableAutoFallback": "활성 프로필 요청이 실패할 때 자동 폴백 사용",
   "aiCommitLite.profiles.idDescription": "이 프로필의 고유 식별자",
   "aiCommitLite.profiles.labelDescription": "설정 및 빠른 선택에 표시되는 이름",
   "aiCommitLite.profiles.providerDescription": "AI 제공자 유형",
