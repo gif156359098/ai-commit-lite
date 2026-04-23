@@ -17,7 +17,8 @@ Other languages:
 
 ## 简体中文
 
-AI Commit Lite 是一个 VS Code 扩展，用 AI 根据当前 Git 暂存区变更自动生成提交信息。基于 `Profile 管理` 的多厂商、多模型工作流，更适合在不同模型和供应商之间快速切换。
+AI Commit Lite 是一个 VS Code 扩展，用 AI 根据当前 Git 暂存区变更自动生成提交信息。基于 `Profile 管理` 的多厂商、多模型工作流，更适合在不同模型和供应商之间快速切换。![Profile 管理](https://github.com/gif156359098/ai-commit-lite/blob/master/docs/images/01.png?raw=true)
+![生成提交信息](https://github.com/gif156359098/ai-commit-lite/blob/master/docs/images/02.png?raw=true)
 
 ### 功能特性
 
