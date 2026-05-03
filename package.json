@@ -2,7 +2,7 @@
   "name": "ai-commit-lite",
   "displayName": "%aiCommitLite.displayName%",
   "description": "%aiCommitLite.description%",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "icon": "icon.png",
   "repository": {
     "type": "git",
