@@ -87,6 +87,9 @@ const getEditingProfile = (): ProfileView | undefined =>
 const getSelectedProvider = (): ProviderView =>
   providerMap[($('provider') as HTMLInputElement).value] || state.providers[0];
 
+const getRequiredLabel = (label: string, required: boolean): string =>
+  required ? `${label} *` : label;
+
 const setBanner = (message: string): void => {
   $('actionBanner').textContent = message || '';
   $('actionBanner').classList.toggle('active', Boolean(message));
@@ -112,6 +115,41 @@ const hideForm = (): void => {
 let fallbackBusy = false;
 let activeSortable: Sortable | null = null;
 let availableSortable: Sortable | null = null;
+let pendingDeleteProfileId: string | undefined;
+
+const formatDeleteConfirmMessage = (profile: ProfileView): string =>
+  state.i18n.profileDeleteConfirm.replace('{label}', () => profile.label);
+
+const showDeleteConfirm = (profileId: string): void => {
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    return;
+  }
+
+  pendingDeleteProfileId = profile.id;
+  $('deleteConfirmMessage').textContent = formatDeleteConfirmMessage(profile);
+  $('deleteConfirmProfileName').textContent = profile.label;
+  $('deleteConfirmProfileMeta').textContent = `${profile.providerLabel} / ${profile.model}`;
+  $('deleteConfirmModal').classList.add('active');
+  $('deleteConfirmModal').setAttribute('aria-hidden', 'false');
+  $('cancelDeleteButton').focus();
+};
+
+const hideDeleteConfirm = (): void => {
+  pendingDeleteProfileId = undefined;
+  $('deleteConfirmModal').classList.remove('active');
+  $('deleteConfirmModal').setAttribute('aria-hidden', 'true');
+};
+
+const confirmDeleteProfile = (): void => {
+  const profileId = pendingDeleteProfileId;
+  if (!profileId) {
+    return;
+  }
+
+  hideDeleteConfirm();
+  vscode.postMessage({ command: 'deleteProfile', profileId });
+};
 
 const syncFallbackControlState = (): void => {
   document
@@ -497,11 +535,10 @@ function renderProviders(): void {
 
 function onProviderChange(resetFields: boolean): void {
   const provider = getSelectedProvider();
-  const editingProfile = getEditingProfile();
   $('modelLabel').textContent =
-    (provider.modelInputKind === 'deployment'
+    getRequiredLabel(provider.modelInputKind === 'deployment'
       ? state.i18n.deploymentName
-      : state.i18n.model) + ' *';
+      : state.i18n.model, true);
   ($('modelHint') as HTMLElement).textContent =
     provider.modelInputKind === 'deployment'
       ? state.i18n.deploymentNameHint
@@ -513,9 +550,14 @@ function onProviderChange(resetFields: boolean): void {
   }
   if (provider.baseUrlMode === 'hidden') {
     ($('baseUrlGroup') as HTMLElement).style.display = 'none';
+    $('baseUrlLabel').textContent = state.i18n.apiEndpoint;
+    ($('baseUrl') as HTMLInputElement).required = false;
     ($('baseUrl') as HTMLInputElement).value = '';
   } else {
+    const baseUrlRequired = provider.baseUrlMode === 'required';
     ($('baseUrlGroup') as HTMLElement).style.display = 'block';
+    $('baseUrlLabel').textContent = getRequiredLabel(state.i18n.apiEndpoint, baseUrlRequired);
+    ($('baseUrl') as HTMLInputElement).required = baseUrlRequired;
     ($('baseUrl') as HTMLInputElement).placeholder =
       provider.baseUrlPlaceholder || provider.defaultBaseUrl || '';
     if (resetFields) {
@@ -525,14 +567,41 @@ function onProviderChange(resetFields: boolean): void {
           : '';
     }
     ($('baseUrlHint') as HTMLElement).textContent =
-      provider.baseUrlMode === 'required'
+      baseUrlRequired
         ? state.i18n.apiEndpointHintRequired
         : state.i18n.apiEndpointHintOptional;
   }
-  ($('apiKeyHint') as HTMLElement).textContent =
-    editingProfile && editingProfile.hasApiKey
-      ? state.i18n.apiKeyHintExisting
-      : state.i18n.apiKeyHintNew;
+  updateApiKeyFieldState();
+}
+
+function updateApiKeyFieldState(): void {
+  const editingProfile = getEditingProfile();
+  const keepsExistingKey = Boolean(editingProfile && editingProfile.hasApiKey);
+  const apiKeyRequired = !keepsExistingKey;
+  const apiKeyInput = $('apiKey') as HTMLInputElement;
+  const apiKeyStatus = $('apiKeyStatus');
+
+  $('apiKeyLabel').textContent = getRequiredLabel(state.i18n.apiKey, apiKeyRequired);
+  ($('apiKeyHint') as HTMLElement).textContent = keepsExistingKey
+    ? state.i18n.apiKeyHintExisting
+    : state.i18n.apiKeyHintNew;
+  apiKeyInput.required = apiKeyRequired;
+
+  if (keepsExistingKey) {
+    apiKeyStatus.textContent = state.i18n.apiKeyStoredNotice;
+    apiKeyStatus.classList.add('active');
+    apiKeyStatus.classList.remove('warning');
+    return;
+  }
+
+  if (editingProfile) {
+    apiKeyStatus.textContent = state.i18n.apiKeyRequiredNotice;
+    apiKeyStatus.classList.add('active', 'warning');
+    return;
+  }
+
+  apiKeyStatus.textContent = '';
+  apiKeyStatus.classList.remove('active', 'warning');
 }
 
 function selectProvider(
@@ -581,13 +650,14 @@ function showEditForm(profileId: string): void {
 function saveProfile(): void {
   const provider = getSelectedProvider();
   const editingProfile = getEditingProfile();
+  const apiKey = ($('apiKey') as HTMLInputElement).value.trim();
   const data = {
     id: ($('profileId') as HTMLInputElement).value.trim() || undefined,
     label: ($('label') as HTMLInputElement).value.trim(),
     provider: ($('provider') as HTMLInputElement).value,
     model: ($('model') as HTMLInputElement).value.trim(),
     baseUrl: ($('baseUrl') as HTMLInputElement).value.trim(),
-    apiKey: ($('apiKey') as HTMLInputElement).value.trim()
+    apiKey: apiKey || undefined
   };
   if (!data.label) {
     setFormError(state.i18n.profileNameRequired);
@@ -647,7 +717,7 @@ $('profilesContainer').addEventListener('click', (event: MouseEvent) => {
     return;
   }
   if (action === 'delete') {
-    vscode.postMessage({ command: 'deleteProfile', profileId });
+    showDeleteConfirm(profileId);
     return;
   }
 });
@@ -694,6 +764,13 @@ $('emptyStateAddButton').addEventListener('click', showAddForm);
 $('cancelButton').addEventListener('click', hideForm);
 $('closeButton').addEventListener('click', hideForm);
 $('saveButton').addEventListener('click', saveProfile);
+$('cancelDeleteButton').addEventListener('click', hideDeleteConfirm);
+$('confirmDeleteButton').addEventListener('click', confirmDeleteProfile);
+$('deleteConfirmModal').addEventListener('click', (event: MouseEvent) => {
+  if (event.target === $('deleteConfirmModal')) {
+    hideDeleteConfirm();
+  }
+});
 $('openSettingsButton').addEventListener('click', () => {
   vscode.postMessage({ command: 'openSettings' });
 });
@@ -723,9 +800,20 @@ window.addEventListener('message', (event: MessageEvent) => {
   if (event.data.command === 'fallbackActionSettled') {
     setFallbackBusy(false);
   }
+  if (event.data.command === 'profileSaved') {
+    hideForm();
+  }
 });
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
+  if (
+    event.key === 'Escape' &&
+    $('deleteConfirmModal').classList.contains('active')
+  ) {
+    hideDeleteConfirm();
+    return;
+  }
+
   if (
     event.key === 'Escape' &&
     $('formModal').classList.contains('active')

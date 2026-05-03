@@ -58,6 +58,8 @@
   "apiEndpointHintOptional": "Facoltativo. Mantieni l'endpoint predefinito o sostituiscilo con uno regionale",
   "apiKeyHintNew": "Archiviata in modo sicuro e mai scritta in chiaro nelle impostazioni",
   "apiKeyHintExisting": "Lascia vuoto per mantenere la chiave API attualmente salvata",
+  "apiKeyStoredNotice": "È già salvata una chiave. Lascia vuoto per mantenerla; inserisci una nuova chiave solo per sostituirla.",
+  "apiKeyRequiredNotice": "Questo profilo non ha ancora una chiave salvata, quindi è richiesta una chiave.",
   "cancelAction": "Annulla",
   "saveAction": "Salva",
   "addFirstProfile": "Aggiungi il tuo primo profilo provider AI per iniziare a generare messaggi di commit.",

@@ -58,6 +58,8 @@
   "apiEndpointHintOptional": "Opcional. Mantén el endpoint predeterminado o reemplázalo por uno regional",
   "apiKeyHintNew": "Se almacena de forma segura y nunca se escribe en texto plano en la configuración",
   "apiKeyHintExisting": "Déjalo vacío para conservar la clave API actual almacenada",
+  "apiKeyStoredNotice": "Ya hay una clave guardada. Déjalo vacío para conservarla; introduce una nueva clave solo para reemplazarla.",
+  "apiKeyRequiredNotice": "Este perfil aún no tiene una clave guardada, por lo que se requiere una clave.",
   "cancelAction": "Cancelar",
   "saveAction": "Guardar",
   "addFirstProfile": "Agrega tu primer perfil de proveedor de IA para empezar a generar mensajes de commit.",

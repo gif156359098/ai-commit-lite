@@ -58,6 +58,8 @@
   "apiEndpointHintOptional": "任意です。既定のエンドポイントを使うか、リージョン用のエンドポイントに置き換えてください",
   "apiKeyHintNew": "安全に保存され、設定に平文では保存されません",
   "apiKeyHintExisting": "空欄のままにすると現在保存されている API キーを保持します",
+  "apiKeyStoredNotice": "キーはすでに保存されています。空欄のまま保存すると保持されます。置き換える場合のみ新しいキーを入力してください。",
+  "apiKeyRequiredNotice": "このプロファイルには保存済みのキーがまだないため、キーの入力が必要です。",
   "cancelAction": "キャンセル",
   "saveAction": "保存",
   "addFirstProfile": "最初の AI プロバイダープロファイルを追加すると、コミットメッセージ生成を開始できます。",

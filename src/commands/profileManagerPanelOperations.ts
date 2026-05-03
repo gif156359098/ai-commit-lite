@@ -20,11 +20,6 @@ export interface ProfileManagerPanelOperationDeps {
   now: () => number;
 }
 
-export interface ProfileDeleteConfirmation {
-  confirmActionDescriptor: LocalizedMessageDescriptor;
-  warningDescriptor: LocalizedMessageDescriptor;
-}
-
 export class ProfileManagerPanelOperationError extends Error {
   public readonly descriptor: LocalizedMessageDescriptor;
 
@@ -111,25 +106,6 @@ export async function saveProfileFromForm(
   }
 
   return getProfileSaveSuccessDescriptor(isNew, label);
-}
-
-export function getDeleteProfileConfirmation(
-  profileId: string,
-  deps: Pick<ProfileManagerPanelOperationDeps, 'getProfiles'>
-): ProfileDeleteConfirmation | null {
-  const profile = deps.getProfiles().find((item) => item.id === profileId);
-
-  if (!profile) {
-    return null;
-  }
-
-  return {
-    confirmActionDescriptor: { key: 'deleteAction' },
-    warningDescriptor: {
-      key: 'profileDeleteConfirm',
-      params: { label: profile.label }
-    }
-  };
 }
 
 export async function deleteProfileById(

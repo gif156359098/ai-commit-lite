@@ -58,6 +58,8 @@
   "apiEndpointHintOptional": "Facultatif. Conservez le point de terminaison par défaut ou remplacez-le par un point de terminaison régional",
   "apiKeyHintNew": "Stockée de manière sécurisée et jamais écrite en clair dans les paramètres",
   "apiKeyHintExisting": "Laissez vide pour conserver la clé API actuellement enregistrée",
+  "apiKeyStoredNotice": "Une clé est déjà enregistrée. Laissez ce champ vide pour la conserver ; saisissez une nouvelle clé uniquement pour la remplacer.",
+  "apiKeyRequiredNotice": "Ce profil n’a pas encore de clé enregistrée, une clé est donc requise.",
   "cancelAction": "Annuler",
   "saveAction": "Enregistrer",
   "addFirstProfile": "Ajoutez votre premier profil de fournisseur IA pour commencer à générer des messages de commit.",

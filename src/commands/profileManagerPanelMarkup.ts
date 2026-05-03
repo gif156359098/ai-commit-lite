@@ -127,15 +127,16 @@ export function buildProfileManagerPanelBodyMarkup(
           </div>
 
           <div class="field" id="baseUrlGroup">
-            <label for="baseUrl">${escapeHtml(i18n.apiEndpoint)}</label>
+            <label for="baseUrl" id="baseUrlLabel">${escapeHtml(i18n.apiEndpoint)}</label>
             <input type="text" id="baseUrl" autocomplete="off">
             <div class="hint" id="baseUrlHint">${escapeHtml(i18n.apiEndpointHintRequired)}</div>
           </div>
 
           <div class="field">
-            <label for="apiKey">${escapeHtml(i18n.apiKey)} *</label>
-            <input type="password" id="apiKey" autocomplete="off">
+            <label for="apiKey" id="apiKeyLabel">${escapeHtml(i18n.apiKey)} *</label>
+            <input type="password" id="apiKey" autocomplete="off" aria-describedby="apiKeyHint apiKeyStatus">
             <div class="hint" id="apiKeyHint">${escapeHtml(i18n.apiKeyHintNew)}</div>
+            <div class="secret-status" id="apiKeyStatus"></div>
           </div>
 
           <div class="form-actions">
@@ -143,6 +144,32 @@ export function buildProfileManagerPanelBodyMarkup(
             <button class="btn primary" id="saveButton" type="button">${escapeHtml(i18n.saveAction)}</button>
           </div>
         </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay confirm-overlay" id="deleteConfirmModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+      <div class="confirm-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"></path>
+          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+          <path d="M10 11v6"></path>
+          <path d="M14 11v6"></path>
+        </svg>
+      </div>
+      <div class="confirm-content">
+        <h2 id="deleteConfirmTitle">${escapeHtml(i18n.deleteAction)}</h2>
+        <p id="deleteConfirmMessage"></p>
+        <div class="confirm-profile">
+          <div class="confirm-profile-name" id="deleteConfirmProfileName"></div>
+          <div class="confirm-profile-meta" id="deleteConfirmProfileMeta"></div>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn" id="cancelDeleteButton" type="button">${escapeHtml(i18n.cancelAction)}</button>
+        <button class="btn danger" id="confirmDeleteButton" type="button">${escapeHtml(i18n.deleteAction)}</button>
       </div>
     </div>
   </div>`;

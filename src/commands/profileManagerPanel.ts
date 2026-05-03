@@ -29,14 +29,12 @@ import {
   LANGUAGE_OPTIONS
 } from './profileManagerPanelView';
 import {
-  LocalizedMessageDescriptor,
   getProfileDeleteErrorDescriptor,
   getProfileSaveErrorDescriptor,
   getProfileSwitchErrorDescriptor,
 } from './commandMessageDescriptors';
 import {
   deleteProfileById,
-  getDeleteProfileConfirmation,
   getProfileManagerPanelOperationErrorDescriptor,
   ProfileManagerPanelOperationDeps,
   saveProfileFromForm,
@@ -186,6 +184,7 @@ export class ProfileManagerPanel {
       this.pendingAction = 'default';
       vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
       await this.pushStateUpdate();
+      void this.panel.webview.postMessage({ command: 'profileSaved' });
     } catch (error: unknown) {
       const descriptor = getProfileManagerPanelOperationErrorDescriptor(
         error,
@@ -196,25 +195,6 @@ export class ProfileManagerPanel {
   }
 
   private async handleDeleteProfile(profileId: string): Promise<void> {
-    const confirmation = getDeleteProfileConfirmation(profileId, profileManagerPanelOperationDeps);
-    if (!confirmation) {
-      return;
-    }
-
-    const confirmLabel = t(
-      confirmation.confirmActionDescriptor.key,
-      confirmation.confirmActionDescriptor.params
-    );
-    const confirm = await vscode.window.showWarningMessage(
-      t(confirmation.warningDescriptor.key, confirmation.warningDescriptor.params),
-      { modal: true },
-      confirmLabel
-    );
-
-    if (confirm !== confirmLabel) {
-      return;
-    }
-
     try {
       const successDescriptor = await deleteProfileById(profileId, profileManagerPanelOperationDeps);
       this.pendingAction = 'default';

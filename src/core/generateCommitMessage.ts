@@ -6,7 +6,11 @@ import {
   generateCommitMessageFromPrepared,
   prepareCommitGeneration
 } from '../commit/generator';
-import { getEffectiveConfig, handleProfileFailure } from '../config/profileManager';
+import {
+  getEffectiveConfig,
+  getEffectiveConfigForProfile,
+  handleProfileFailure
+} from '../config/profileManager';
 import { checkHasStagedChanges } from '../git/diff';
 import { t } from '../i18n';
 import { ModelProfile } from '../types/profile';
@@ -101,13 +105,16 @@ async function generateWithAutoFallback(
 ): Promise<GenerateCommitResult> {
   const { abortSignal, onInfo, progress, startedAt, token } = options;
   const attemptedProfileIds = new Set<string>();
+  let fallbackProfileId: string | undefined;
 
   while (true) {
     if (token.isCancellationRequested || abortSignal.aborted) {
       return createCancelledResult('Cancelled before the AI request started.');
     }
 
-    const config = await getEffectiveConfig();
+    const config = fallbackProfileId
+      ? await getEffectiveConfigForProfile(fallbackProfileId)
+      : await getEffectiveConfig();
     const currentProfile = config.profile;
     attemptedProfileIds.add(currentProfile.id);
 
@@ -154,6 +161,7 @@ async function generateWithAutoFallback(
         return { type: 'failure', error: error instanceof Error ? error : String(error) };
       }
 
+      fallbackProfileId = nextProfile.id;
       progress.report({
         increment: 0,
         message: t('retryingWithProfile', { profile: nextProfile.label })

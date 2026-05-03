@@ -84,6 +84,15 @@ export async function getEffectiveConfig(): Promise<AICommitConfigWithProfile> {
     throw new Error(t('noProfilesConfigured'));
   }
 
+  return await getEffectiveConfigForProfile(profile.id);
+}
+
+export async function getEffectiveConfigForProfile(profileId: string): Promise<AICommitConfigWithProfile> {
+  const profile = getProfiles().find((item) => item.id === profileId);
+  if (!profile) {
+    throw new Error(t('invalidProfile', { error: `Profile with ID ${profileId} not found` }));
+  }
+
   const apiKey = await getProfileApiKey(profile.id);
   if (!apiKey) {
     throw new Error(t('apiKeyRequiredForProfile', { profile: profile.label }));
@@ -125,7 +134,6 @@ export async function handleProfileFailure(currentProfileId: string): Promise<Mo
     if (profile) {
       const apiKey = await getProfileApiKey(profile.id);
       if (apiKey) {
-        await switchProfile(profile.id);
         return profile;
       }
     }

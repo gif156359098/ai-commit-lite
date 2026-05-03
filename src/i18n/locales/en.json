@@ -64,6 +64,8 @@
   "apiEndpointHintOptional": "Optional. Keep the default endpoint or replace it with a regional endpoint",
   "apiKeyHintNew": "Stored securely and never written to settings in plain text",
   "apiKeyHintExisting": "Leave blank to keep the current stored API key",
+  "apiKeyStoredNotice": "A key is already saved. Leaving this blank keeps it; enter a new key only to replace it.",
+  "apiKeyRequiredNotice": "This profile does not have a saved key yet, so a key is required.",
   "cancelAction": "Cancel",
   "saveAction": "Save",
   "addFirstProfile": "Add your first AI provider profile to start generating commit messages.",

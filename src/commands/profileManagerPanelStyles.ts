@@ -98,6 +98,15 @@ export function buildProfileManagerPanelStyles(): string {
     .btn:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 15%, transparent); }
     .btn.primary { background: var(--accent-bg); color: var(--accent-fg); border-color: transparent; }
     .btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+    }
+    .btn.danger:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--danger) 18%, transparent);
+      border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+    }
     .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
     .status-note {
@@ -361,6 +370,48 @@ margin-left: 2px;
     .close-btn:hover { background: color-mix(in srgb, var(--fg) 10%, transparent); color: var(--fg); }
 
     .modal-body { display: grid; grid-template-columns: 280px 1fr; flex: 1; min-height: 0; }
+    .confirm-overlay { z-index: 120; }
+    .confirm-modal {
+      width: min(440px, 100%);
+      background: var(--bg);
+      border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--border));
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 16px;
+      animation: modalScale 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+    }
+    .confirm-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--danger);
+      background: var(--danger-bg);
+      border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+    }
+    .confirm-content { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+    .confirm-content h2 { font-size: 1.1rem; line-height: 1.25; font-weight: 650; }
+    .confirm-content p { color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
+    .confirm-profile {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--fg) 6%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+    }
+    .confirm-profile-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .confirm-profile-meta { margin-top: 2px; color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .confirm-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 4px;
+    }
     .pane-providers {
       background: var(--card-bg);
       border-right: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
@@ -413,6 +464,21 @@ margin-left: 2px;
     }
     .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
     .hint { font-size: 0.8rem; color: var(--muted); }
+    .secret-status {
+      display: none;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      color: var(--fg);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .secret-status.active { display: block; }
+    .secret-status.warning {
+      border-color: color-mix(in srgb, var(--warning) 34%, transparent);
+      background: var(--warning-bg);
+    }
     .error {
       display: none;
       padding: 12px 16px;
@@ -431,6 +497,9 @@ margin-left: 2px;
       .toolbar { flex-direction: column; align-items: stretch; }
       .toolbar-actions { justify-content: space-between; }
       .modal-body { grid-template-columns: 1fr; }
+      .confirm-modal { grid-template-columns: 1fr; }
+      .confirm-actions { flex-direction: column-reverse; }
+      .confirm-actions .btn { width: 100%; }
       .pane-providers {
         border-right: none;
         border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);

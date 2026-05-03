@@ -58,12 +58,15 @@ export interface WebviewI18n {
   apiEndpointHintOptional: string;
   apiKeyHintNew: string;
   apiKeyHintExisting: string;
+  apiKeyStoredNotice: string;
+  apiKeyRequiredNotice: string;
   cancelAction: string;
   saveAction: string;
   addProfileTitle: string;
   editProfileTitle: string;
   editProfilePrompt: string;
   deleteProfilePrompt: string;
+  profileDeleteConfirm: string;
   profileNameRequired: string;
   profileModelRequired: string;
   profileBaseUrlRequired: string;

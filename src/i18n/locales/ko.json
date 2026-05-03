@@ -58,6 +58,8 @@
   "apiEndpointHintOptional": "선택 사항입니다. 기본 엔드포인트를 유지하거나 지역 엔드포인트로 바꾸세요",
   "apiKeyHintNew": "안전하게 저장되며 설정에 평문으로 기록되지 않습니다",
   "apiKeyHintExisting": "비워 두면 현재 저장된 API 키를 유지합니다",
+  "apiKeyStoredNotice": "이미 저장된 키가 있습니다. 비워 두면 유지되며, 교체할 때만 새 키를 입력하세요.",
+  "apiKeyRequiredNotice": "이 프로필에는 아직 저장된 키가 없으므로 키를 입력해야 합니다.",
   "cancelAction": "취소",
   "saveAction": "저장",
   "addFirstProfile": "첫 AI 제공자 프로필을 추가하면 커밋 메시지 생성을 시작할 수 있습니다.",

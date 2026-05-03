@@ -58,6 +58,8 @@
   "apiEndpointHintOptional": "Optional. Behalten Sie den Standardendpunkt bei oder ersetzen Sie ihn durch einen regionalen Endpunkt",
   "apiKeyHintNew": "Wird sicher gespeichert und niemals im Klartext in den Einstellungen abgelegt",
   "apiKeyHintExisting": "Leer lassen, um den aktuell gespeicherten API-Schlüssel beizubehalten",
+  "apiKeyStoredNotice": "Es ist bereits ein Schlüssel gespeichert. Leer lassen, um ihn beizubehalten; geben Sie nur einen neuen Schlüssel ein, um ihn zu ersetzen.",
+  "apiKeyRequiredNotice": "Für dieses Profil ist noch kein Schlüssel gespeichert, daher ist ein Schlüssel erforderlich.",
   "cancelAction": "Abbrechen",
   "saveAction": "Speichern",
   "addFirstProfile": "Fügen Sie Ihr erstes KI-Anbieterprofil hinzu, um Commit-Nachrichten zu erzeugen.",
