@@ -1,180 +1,131 @@
 # AI Commit Lite
 
-기본 중영 이중 언어 문서는 [README.md](README.md)를 참고하세요.
+AI를 사용하여 Git 커밋 메시지를 자동으로 생성하는 VS Code 확장입니다.
 
-AI Commit Lite는 현재 Git 스테이징 변경 사항을 바탕으로 AI가 커밋 메시지를 생성하는 VS Code 확장입니다. 현재 버전은 예전의 단일 공급자 설정 흐름 대신 `Profile Manager` 중심의 멀티 벤더 워크플로로 전환되었습니다.
+[**简体中文 / English 병렬 문서 →**](README.md)
 
-## 주요 기능
+---
 
-- 시각적인 `Profile Manager`
-- OpenAI, Azure OpenAI, DeepSeek, Gemini, Anthropic, Cohere, Mistral, Qwen / DashScope, OpenAI-Compatible 지원
-- API 키를 VS Code Secret Storage에 안전하게 저장
-- `detailed`, `concise` 두 가지 커밋 스타일
-- 자동 형식 수정: 모델이 요구된 상세 형식을 따르지 않을 경우 확장이 자동으로 형식 수정 실행
-- Gitmoji 및 Conventional Commits 지원
-- 쿼터 또는 속도 제한 시 자동 폴백
-- 다국어 커밋 메시지 출력
-- Git diff 최적화: 스테이징된 변경 사항을 배치 분석하여 파일별 순차 diff 대기 시간 단축
-- 상태 표시줄, SCM 버튼, 명령 팔레트, 단축키 지원
+## 빠른 시작
 
-## 설치
+3단계로 시작할 수 있습니다:
 
-### `.vsix` 설치
+**1️⃣ 확장 설치**
+Profile이 없으면 설치 후 온보딩 알림이 표시됩니다.
 
-1. VS Code에서 `Extensions: Install from VSIX...` 실행
-2. `.vsix` 파일 선택
+**2️⃣ AI 설정**
+「Profile 추가」→「공급자 선택」→「API Key 입력」
+(Key는 VS Code Secret Storage에 안전하게 저장됩니다)
 
-### 소스에서 빌드
-
-```bash
-git clone https://github.com/gif156359098/ai-commit-lite.git
-cd ai-commit-lite
-npm install
-npm run compile
-npm run package
-```
-
-## 사용 튜토리얼
-
-### 1. Profile Manager 열기
-
-다음 중 하나를 사용하세요.
-
-- 상태 표시줄의 `AI Commit Lite`
-- 명령 팔레트의 `AI Commit Lite: Open Profile Manager`
-
-처음 설치했고 Profile이 없으면 온보딩 알림이 자동으로 표시됩니다.
-
-### 2. Profile 추가
-
-1. `Add Profile` 클릭
-2. 공급자 선택
-3. 표시 이름 입력
-4. 모델 이름 입력
-5. API 키 입력
-6. `Azure OpenAI` 또는 `OpenAI-Compatible` 선택 시 Endpoint / Base URL 추가 입력
-7. 저장
-
-참고:
-
-- 편집 시 API 키를 비워 두면 기존 키가 유지됩니다
-- 첫 번째 Profile은 자동으로 활성 Profile이 됩니다
-
-### 3. 변경 사항 스테이징
-
+**3️⃣ 커밋 생성**
 ```bash
 git add .
 ```
-
-### 4. 커밋 메시지 생성
-
-사용 가능한 진입점:
-
-- `AI Commit Lite: Generate Commit`
+다음 방법으로 생성:
+- 명령 팔레트: `AI Commit Lite: Generate Commit`
 - SCM 제목 버튼
 - `Ctrl+Shift+G Ctrl+Shift+C`
-- macOS: `Cmd+Shift+G Cmd+Shift+C`
 
-생성된 메시지는 Source Control 입력 상자에 자동으로 채워집니다.
+생성 후 메시지는 Source Control 입력란에 자동 입력됩니다.
 
-### 5. 커밋 스타일 선택
+## 기능 미리보기
 
-`aiCommitLite.commitMessageStyle` 설정:
+![Profile 관리](docs/images/01.png)
+![커밋 생성](docs/images/02.png)
 
-- `detailed`: 제목 1줄 + 2~5개의 불릿
-- `concise`: 한 줄 제목만 출력
+## 할 수 있는 것
 
-모델이 상세 형식을 지키지 않으면 확장이 한 번 자동으로 형식을 보정합니다.
+**Q: 어떤 공급자를 지원합니까?**
+OpenAI, DeepSeek, Gemini, Anthropic, Cohere, Mistral, DashScope, OpenAI 호환 API 등을 지원합니다.
+
+**Q: API 키는 안전한가요?**
+네. 키는 VS Code Secret Storage에 저장되며 일반 설정에 평문으로 저장되지 않습니다.
+
+**Q: 여러 AI 설정을 사용할 수 있나요?**
+네. Profile Manager에서 여러 설정을 만들고 서로 다른 팀이나 계정의 계정을 관리할 수 있습니다. 자동 폴백 순서도 설정 가능합니다.
+
+**Q: 출력 형식을 조정할 수 있나요?**
+`detailed`(상세 버전, 불릿 포인트 포함)와 `concise`(간단 버전, 한 줄만) 두 가지를 지원합니다.
+
+**Q: 다국어 출력을 지원하나요?**
+지원 언어: 영어, 중국어 간체, 일본어, 한국어, 스페인어, 프랑스어, 독일어, 러시아어, 포르투갈어, 이탈리아어 (10개 언어)
 
 ## 지원 공급자
 
-| 공급자 | 용도 | 사용자 Endpoint 필요 여부 |
-| --- | --- | --- |
-| OpenAI | 공식 OpenAI 모델 | 아니요 |
-| Azure OpenAI | Azure에 배포된 OpenAI 모델 | 예 |
-| DeepSeek | 공식 DeepSeek 모델 | 아니요 |
-| Gemini | 공식 Google Gemini 모델 | 아니요 |
-| Anthropic | 공식 Claude 모델 | 아니요 |
-| Cohere | 공식 Cohere / Command 모델 | 아니요 |
-| Mistral | 공식 Mistral 모델 | 아니요 |
-| Qwen / DashScope | Alibaba Cloud DashScope 모델 | 아니요 |
-| OpenAI-Compatible | OpenRouter, 호환 게이트웨이, 자체 호스팅 호환 API 등 | 예 |
+| 공급자 | 설명 |
+| --- | --- |
+| OpenAI | OpenAI 공식 모델 |
+| DeepSeek | DeepSeek 공식 모델 |
+| Gemini | Google Gemini |
+| Anthropic | Anthropic Claude 시리즈 |
+| Cohere | Command 시리즈 |
+| Mistral | Mistral 공식 모델 |
+| DashScope | Alibaba Cloud 동이천문 (通義千問) |
+| Azure OpenAI | Azure에 배포된 OpenAI |
+| OpenAI-Compatible | OpenRouter, 자체 호스트 서비스 등 |
 
-## 주요 설정
+*사용자 정의 Endpoint 필요: Azure OpenAI, OpenAI-Compatible*
+
+## 명령어
+
+| 명령어 | 설명 |
+| --- | --- |
+| `AI Commit Lite: Generate Commit` | 커밋 메시지 생성 |
+| `AI Commit Lite: Open Profile Manager` | 설정 화면 열기 |
+| `AI Commit Lite: Switch Profile` | Profile 전환 |
+| `AI Commit Lite: Add Profile` | 새 Profile 추가 |
+| `AI Commit Lite: Edit Profile` | Profile 편집 |
+| `AI Commit Lite: Delete Profile` | Profile 삭제 |
+
+**단축키**: `Ctrl+Shift+G Ctrl+Shift+C` (Windows/Linux), `Cmd+Shift+G Cmd+Shift+C` (macOS)
+
+## 설정
 
 | 설정 | 기본값 | 설명 |
 | --- | --- | --- |
 | `aiCommitLite.language` | `en` | 출력 언어 |
 | `aiCommitLite.useGitmoji` | `true` | Gitmoji 사용 여부 |
-| `aiCommitLite.conventionalCommits` | `true` | Conventional Commits 사용 여부 |
-| `aiCommitLite.commitMessageStyle` | `detailed` | 출력 스타일 |
-| `aiCommitLite.customSystemPrompt` | `""` | 사용자 시스템 프롬프트 |
-| `aiCommitLite.temperature` | `0.7` | 생성 온도 |
-| `aiCommitLite.maxTokens` | `1000` | 최대 출력 토큰 |
-| `aiCommitLite.maxDiffCharacters` | `24000` | 전체 diff 한도 |
-| `aiCommitLite.maxFileDiffCharacters` | `8000` | 파일별 diff 한도 |
-| `aiCommitLite.contextExcludePatterns` | 내장 기본값 | diff 분석에서 제외되는 파일 패턴 |
-| `aiCommitLite.enableAutoFallback` | `true` | 자동 폴백 사용 |
-| `aiCommitLite.profileFallbackOrder` | `[]` | 폴백 순서 |
-| `aiCommitLite.profiles` | `[]` | 저장된 프로필 메타데이터 |
-| `aiCommitLite.activeProfile` | `""` | 활성 프로필 ID |
+| `aiCommitLite.commitMessageStyle` | `detailed` | `detailed` 또는 `concise` |
+| `aiCommitLite.enableAutoFallback` | `true` | 자동 폴백 활성화 |
+| `aiCommitLite.profileFallbackOrder` | `[]` | 폴백 우선순위 |
+| `aiCommitLite.maxDiffCharacters` | `24000` | 전체 diff 문자 수 상한 |
+| `aiCommitLite.maxFileDiffCharacters` | `8000` | 파일당 상한 |
 
-## 명령어
+## 자주 묻는 질문
 
-- `AI Commit Lite: Generate Commit`
-- `AI Commit Lite: Switch Profile`
-- `AI Commit Lite: Add Profile`
-- `AI Commit Lite: Edit Profile`
-- `AI Commit Lite: Delete Profile`
-- `AI Commit Lite: Open Profile Manager`
+**Profile이 보이지 않아요?**
+- 상태 표시줄의 "AI Commit Lite"를 클릭하세요
+- 또는 `AI Commit Lite: Open Profile Manager`를 실행하세요
 
-## 문제 해결
+**스테이징된 변경이 없다고 표시되나요?**
+먼저 `git add .`를 실행하세요.
 
-### Profile이 보이지 않음
+**생성이 느려요?**
+- 불필요한 큰 파일이나 바이너리를 스테이징하지 마세요
+- `aiCommitLite.contextExcludePatterns`를 조정하세요
 
-- `AI Commit Lite: Open Profile Manager` 실행
-- 최소 1개의 Profile이 생성되었는지 확인
+**레이트 리밋이나 할당량에 도달했나요?**
+1. `aiCommitLite.enableAutoFallback`을 활성화하세요
+2. Profile Manager에서 폴백 우선순위를 설정하세요
 
-### 스테이징된 변경 사항이 없다고 표시됨
+**추론 모델 출력이 불안정해요?**
+`aiCommitLite.commitMessageStyle = detailed`를 유지하세요. 확장이 자동으로 형식을 수정합니다.
 
-먼저 `git add`를 실행하세요.
+---
 
-### 생성 속도가 느림
+## 개발자 정보
 
-- 큰 생성물이나 바이너리 파일을 과도하게 스테이징하지 마세요
-- `aiCommitLite.contextExcludePatterns` 조정
-- `aiCommitLite.maxDiffCharacters` 축소
+**요구 사항**: Node.js 18+ / VS Code 1.80+
 
-### 속도 제한 또는 쿼터 문제
-
-`aiCommitLite.enableAutoFallback`를 활성화하고 `aiCommitLite.profileFallbackOrder`를 설정하세요.
-
-### 추론 모델의 출력 형식이 불안정
-
-- `aiCommitLite.commitMessageStyle = detailed` 유지
-- 필요시 `aiCommitLite.maxTokens` 증가
-- 일부 추론 모델이 여전히 한 줄만 반환할 경우 확장이 자동으로 형식 수정 실행
-
-## 개발
-
-#### 요구 사항
-
-- Node.js 18+
-- VS Code 1.80+
-
-#### 명령어
-
+**명령어**:
 ```bash
-npm run compile
-npm run watch
-npm run lint
-npm test
-npm run package
+npm run compile   # 컴파일
+npm run watch     # 감시 모드
+npm run lint      # 린트
+npm test          # 테스트
+npm run package   # 패키지
 ```
-
-참고: 이 저장소에는 `npm test`가 포함되어 있으며, 먼저 테스트 대상을 컴파일한 다음 Node 네이티브 테스트를 실행합니다.
 
 ## License
 
 [MIT](LICENSE)
-

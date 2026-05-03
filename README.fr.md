@@ -1,181 +1,131 @@
 # AI Commit Lite
 
-Consultez la version bilingue chinois-anglais dans [README.md](README.md).
+Extension VS Code qui utilise l'IA pour générer automatiquement des messages de commit Git.
 
-AI Commit Lite est une extension VS Code qui utilise l'IA pour générer des messages de commit à partir des changements Git déjà indexés. La version actuelle n'utilise plus l'ancien flux basé sur une seule configuration fournisseur ; elle repose désormais sur `Profile Manager` pour gérer plusieurs fournisseurs et plusieurs modèles.
+[**简体中文 / English 主文档 →**](README.md)
 
-## Fonctionnalités
+---
 
-- `Profile Manager` visuel
-- Prise en charge de OpenAI, Azure OpenAI, DeepSeek, Gemini, Anthropic, Cohere, Mistral, Qwen / DashScope et des services OpenAI-Compatible
-- Stockage sécurisé des API keys via VS Code Secret Storage
-- Deux styles de commit : `detailed` et `concise`
-- Correction automatique du format : si un modèle ne respecte pas le format détaillé requis, l'extension exécute automatiquement une correction
-- Support de Gitmoji et Conventional Commits
-- Bascule automatique vers des profils de secours
-- Génération multilingue
-- Optimisation du Git diff : analyse par lots des modifications indexées, réduisant le temps d'attente du diff séquentiel par fichier
-- Accès depuis la barre d'état, le bouton SCM, la palette de commandes et un raccourci clavier
+## Démarrage Rapide
 
-## Installation
+3 étapes pour commencer:
 
-### Installer un fichier `.vsix`
+**1️⃣ Installer l'extension**
+Si aucun Profile n'existe, une notification de bienvenue apparaîtra après l'installation.
 
-1. Exécutez `Extensions: Install from VSIX...` dans VS Code
-2. Sélectionnez le fichier `.vsix`
+**2️⃣ Configurer l'IA**
+「Add Profile」→「Sélectionner un fournisseur」→「Entrer la clé API」
+(La clé est stockée de manière sécurisée dans VS Code Secret Storage)
 
-### Construire depuis les sources
-
-```bash
-git clone https://github.com/gif156359098/ai-commit-lite.git
-cd ai-commit-lite
-npm install
-npm run compile
-npm run package
-```
-
-## Tutoriel d'utilisation
-
-### 1. Ouvrir Profile Manager
-
-Vous pouvez l'ouvrir depuis :
-
-- la barre d'état avec `AI Commit Lite`
-- la palette de commandes avec `AI Commit Lite: Open Profile Manager`
-
-Si aucun profil n'existe après l'installation, l'extension affiche automatiquement une notification d'onboarding.
-
-### 2. Ajouter un profil
-
-1. Cliquez sur `Add Profile`
-2. Choisissez le fournisseur
-3. Saisissez le nom d'affichage
-4. Saisissez le modèle
-5. Saisissez l'API key
-6. Si vous utilisez `Azure OpenAI` ou `OpenAI-Compatible`, renseignez aussi l'Endpoint / Base URL
-7. Enregistrez
-
-Remarques :
-
-- Si vous laissez le champ API key vide lors d'une modification, la clé existante est conservée
-- Le premier profil créé devient automatiquement le profil actif
-
-### 3. Indexer vos changements
-
+**3️⃣ Générer le commit**
 ```bash
 git add .
 ```
-
-### 4. Générer le message de commit
-
-Entrées disponibles :
-
-- `AI Commit Lite: Generate Commit`
-- bouton dans le titre SCM
+Générer avec l'une de ces méthodes:
+- Palette de commandes: `AI Commit Lite: Generate Commit`
+- Bouton du titre SCM
 - `Ctrl+Shift+G Ctrl+Shift+C`
-- macOS : `Cmd+Shift+G Cmd+Shift+C`
 
-Le message généré est inséré automatiquement dans la zone de saisie Source Control.
+Le message généré sera automatiquement inséré dans le champ Source Control.
 
-### 5. Choisir le style du commit
+## Aperçu
 
-Réglez `aiCommitLite.commitMessageStyle` :
+![Gestion des Profile](docs/images/01.png)
+![Génération de commit](docs/images/02.png)
 
-- `detailed` : une ligne de sujet + 2 à 5 puces
-- `concise` : uniquement une ligne de sujet
+## Ce qu'il peut faire
 
-Si le modèle ne respecte pas le format détaillé, l'extension tente une correction automatique une seule fois.
+**Q: Quels fournisseurs sont pris en charge?**
+OpenAI, DeepSeek, Gemini, Anthropic, Cohere, Mistral, DashScope et les APIs compatibles OpenAI.
 
-## Fournisseurs pris en charge
+**Q: Les clés API sont-elles sécurisées?**
+Oui. Les clés sont stockées dans VS Code Secret Storage et n'apparaissent pas en texte brut dans les paramètres.
 
-| Fournisseur | Usage typique | Endpoint personnalisé |
-| --- | --- | --- |
-| OpenAI | Modèles officiels OpenAI | Non |
-| Azure OpenAI | Modèles OpenAI déployés sur Azure | Oui |
-| DeepSeek | Modèles officiels DeepSeek | Non |
-| Gemini | Modèles officiels Google Gemini | Non |
-| Anthropic | Modèles officiels Claude | Non |
-| Cohere | Modèles officiels Cohere / Command | Non |
-| Mistral | Modèles officiels Mistral | Non |
-| Qwen / DashScope | Modèles Alibaba Cloud DashScope | Non |
-| OpenAI-Compatible | OpenRouter, passerelles compatibles, services auto-hébergés compatibles, etc. | Oui |
+**Q: Puis-je utiliser plusieurs configurations IA?**
+Oui. Profile Manager permet de créer plusieurs configurations pour différentes équipes ou comptes. Le fallback automatique est également configurable.
 
-## Paramètres importants
+**Q: Puis-je ajuster le format de sortie?**
+Prend en charge `detailed` (détaillé, avec des points) et `concise` (concis, une seule ligne).
+
+**Q: Sortie multilingue?**
+Languesprises en charge: anglais, chinois simplifié, japonais, coréen, espagnol, français, allemand, russe, portugais, italien (10 langues).
+
+## Fournisseurs Pris en Charge
+
+| Fournisseur | Description |
+| --- | --- |
+| OpenAI | Modèles officiels OpenAI |
+| DeepSeek | Modèles officiels DeepSeek |
+| Gemini | Google Gemini |
+| Anthropic | Série Claude d'Anthropic |
+| Cohere | Série Command |
+| Mistral | Modèles officiels Mistral |
+| DashScope | Tongyi Qianwen d'Alibaba Cloud |
+| Azure OpenAI | OpenAI sur Azure |
+| OpenAI-Compatible | OpenRouter, services auto-hébergés, etc. |
+
+*Endpoint personnalisé requis: Azure OpenAI, OpenAI-Compatible*
+
+## Commandes
+
+| Commande | Description |
+| --- | --- |
+| `AI Commit Lite: Generate Commit` | Générer le message de commit |
+| `AI Commit Lite: Open Profile Manager` | Ouvrir les paramètres |
+| `AI Commit Lite: Switch Profile` | Changer de Profile |
+| `AI Commit Lite: Add Profile` | Ajouter un nouveau Profile |
+| `AI Commit Lite: Edit Profile` | Modifier le Profile |
+| `AI Commit Lite: Delete Profile` | Supprimer le Profile |
+
+**Raccourci**: `Ctrl+Shift+G Ctrl+Shift+C` (Windows/Linux), `Cmd+Shift+G Cmd+Shift+C` (macOS)
+
+## Paramètres
 
 | Paramètre | Valeur par défaut | Description |
 | --- | --- | --- |
 | `aiCommitLite.language` | `en` | Langue de sortie |
 | `aiCommitLite.useGitmoji` | `true` | Utiliser Gitmoji |
-| `aiCommitLite.conventionalCommits` | `true` | Utiliser Conventional Commits |
-| `aiCommitLite.commitMessageStyle` | `detailed` | Style de sortie |
-| `aiCommitLite.customSystemPrompt` | `""` | Prompt système personnalisé |
-| `aiCommitLite.temperature` | `0.7` | Température du modèle |
-| `aiCommitLite.maxTokens` | `1000` | Nombre maximal de tokens en sortie |
-| `aiCommitLite.maxDiffCharacters` | `24000` | Limite globale du diff |
-| `aiCommitLite.maxFileDiffCharacters` | `8000` | Limite par fichier |
-| `aiCommitLite.contextExcludePatterns` | valeurs par défaut intégrés | Modèles exclus de l'analyse de diff |
+| `aiCommitLite.commitMessageStyle` | `detailed` | `detailed` ou `concise` |
 | `aiCommitLite.enableAutoFallback` | `true` | Activer le fallback automatique |
-| `aiCommitLite.profileFallbackOrder` | `[]` | Ordre de fallback |
-| `aiCommitLite.profiles` | `[]` | Métadonnées des profils stockés |
-| `aiCommitLite.activeProfile` | `""` | ID du profil actif |
-
-## Commandes
-
-- `AI Commit Lite: Generate Commit`
-- `AI Commit Lite: Switch Profile`
-- `AI Commit Lite: Add Profile`
-- `AI Commit Lite: Edit Profile`
-- `AI Commit Lite: Delete Profile`
-- `AI Commit Lite: Open Profile Manager`
+| `aiCommitLite.profileFallbackOrder` | `[]` | Priorité de fallback |
+| `aiCommitLite.maxDiffCharacters` | `24000` | Limite totale de caractères diff |
+| `aiCommitLite.maxFileDiffCharacters` | `8000` | Limite par fichier |
 
 ## Dépannage
 
-### Je ne vois pas mes profils
+**Profile non visible?**
+- Cliquez sur "AI Commit Lite" dans la barre d'état
+- Ou exécutez `AI Commit Lite: Open Profile Manager`
 
-- Exécutez `AI Commit Lite: Open Profile Manager`
-- Vérifiez qu'au moins un profil a été créé
+**Aucune modification stagée?**
+Exécutez d'abord `git add .`.
 
-### Aucun changement indexé
-
-Exécutez d'abord `git add`.
-
-### La génération est lente
-
-- Évitez d'indexer des fichiers binaires ou très volumineux si ce n'est pas nécessaire
+**Génération lente?**
+- Évitez de stage des fichiers volumineux ou binaires inutiles
 - Ajustez `aiCommitLite.contextExcludePatterns`
-- Réduisez `aiCommitLite.maxDiffCharacters`
 
-### Problèmes de quota ou de rate limit
+**Limite de taux ou quota atteint?**
+1. Activez `aiCommitLite.enableAutoFallback`
+2. Configurez la priorité de fallback dans Profile Manager
 
-Activez `aiCommitLite.enableAutoFallback` et configurez `aiCommitLite.profileFallbackOrder`.
+**Formatage incohérent des modèles de raisonnement?**
+Gardez `aiCommitLite.commitMessageStyle = detailed`. L'extension corrigera automatiquement le format.
 
-### Les modèles de raisonnement renvoient un format incohérent
+---
 
-- Gardez `aiCommitLite.commitMessageStyle = detailed`
-- Augmentez `aiCommitLite.maxTokens` si nécessaire
-- Si certains modèles de raisonnement continuent de ne renvoyer qu'une seule ligne, l'extension exécutera automatiquement une correction de format
+## Pour les Développeurs
 
-## Développement
+**Configuration requise**: Node.js 18+ / VS Code 1.80+
 
-#### Prérequis
-
-- Node.js 18+
-- VS Code 1.80+
-
-#### Commandes
-
+**Commandes**:
 ```bash
-npm run compile
-npm run watch
-npm run lint
-npm test
-npm run package
+npm run compile   # Compiler
+npm run watch     # Mode surveillance
+npm run lint      # Linting
+npm test          # Tests
+npm run package   # Empaqueter
 ```
-
-Remarque : le dépôt inclut 
-pm test, qui compile d'abord les cibles de test puis exécute les tests natifs de Node.
 
 ## License
 
 [MIT](LICENSE)
-

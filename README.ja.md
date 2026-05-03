@@ -1,180 +1,131 @@
 # AI Commit Lite
 
-既定の中英バイリンガル版は [README.md](README.md) を参照してください。
+AI を使って Git コミットメッセージを自動生成する VS Code 拡張機能です。
 
-AI Commit Lite は、現在の Git ステージ済み変更から AI でコミットメッセージを生成する VS Code 拡張です。現在は旧来の単一プロバイダー設定ではなく、`Profile Manager` を中心に複数ベンダーと複数モデルを管理するワークフローになっています。
+[**简体中文 / English バイリンガル版 →**](README.md)
 
-## 主な機能
+---
 
-- ビジュアルな `Profile Manager`
-- OpenAI、Azure OpenAI、DeepSeek、Gemini、Anthropic、Cohere、Mistral、Qwen / DashScope、OpenAI-Compatible をサポート
-- API キーは VS Code Secret Storage に安全に保存
-- `detailed` と `concise` の 2 種類のコミットスタイル
-- 自動フォーマット修正：モデルが要求された詳細形式に従わない場合、拡張機能が自動的にフォーマット修正を実行
-- Gitmoji と Conventional Commits をサポート
-- レート制限やクォータ超過時の自動フォールバック
-- 多言語のコミットメッセージ出力
-- Git diff 最適化：ステージ済みの変更をバッチ分析し、ファイルごとの逐次 diff 待ち時間を削減
-- ステータスバー、SCM ボタン、コマンドパレット、ショートカットから利用可能
+## クイックスタート
 
-## インストール
+3ステップで使い始められます：
 
-### `.vsix` からインストール
+**1️⃣ 拡張機能をインストール**
+Profile が存在しない場合、インストール後にウェルカム通知が表示されます。
 
-1. VS Code で `Extensions: Install from VSIX...` を実行
-2. `.vsix` ファイルを選択
+**2️⃣ AI を設定**
+「Profile を追加」→「プロバイダーを選択」→「API Key を入力」
+（Key は VS Code Secret Storage に安全に保存されます）
 
-### ソースからビルド
-
-```bash
-git clone https://github.com/gif156359098/ai-commit-lite.git
-cd ai-commit-lite
-npm install
-npm run compile
-npm run package
-```
-
-## 使い方チュートリアル
-
-### 1. Profile Manager を開く
-
-次のいずれかを使います。
-
-- ステータスバーの `AI Commit Lite`
-- コマンドパレットの `AI Commit Lite: Open Profile Manager`
-
-初回インストールで Profile がまだない場合は、オンボーディング通知が表示されます。
-
-### 2. Profile を追加する
-
-1. `Add Profile` をクリック
-2. プロバイダーを選択
-3. 表示名を入力
-4. モデル名を入力
-5. API キーを入力
-6. `Azure OpenAI` または `OpenAI-Compatible` の場合は Endpoint / Base URL も入力
-7. 保存
-
-補足:
-
-- 編集時に API キーを空欄にすると既存のキーを保持します
-- 最初に作成した Profile は自動でアクティブになります
-
-### 3. 変更をステージする
-
+**3️⃣ コミットを生成**
 ```bash
 git add .
 ```
-
-### 4. コミットメッセージを生成する
-
-利用できる入口:
-
-- `AI Commit Lite: Generate Commit`
+任意の方法で生成：
+- コマンドパレット：`AI Commit Lite: Generate Commit`
 - SCM タイトルボタン
 - `Ctrl+Shift+G Ctrl+Shift+C`
-- macOS: `Cmd+Shift+G Cmd+Shift+C`
 
-生成されたメッセージは Source Control の入力欄に自動で入ります。
+生成後、メッセージは Source Control の入力欄に自動入力されます。
 
-### 5. コミットスタイルを選ぶ
+## 機能プレビュー
 
-`aiCommitLite.commitMessageStyle` を設定します。
+![Profile 管理](docs/images/01.png)
+![コミット生成](docs/images/02.png)
 
-- `detailed`: 1 行の件名 + 2 から 5 個の箇条書き
-- `concise`: 1 行の件名のみ
+## できること
 
-モデルが詳細形式に従わない場合、拡張が 1 回だけ自動修正を試みます。
+**Q: どのプロバイダーをサポート？**
+OpenAI、DeepSeek、Gemini、Anthropic、Cohere、Mistral、DashScope、OpenAI 互換 API など。
+
+**Q: API キーは安全？**
+はい。キーは VS Code Secret Storage に保存され、平文で設定に書き込まれることはありません。
+
+**Q: 複数の AI 設定可以使用？**
+はい。Profile Manager で複数の設定を作成し、異なるチームやアカウントのアカウントを管理できます。自動フォールバック順序も設定可能。
+
+**Q: 出力フォーマットは調整可能？**
+`detailed`（詳細版、要点リスト付き）と `concise`（簡潔版、1行のみ）の2種類をサポート。
+
+**Q: 多言語出力？**
+対応言語：英語、简体中文、日本語、韓国語、スペイン語、フランス語、ドイツ語、ロシア語、ポルトガル語、イタリア語（10言語）。
 
 ## 対応プロバイダー
 
-| プロバイダー | 用途 | カスタム Endpoint |
-| --- | --- | --- |
-| OpenAI | OpenAI 公式モデル | 不要 |
-| Azure OpenAI | Azure 上の OpenAI モデル | 必要 |
-| DeepSeek | DeepSeek 公式モデル | 不要 |
-| Gemini | Google Gemini 公式モデル | 不要 |
-| Anthropic | Claude 公式モデル | 不要 |
-| Cohere | Cohere / Command 公式モデル | 不要 |
-| Mistral | Mistral 公式モデル | 不要 |
-| Qwen / DashScope | Alibaba Cloud DashScope モデル | 不要 |
-| OpenAI-Compatible | OpenRouter、互換ゲートウェイ、自前ホスト互換 API など | 必要 |
+| プロバイダー | 説明 |
+| --- | --- |
+| OpenAI | OpenAI 公式モデル |
+| DeepSeek | DeepSeek 公式モデル |
+| Gemini | Google Gemini |
+| Anthropic | Anthropic Claude シリーズ |
+| Cohere | Command シリーズ |
+| Mistral | Mistral 公式モデル |
+| DashScope | Alibaba Cloud 通義千問 |
+| Azure OpenAI | Azure 上の OpenAI |
+| OpenAI-Compatible | OpenRouter、自/self-Hosted サービスなど |
 
-## 主な設定
-
-| 設定 | 既定値 | 説明 |
-| --- | --- | --- |
-| `aiCommitLite.language` | `en` | 出力言語 |
-| `aiCommitLite.useGitmoji` | `true` | Gitmoji を使うか |
-| `aiCommitLite.conventionalCommits` | `true` | Conventional Commits を使うか |
-| `aiCommitLite.commitMessageStyle` | `detailed` | 出力スタイル |
-| `aiCommitLite.customSystemPrompt` | `""` | カスタムシステムプロンプト |
-| `aiCommitLite.temperature` | `0.7` | 生成温度 |
-| `aiCommitLite.maxTokens` | `1000` | 最大出力トークン数 |
-| `aiCommitLite.maxDiffCharacters` | `24000` | diff 全体の上限 |
-| `aiCommitLite.maxFileDiffCharacters` | `8000` | 1 ファイルあたりの上限 |
-| `aiCommitLite.contextExcludePatterns` | 内蔵デフォルト値 | diff 分析から除外するファイルパターン |
-| `aiCommitLite.enableAutoFallback` | `true` | 自動フォールバック |
-| `aiCommitLite.profileFallbackOrder` | `[]` | フォールバック順序 |
-| `aiCommitLite.profiles` | `[]` | 保存されたプロファイルメタデータ |
-| `aiCommitLite.activeProfile` | `""` | アクティブプロファイルID |
+*カスタム Endpoint が必要：Azure OpenAI、OpenAI-Compatible*
 
 ## コマンド
 
-- `AI Commit Lite: Generate Commit`
-- `AI Commit Lite: Switch Profile`
-- `AI Commit Lite: Add Profile`
-- `AI Commit Lite: Edit Profile`
-- `AI Commit Lite: Delete Profile`
-- `AI Commit Lite: Open Profile Manager`
+| コマンド | 説明 |
+| --- | --- |
+| `AI Commit Lite: Generate Commit` | コミットメッセージを生成 |
+| `AI Commit Lite: Open Profile Manager` | 設定画面を開く |
+| `AI Commit Lite: Switch Profile` | Profile を切り替え |
+| `AI Commit Lite: Add Profile` | 新規 Profile 追加 |
+| `AI Commit Lite: Edit Profile` | Profile を編集 |
+| `AI Commit Lite: Delete Profile` | Profile を削除 |
 
-## トラブルシューティング
+**ショートカット**: `Ctrl+Shift+G Ctrl+Shift+C` (Windows/Linux), `Cmd+Shift+G Cmd+Shift+C` (macOS)
 
-### Profile が見つからない
+## 設定
 
-- `AI Commit Lite: Open Profile Manager` を実行
-- 少なくとも 1 つ Profile があるか確認
+| 設定 | デフォルト | 説明 |
+| --- | --- | --- |
+| `aiCommitLite.language` | `en` | 出力言語 |
+| `aiCommitLite.useGitmoji` | `true` | Gitmoji を使用するか |
+| `aiCommitLite.commitMessageStyle` | `detailed` | `detailed` または `concise` |
+| `aiCommitLite.enableAutoFallback` | `true` | 自動フォールバックを有効化 |
+| `aiCommitLite.profileFallbackOrder` | `[]` | フォールバック優先順位 |
+| `aiCommitLite.maxDiffCharacters` | `24000` | 全 diff 文字数の上限 |
+| `aiCommitLite.maxFileDiffCharacters` | `8000` | ファイルあたりの上限 |
 
-### ステージ済み変更がないと表示される
+## よくある問題
 
-先に `git add` を実行してください。
+**Profile が見つからない？**
+- ステータスバーの「AI Commit Lite」をクリック
+- または `AI Commit Lite: Open Profile Manager` を実行
 
-### 生成が遅い
+**ステージ済み変更がないと言われる？**
+先に `git add .` を実行してください。
 
-- 大きな生成物やバイナリをステージしすぎない
+**生成が遅い？**
+- 不要な大きなファイルやバイナリをステージングしない
 - `aiCommitLite.contextExcludePatterns` を調整
-- `aiCommitLite.maxDiffCharacters` を下げる
 
-### クォータやレート制限に当たる
+**レートリミットやクォータに達した？**
+1. `aiCommitLite.enableAutoFallback` を有効化
+2. Profile Manager でフォールバック優先度を設定
 
-`aiCommitLite.enableAutoFallback` を有効にし、`aiCommitLite.profileFallbackOrder` を設定してください。
+**推理モデルの出力が不安定？**
+`aiCommitLite.commitMessageStyle = detailed` を維持してください。拡張が自動的にフォーマットを修正します。
 
-### 推論モデルの出力フォーマットが不安定
+---
 
-- `aiCommitLite.commitMessageStyle = detailed` を維持
-- 必要に応じて `aiCommitLite.maxTokens` を増やす
-- 一部の推論モデルが依然として 1 行のみ返す場合、拡張機能が自動的にフォーマット修正を実行
+## 開発者向け
 
-## 開発
+**要件**: Node.js 18+ / VS Code 1.80+
 
-#### 必要環境
-
-- Node.js 18+
-- VS Code 1.80+
-
-#### コマンド
-
+**コマンド**:
 ```bash
-npm run compile
-npm run watch
-npm run lint
-npm test
-npm run package
+npm run compile   # コンパイル
+npm run watch    # 監視モード
+npm run lint      # リント
+npm test          # テスト
+npm run package   # パッケージ
 ```
-
-注意: リポジトリには `npm test` が含まれており、先にテスト対象をコンパイルしてから Node ネイティブテストを実行します。
 
 ## License
 
 [MIT](LICENSE)
-

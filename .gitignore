@@ -10,4 +10,6 @@ dist
 .nyc_output/
 coverage/
 .opencode/
+.claude/
 scripts/
+docs/superpowers
