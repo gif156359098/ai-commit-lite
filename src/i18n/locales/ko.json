@@ -139,5 +139,10 @@
   "addToPriorityAction": "우선순위에 추가",
   "removeFromPriorityAction": "우선순위에서 제거",
   "fallbackActiveLabel": "폴백 순서 내",
-  "fallbackAvailableLabel": "추가 가능"
+  "fallbackAvailableLabel": "추가 가능",
+  "testAction": "테스트",
+  "testConnectionSuccess": "연결 성공",
+  "testConnectionFailed": "연결 실패",
+  "testConnectionErrorTitle": "프로필 \"{profile}\" 연결 테스트 실패",
+  "viewErrorDetailsAction": "자세히 보기"
 }

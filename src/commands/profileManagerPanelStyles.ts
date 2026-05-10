@@ -303,6 +303,15 @@ margin-left: 2px;
 .fallback-chip-btn svg { width: 14px; height: 14px; }
 .fallback-empty { font-size: 0.85rem; color: var(--muted); font-style: italic; }
 
+    .card-test-row { display: flex; align-items: center; gap: 8px; min-height: 20px; }
+    .test-status { font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; animation: fadeIn 0.2s ease-out; }
+    .test-status.success { color: var(--vscode-testing-iconPassed, #4ec9b0); }
+    .test-status.error { color: var(--vscode-testing-iconFailed, #f14c4c); }
+    .test-status svg { width: 14px; height: 14px; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .test-spinner { width: 14px; height: 14px; border: 2px solid var(--muted); border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
+    .icon-btn.testing { pointer-events: none; opacity: 0.6; }
+
     .card-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; flex-wrap: wrap; }
     .icon-btn {
       width: 32px;

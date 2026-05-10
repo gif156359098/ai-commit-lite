@@ -139,5 +139,10 @@
   "addToPriorityAction": "加入优先级",
   "removeFromPriorityAction": "移出优先级",
   "fallbackActiveLabel": "已加入回退",
-  "fallbackAvailableLabel": "待加入"
+  "fallbackAvailableLabel": "待加入",
+  "testAction": "测试",
+  "testConnectionSuccess": "连接成功",
+  "testConnectionFailed": "连接失败",
+  "testConnectionErrorTitle": "Profile「{profile}」连接测试失败",
+  "viewErrorDetailsAction": "查看详情"
 }

@@ -180,6 +180,28 @@ const postFallbackAction = (message: Record<string, unknown>): void => {
   vscode.postMessage(message);
 };
 
+interface TestCardState {
+  status: 'idle' | 'testing' | 'success' | 'error';
+  latencyMs?: number;
+  dismissTimer?: ReturnType<typeof setTimeout>;
+}
+
+const testStates = new Map<string, TestCardState>();
+
+function clearTestState(profileId: string): void {
+  const existing = testStates.get(profileId);
+  if (existing?.dismissTimer) {
+    clearTimeout(existing.dismissTimer);
+  }
+  testStates.delete(profileId);
+}
+
+function clearAllTestStates(): void {
+  for (const [profileId] of testStates) {
+    clearTestState(profileId);
+  }
+}
+
 const icons = {
   check:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
@@ -188,7 +210,13 @@ const icons = {
   trash:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
   star:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+  bolt:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+  checkSmall:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+  xSmall:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
 };
 
 function renderFallbackPanel(): void {
@@ -438,6 +466,7 @@ function renderProfiles(): void {
   $('profilesContainer').innerHTML = state.profiles
     .map((profile) => {
       const isActive = state.activeProfileId === profile.id;
+      const ts = testStates.get(profile.id) || { status: 'idle' };
       const pillText = isActive
         ? state.i18n.currentProfile
         : profile.hasApiKey
@@ -490,6 +519,15 @@ function renderProfiles(): void {
             icons.star +
             escapeText(state.i18n.useThisProfile) +
             '</button>') +
+        '<button class="icon-btn' +
+        (ts.status === 'testing' ? ' testing' : '') +
+        '" title="' +
+        escapeText(state.i18n.testAction) +
+        '" data-action="test" data-profile-id="' +
+        escapeText(profile.id) +
+        '">' +
+        (ts.status === 'testing' ? '<span class="test-spinner"></span>' : icons.bolt) +
+        '</button>' +
         '<button class="icon-btn" title="' +
         escapeText(state.i18n.editAction) +
         '" data-action="edit" data-profile-id="' +
@@ -505,6 +543,17 @@ function renderProfiles(): void {
         icons.trash +
         '</button>' +
         '</div>' +
+        (ts.status === 'success' || ts.status === 'error'
+          ? '<div class="card-test-row"><div class="test-status ' +
+            ts.status +
+            '">' +
+            (ts.status === 'success' ? icons.checkSmall : icons.xSmall) +
+            ' ' +
+            escapeText(ts.status === 'success'
+              ? state.i18n.testConnectionSuccess + (ts.latencyMs ? ' - ' + (ts.latencyMs / 1000).toFixed(1) + 's' : '')
+              : state.i18n.testConnectionFailed) +
+            '</div></div>'
+          : '<div class="card-test-row"></div>') +
         '</article>'
       );
     })
@@ -720,6 +769,17 @@ $('profilesContainer').addEventListener('click', (event: MouseEvent) => {
     showDeleteConfirm(profileId);
     return;
   }
+  if (action === 'test') {
+    const current = testStates.get(profileId);
+    if (current?.status === 'testing') {
+      return;
+    }
+    clearTestState(profileId);
+    testStates.set(profileId, { status: 'testing' });
+    renderProfiles();
+    vscode.postMessage({ command: 'testProfile', profileId });
+    return;
+  }
 });
 
 $('fallbackActiveList').addEventListener('click', (event: MouseEvent) => {
@@ -789,6 +849,7 @@ window.addEventListener('message', (event: MessageEvent) => {
     const newState = event.data.state as WebviewState;
     Object.assign(state, newState);
     updateProviderMap();
+    clearAllTestStates();
     renderProfiles();
     renderProviders();
     onProviderChange(false);
@@ -802,6 +863,28 @@ window.addEventListener('message', (event: MessageEvent) => {
   }
   if (event.data.command === 'profileSaved') {
     hideForm();
+  }
+  if (event.data.command === 'testResult') {
+    const { profileId, success, latencyMs } = event.data as {
+      profileId: string;
+      success: boolean;
+      latencyMs?: number;
+    };
+    const existing = testStates.get(profileId);
+    if (!existing || existing.status !== 'testing') {
+      return;
+    }
+    clearTestState(profileId);
+    const newStatus: TestCardState = {
+      status: success ? 'success' : 'error',
+      latencyMs
+    };
+    newStatus.dismissTimer = setTimeout(() => {
+      clearTestState(profileId);
+      renderProfiles();
+    }, success ? 3000 : 5000);
+    testStates.set(profileId, newStatus);
+    renderProfiles();
   }
 });
 

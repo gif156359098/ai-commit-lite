@@ -45,6 +45,9 @@ export interface WebviewI18n {
   useThisProfile: string;
   editAction: string;
   deleteAction: string;
+  testAction: string;
+  testConnectionSuccess: string;
+  testConnectionFailed: string;
   provider: string;
   model: string;
   deploymentName: string;

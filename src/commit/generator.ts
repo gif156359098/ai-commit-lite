@@ -1,12 +1,6 @@
-import { AnthropicProvider } from '../ai/anthropic';
-import { CohereProvider } from '../ai/cohere';
-import { OpenAIProvider } from '../ai/openai';
-import { DeepSeekProvider } from '../ai/deepseek';
-import { OpenAICompatibleProvider } from '../ai/openaiCompatible';
-import { AzureOpenAIProvider } from '../ai/azure';
-import { GeminiProvider } from '../ai/gemini';
 import { AIProvider } from '../ai/providers';
-import { getProviderDefinition, normalizeProviderType } from '../ai/providerRegistry';
+import { createAIProvider } from '../ai/providerFactory';
+import { getProviderDefinition } from '../ai/providerRegistry';
 import { AICommitConfigWithProfile } from '../types/profile';
 import { CommitContext } from '../ai/providers';
 import { postProcessCommitMessage } from './messagePostProcessor';
@@ -81,38 +75,4 @@ export async function generateCommitMessageFromPrepared(
   };
 }
 
-function createAIProvider(config: AICommitConfigWithProfile): AIProvider {
-  const { profile, apiKey, apiEndpoint } = config;
-  const provider = normalizeProviderType(profile.provider);
-  const providerDefinition = getProviderDefinition(provider);
-  const endpoint = apiEndpoint || providerDefinition.defaultBaseUrl || '';
-
-  switch (provider) {
-    case 'openai':
-      return new OpenAIProvider(apiKey, profile.model, endpoint);
-    case 'deepseek':
-      return new DeepSeekProvider(apiKey, profile.model, endpoint);
-    case 'azure':
-      return new AzureOpenAIProvider(apiKey, profile.model, endpoint);
-    case 'gemini':
-      return new GeminiProvider(apiKey, profile.model, endpoint);
-    case 'anthropic':
-      return new AnthropicProvider(apiKey, profile.model, endpoint);
-    case 'cohere':
-      return new CohereProvider(apiKey, profile.model, endpoint);
-    case 'mistral':
-    case 'dashscope':
-    case 'openai-compatible':
-      return new OpenAICompatibleProvider(
-        apiKey,
-        profile.model,
-        {
-          providerName: providerDefinition.label,
-          defaultEndpoint: providerDefinition.defaultBaseUrl || endpoint
-        },
-        endpoint
-      );
-    default:
-      throw new Error(`Unsupported API provider: ${provider}`);
-  }
-}
+// createAIProvider moved to ../ai/providerFactory

@@ -139,5 +139,10 @@
   "addToPriorityAction": "Aggiungi alla priorità",
   "removeFromPriorityAction": "Rimuovi dalla priorità",
   "fallbackActiveLabel": "Nell'ordine di fallback",
-  "fallbackAvailableLabel": "Disponibili"
+  "fallbackAvailableLabel": "Disponibili",
+  "testAction": "Test",
+  "testConnectionSuccess": "Connesso",
+  "testConnectionFailed": "Connessione fallita",
+  "testConnectionErrorTitle": "Il test di connessione del profilo \"{profile}\" è fallito",
+  "viewErrorDetailsAction": "Visualizza dettagli"
 }

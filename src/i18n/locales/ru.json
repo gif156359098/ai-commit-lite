@@ -139,5 +139,10 @@
   "addToPriorityAction": "Добавить в приоритет",
   "removeFromPriorityAction": "Убрать из приоритета",
   "fallbackActiveLabel": "В порядке резервного переключения",
-  "fallbackAvailableLabel": "Доступные"
+  "fallbackAvailableLabel": "Доступные",
+  "testAction": "Тест",
+  "testConnectionSuccess": "Подключено",
+  "testConnectionFailed": "Ошибка подключения",
+  "testConnectionErrorTitle": "Тест подключения профиля \"{profile}\" не удался",
+  "viewErrorDetailsAction": "Подробнее"
 }

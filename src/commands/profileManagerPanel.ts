@@ -41,6 +41,10 @@ import {
   switchProfileById
 } from './profileManagerPanelOperations';
 import {
+  testProfileConnection,
+  showTestErrorNotification
+} from './profileConnectionTester';
+import {
   ProfileFormData,
   ProfileManagerPanelAction,
   BuildWebviewHtmlData
@@ -155,6 +159,11 @@ export class ProfileManagerPanel {
           case 'openSettings':
             await this.handleOpenSettings();
             break;
+          case 'testProfile':
+            if (message.profileId) {
+              await this.handleTestProfile(message.profileId);
+            }
+            break;
           case 'updateLanguage':
             if (message.language) {
               await this.handleUpdateLanguage(message.language);
@@ -244,6 +253,22 @@ export class ProfileManagerPanel {
 
   private async handleOpenSettings(): Promise<void> {
     await vscode.commands.executeCommand('workbench.action.openSettings', 'aiCommitLite');
+  }
+
+  private async handleTestProfile(profileId: string): Promise<void> {
+    const profile = getProfiles().find((p) => p.id === profileId);
+    const result = await testProfileConnection(profileId);
+
+    void this.panel.webview.postMessage({
+      command: 'testResult',
+      profileId,
+      success: result.success,
+      latencyMs: result.latencyMs
+    });
+
+    if (!result.success && result.errorMessage) {
+      showTestErrorNotification(profile?.label || profileId, result.errorMessage);
+    }
   }
 
   private async handleUpdateLanguage(language: string): Promise<void> {
