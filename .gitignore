@@ -12,4 +12,4 @@ coverage/
 .opencode/
 .claude/
 scripts/
-docs/superpowers
+docs/superpowers/*
