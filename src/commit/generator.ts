@@ -1,6 +1,5 @@
 import { AIProvider } from '../ai/providers';
 import { createAIProvider } from '../ai/providerFactory';
-import { getProviderDefinition } from '../ai/providerRegistry';
 import { AICommitConfigWithProfile } from '../types/profile';
 import { CommitContext } from '../ai/providers';
 import { postProcessCommitMessage } from './messagePostProcessor';

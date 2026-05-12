@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { buildProfileManagerPanelBodyMarkup } from './profileManagerPanelMarkup';
 import { buildProfileManagerPanelStyles } from './profileManagerPanelStyles';
 import { BuildWebviewHtmlData } from './profileManagerPanelTypes';
@@ -67,10 +68,10 @@ export function serializeForWebviewScript(value: unknown): string {
 }
 
 function getNonce(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let nonce = '';
-  for (let i = 0; i < 32; i += 1) {
-    nonce += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return nonce;
+  // Generate a cryptographically secure nonce using base64 encoding
+  // The result contains only alphanumeric characters (A-Z, a-z, 0-9, +, /) with = padding
+  // CSP allows alphanumeric + few special chars; we strip non-alphanumeric chars
+  return randomBytes(16)
+    .toString('base64')
+    .replace(/[^A-Za-z0-9]/g, '');
 }

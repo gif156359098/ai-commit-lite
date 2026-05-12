@@ -1,3 +1,4 @@
+import { AZURE_API_VERSION } from './constants';
 import { BaseAIProvider, CommitContext } from './providers';
 import {
   cleanCommitMessage,
@@ -21,7 +22,7 @@ export class AzureOpenAIProvider extends BaseAIProvider {
     const cancelTokenSource = this.createCancelToken();
 
     try {
-      const requestUrl = `${this.apiEndpoint}/openai/deployments/${this.model}/chat/completions?api-version=2023-05-15`;
+      const requestUrl = `${this.apiEndpoint}/openai/deployments/${this.model}/chat/completions?api-version=${AZURE_API_VERSION}`;
       const requestConfig = {
         headers: {
           'api-key': this.apiKey

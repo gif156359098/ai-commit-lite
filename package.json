@@ -310,9 +310,13 @@
   "scripts": {
     "install:npm": "npm install",
     "watch": "node scripts/build.mjs --mode development --watch",
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run typecheck && npm run test && npm run compile",
+    "typecheck": "npm run typecheck:extension && npm run typecheck:webview",
+    "typecheck:extension": "tsc -p tsconfig.json --noEmit",
+    "typecheck:webview": "tsc -p tsconfig.webview.json --noEmit",
     "compile": "node scripts/build.mjs --mode production",
     "compile:test": "tsc -p tsconfig.test.json",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run compile",
     "package": "vsce package",
     "lint": "eslint src --ext ts",
     "test": "npm run compile:test && node --test \"out-test/test/**/*.test.js\""

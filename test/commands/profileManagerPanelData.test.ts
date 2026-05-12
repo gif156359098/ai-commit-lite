@@ -45,6 +45,9 @@ const i18n: WebviewI18n = {
   useThisProfile: 'Use this profile',
   editAction: 'Edit',
   deleteAction: 'Delete',
+  testAction: 'Test connection',
+  testConnectionSuccess: 'Connection successful',
+  testConnectionFailed: 'Connection failed',
   provider: 'Provider',
   model: 'Model',
   deploymentName: 'Deployment',
@@ -58,12 +61,15 @@ const i18n: WebviewI18n = {
   apiEndpointHintOptional: 'Optional',
   apiKeyHintNew: 'Stored securely',
   apiKeyHintExisting: 'Keep existing',
+  apiKeyStoredNotice: 'Stored securely',
+  apiKeyRequiredNotice: 'API key required',
   cancelAction: 'Cancel',
   saveAction: 'Save',
   addProfileTitle: 'Add',
   editProfileTitle: 'Edit',
   editProfilePrompt: 'Edit prompt',
   deleteProfilePrompt: 'Delete prompt',
+  profileDeleteConfirm: 'Delete {label}?',
   profileNameRequired: 'Name required',
   profileModelRequired: 'Model required',
   profileBaseUrlRequired: 'Endpoint required',
@@ -92,7 +98,13 @@ const i18n: WebviewI18n = {
   moveFallbackEarlierAction: 'Move earlier',
   moveFallbackLaterAction: 'Move later',
   useDefaultFallbackOrderAction: 'Use default order',
-  autoFallbackDisabledNotice: 'Automatic fallback is off.'
+  autoFallbackDisabledNotice: 'Automatic fallback is off.',
+  fallbackPanelTitle: 'Fallback profiles',
+  fallbackChipActive: 'Active fallback',
+  addToPriorityAction: 'Add to fallback',
+  removeFromPriorityAction: 'Remove from fallback',
+  fallbackActiveLabel: 'Fallback active',
+  fallbackAvailableLabel: 'Fallback available'
 };
 
 test('buildPanelProfileView merges provider and fallback metadata', () => {

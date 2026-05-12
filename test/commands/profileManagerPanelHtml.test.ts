@@ -26,7 +26,7 @@ test('serializeForWebviewScript neutralizes script-breaking characters', () => {
 });
 
 test('buildWebviewHtml serializes fallback settings into the page state', () => {
-  const html = buildWebviewHtml(createWebviewHtmlData());
+  const html = buildWebviewHtml(createWebviewHtmlData(), './profileManager.js');
 
   assert.doesNotMatch(html, /<link rel="icon"/);
   assert.match(html, /<title>Profile Manager<\/title>/);
@@ -50,6 +50,9 @@ function createWebviewHtmlData(): BuildWebviewHtmlData {
       useThisProfile: 'Use this profile',
       editAction: 'Edit',
       deleteAction: 'Delete',
+      testAction: 'Test connection',
+      testConnectionSuccess: 'Connection successful',
+      testConnectionFailed: 'Connection failed',
       provider: 'Provider',
       model: 'Model',
       deploymentName: 'Deployment',
@@ -63,12 +66,15 @@ function createWebviewHtmlData(): BuildWebviewHtmlData {
       apiEndpointHintOptional: 'Optional',
       apiKeyHintNew: 'New key',
       apiKeyHintExisting: 'Keep existing',
+      apiKeyStoredNotice: 'Stored securely',
+      apiKeyRequiredNotice: 'API key required',
       cancelAction: 'Cancel',
       saveAction: 'Save',
       addProfileTitle: 'Add profile',
       editProfileTitle: 'Edit profile',
       editProfilePrompt: 'Edit this profile',
       deleteProfilePrompt: 'Delete this profile',
+      profileDeleteConfirm: 'Delete {label}?',
       profileNameRequired: 'Name required',
       profileModelRequired: 'Model required',
       profileBaseUrlRequired: 'Endpoint required',
@@ -97,7 +103,13 @@ function createWebviewHtmlData(): BuildWebviewHtmlData {
       moveFallbackEarlierAction: 'Move earlier',
       moveFallbackLaterAction: 'Move later',
       useDefaultFallbackOrderAction: 'Use default order',
-      autoFallbackDisabledNotice: 'Automatic fallback is off.'
+      autoFallbackDisabledNotice: 'Automatic fallback is off.',
+      fallbackPanelTitle: 'Fallback profiles',
+      fallbackChipActive: 'Active fallback',
+      addToPriorityAction: 'Add to fallback',
+      removeFromPriorityAction: 'Remove from fallback',
+      fallbackActiveLabel: 'Fallback active',
+      fallbackAvailableLabel: 'Fallback available'
     },
     providers: [],
     profiles: [{

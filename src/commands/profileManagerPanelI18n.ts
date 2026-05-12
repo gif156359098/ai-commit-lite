@@ -63,7 +63,8 @@ export function buildI18n(profileCount: number): WebviewI18n {
     defaultFallbackOrder: t('defaultFallbackOrder'),
     skippedWhileActive: t('skippedWhileActive'),
     prioritizeFallbackAction: t('prioritizeFallbackAction'),
-
+    moveFallbackEarlierAction: t('moveFallbackEarlierAction'),
+    moveFallbackLaterAction: t('moveFallbackLaterAction'),
     useDefaultFallbackOrderAction: t('useDefaultFallbackOrderAction'),
     autoFallbackDisabledNotice: t('autoFallbackDisabledNotice'),
   fallbackPanelTitle: t('fallbackPanelTitle'),

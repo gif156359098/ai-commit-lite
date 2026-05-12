@@ -5,18 +5,29 @@ Guidelines for AI agents working on the AI Commit Lite VS Code extension.
 ## Build Commands
 
 ```bash
-npm run compile    # Webpack production build
-npm run watch      # Webpack development watch mode
-npm run lint       # Lint with ESLint
-npm run package    # Package into .vsix
+npm run compile     # esbuild production build (extension + webview)
+npm run watch       # esbuild development watch mode
+npm run lint        # ESLint check with TypeScript support
+npm run typecheck   # TypeScript type checking (extension + webview)
+npm test            # Compile tests and run Node test runner
+npm run verify      # Full verification: typecheck + lint + test + compile
+npm run package     # Package into .vsix
 ```
 
-**No test suite**: `npm test` is not defined. No test files exist.
+### Test Suite
+- Test files exist in `test/` directory (21 .test.ts files)
+- Tests use Node's built-in test runner (`node --test`)
+- Run `npm test` to compile and execute tests
+
+### Release
+- Package uses `.vscodeignore` to exclude dev files
+- VSIX contains only runtime assets (out/, resources/, package.json, etc.)
+- Published package size is ~660KB (vs previously 13.5MB with dev files)
 
 ### Configuration
 - **TypeScript**: `strict: true`, ES2020 target, `out/` output
-- **Webpack**: Node.js target, `vscode` external
-- **ESLint**: Default TypeScript rules (no config file)
+- **esbuild**: Separate bundles for extension (CommonJS) and webview (IIFE)
+- **ESLint**: Configured with @typescript-eslint/recommended rules
 - **No Prettier, Cursor, or Copilot rules**
 
 ## Code Style
@@ -149,3 +160,21 @@ vscode.window.withProgress({
 ## Quick Reference
 - **Commands**: `compile` (production), `watch` (development), `lint`, `package`
 - **Patterns**: VS Code → Node.js → Third-party → Local imports, try-catch with context, explicit types
+
+
+<claude-mem-context>
+# Memory Context
+
+# claude-mem status
+
+This project has no memory yet. The current session will seed it; subsequent sessions will receive auto-injected context for relevant past work.
+
+Memory injection starts on your second session in a project.
+
+`/learn-codebase` is available if the user wants to front-load the entire repo into memory in a single pass (~5 minutes on a typical repo, optional). Otherwise memory builds passively as work happens.
+
+Live activity: http://localhost:37777
+How it works: `/how-it-works`
+
+This message disappears once the first observation lands.
+</claude-mem-context>

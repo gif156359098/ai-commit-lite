@@ -14,6 +14,9 @@ const i18n: WebviewI18n = {
   useThisProfile: 'Use this profile',
   editAction: 'Edit',
   deleteAction: 'Delete',
+  testAction: 'Test connection',
+  testConnectionSuccess: 'Connection successful',
+  testConnectionFailed: 'Connection failed',
   provider: 'Provider',
   model: 'Model',
   deploymentName: 'Deployment',
@@ -27,12 +30,15 @@ const i18n: WebviewI18n = {
   apiEndpointHintOptional: 'Endpoint optional',
   apiKeyHintNew: 'Stored securely',
   apiKeyHintExisting: 'Leave blank to keep',
+  apiKeyStoredNotice: 'Stored securely',
+  apiKeyRequiredNotice: 'API key required',
   cancelAction: 'Cancel',
   saveAction: 'Save',
   addProfileTitle: 'Add profile',
   editProfileTitle: 'Edit profile',
   editProfilePrompt: 'Edit prompt',
   deleteProfilePrompt: 'Delete prompt',
+  profileDeleteConfirm: 'Delete {label}?',
   profileNameRequired: 'Name required',
   profileModelRequired: 'Model required',
   profileBaseUrlRequired: 'Endpoint required',
@@ -61,7 +67,13 @@ const i18n: WebviewI18n = {
   moveFallbackEarlierAction: 'Move earlier',
   moveFallbackLaterAction: 'Move later',
   useDefaultFallbackOrderAction: 'Use default order',
-  autoFallbackDisabledNotice: 'Automatic fallback is off.'
+  autoFallbackDisabledNotice: 'Automatic fallback is off.',
+  fallbackPanelTitle: 'Fallback profiles',
+  fallbackChipActive: 'Active fallback',
+  addToPriorityAction: 'Add to fallback',
+  removeFromPriorityAction: 'Remove from fallback',
+  fallbackActiveLabel: 'Fallback active',
+  fallbackAvailableLabel: 'Fallback available'
 };
 
 test('buildProfileManagerPanelBodyMarkup keeps required panel hooks', () => {
@@ -104,6 +116,6 @@ test('buildProfileManagerPanelStyles exposes fallback and status-note rules', ()
 
   assert.match(styles, /\.overlay\s*\{/);
   assert.match(styles, /\.providers\s*\{/);
-  assert.match(styles, /\.fallback-block\s*\{/);
+  assert.match(styles, /\.fallback-panel\s*\{/);
   assert.match(styles, /\.status-note\s*\{/);
 });

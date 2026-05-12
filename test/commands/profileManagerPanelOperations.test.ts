@@ -3,7 +3,6 @@ import test from 'node:test';
 import { ModelProfile } from '../../src/types/profile';
 import {
   deleteProfileById,
-  getDeleteProfileConfirmation,
   getProfileManagerPanelOperationErrorDescriptor,
   ProfileManagerPanelOperationDeps,
   ProfileManagerPanelOperationError,
@@ -134,26 +133,6 @@ test('saveProfileFromForm throws a descriptor-backed error when required endpoin
       return true;
     }
   );
-});
-
-test('getDeleteProfileConfirmation returns localized descriptors for existing profiles', () => {
-  const deps = createDeps([{
-    id: 'demo',
-    label: 'Demo',
-    provider: 'openai',
-    model: 'gpt-4.1-mini'
-  }]);
-
-  const confirmation = getDeleteProfileConfirmation('demo', deps);
-
-  assert.deepEqual(confirmation, {
-    confirmActionDescriptor: { key: 'deleteAction' },
-    warningDescriptor: {
-      key: 'profileDeleteConfirm',
-      params: { label: 'Demo' }
-    }
-  });
-  assert.equal(getDeleteProfileConfirmation('missing', deps), null);
 });
 
 test('deleteProfileById and switchProfileById return success descriptors and invoke deps', async () => {

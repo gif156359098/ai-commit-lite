@@ -95,6 +95,8 @@ export interface WebviewI18n {
   defaultFallbackOrder: string;
   skippedWhileActive: string;
   prioritizeFallbackAction: string;
+  moveFallbackEarlierAction: string;
+  moveFallbackLaterAction: string;
   useDefaultFallbackOrderAction: string;
   autoFallbackDisabledNotice: string;
   fallbackPanelTitle: string;
