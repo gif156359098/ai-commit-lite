@@ -133,7 +133,7 @@ export function buildProfileManagerPanelStyles(): string {
     }
     .banner.active { display: block; }
 
-    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
     .card {
       background: var(--card-bg);
       border-radius: var(--radius-lg);
@@ -312,10 +312,10 @@ margin-left: 2px;
     .test-spinner { width: 14px; height: 14px; border: 2px solid var(--muted); border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
     .icon-btn.testing { pointer-events: none; opacity: 0.6; }
 
-    .card-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; flex-wrap: wrap; }
+    .card-actions { display: flex; justify-content: flex-end; align-items: center; gap: clamp(6px, 1vw, 12px); margin-top: auto; padding-top: 8px; flex-wrap: wrap; }
     .icon-btn {
-      width: 32px;
-      height: 32px;
+      width: clamp(28px, 2.5vw, 36px);
+      height: clamp(28px, 2.5vw, 36px);
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
