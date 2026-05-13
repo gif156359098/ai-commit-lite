@@ -1,4 +1,5 @@
 import Sortable from 'sortablejs';
+import morphdom from 'morphdom';
 
 interface WebviewState {
   activeProfileId: string;
@@ -261,84 +262,38 @@ function renderFallbackPanel(): void {
   const addIcon =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
 
-  activeList.innerHTML = explicitProfiles
+  morphdom(activeList, '<div>' + explicitProfiles
     .map((profile, index) => {
       const isActive = state.activeProfileId === profile.id;
       const classes = ['fallback-chip'];
       if (isActive) {
         classes.push('active', 'no-drag');
       }
-      return (
-        '<div class="' +
-        classes.join(' ') +
-        '" data-fallback-chip="true" data-profile-id="' +
-        escapeText(profile.id) +
-        '">' +
-        '<span class="fallback-chip-rank">#' +
-        (index + 1) +
-        '</span>' +
-        '<span class="fallback-chip-label">' +
-        escapeText(profile.label) +
-        '</span>' +
-        '<span class="fallback-chip-provider">' +
-        escapeText(profile.providerLabel) +
-        '</span>' +
-        (isActive
-          ? '<span class="fallback-chip-badge">' +
-            escapeText(state.i18n.fallbackChipActive) +
-            '</span>'
-          : '') +
-        (!isActive
-          ? '<button class="fallback-chip-btn" data-action="clearFallbackPriority" data-profile-id="' +
-            escapeText(profile.id) +
-            '" title="' +
-            escapeText(state.i18n.removeFromPriorityAction) +
-            '">' +
-            removeIcon +
-            '</button>'
-          : '') +
-        '</div>'
-      );
+      return '<div class="' + classes.join(' ') + '" data-fallback-chip="true" data-profile-id="' + escapeText(profile.id) + '">'
+        + '<span class="fallback-chip-rank">#' + (index + 1) + '</span>'
+        + '<span class="fallback-chip-label">' + escapeText(profile.label) + '</span>'
+        + '<span class="fallback-chip-provider">' + escapeText(profile.providerLabel) + '</span>'
+        + (isActive ? '<span class="fallback-chip-badge">' + escapeText(state.i18n.fallbackChipActive) + '</span>' : '')
+        + (!isActive ? '<button class="fallback-chip-btn" data-action="clearFallbackPriority" data-profile-id="' + escapeText(profile.id) + '" title="' + escapeText(state.i18n.removeFromPriorityAction) + '">' + removeIcon + '</button>' : '')
+        + '</div>';
     })
-    .join('');
+    .join('') + '</div>', { childrenOnly: true });
 
-  availableList.innerHTML = defaultProfiles
+  morphdom(availableList, '<div>' + defaultProfiles
     .map((profile) => {
       const isActive = state.activeProfileId === profile.id;
       const classes = ['fallback-chip'];
       if (isActive) {
         classes.push('active', 'no-drag');
       }
-      return (
-        '<div class="' +
-        classes.join(' ') +
-        '" data-fallback-chip="true" data-profile-id="' +
-        escapeText(profile.id) +
-        '">' +
-        '<span class="fallback-chip-label">' +
-        escapeText(profile.label) +
-        '</span>' +
-        '<span class="fallback-chip-provider">' +
-        escapeText(profile.providerLabel) +
-        '</span>' +
-        (isActive
-          ? '<span class="fallback-chip-badge">' +
-            escapeText(state.i18n.fallbackChipActive) +
-            '</span>'
-          : '') +
-        (!isActive
-          ? '<button class="fallback-chip-btn" data-action="prioritizeFallback" data-profile-id="' +
-            escapeText(profile.id) +
-            '" title="' +
-            escapeText(state.i18n.addToPriorityAction) +
-            '">' +
-            addIcon +
-            '</button>'
-          : '') +
-        '</div>'
-      );
+      return '<div class="' + classes.join(' ') + '" data-fallback-chip="true" data-profile-id="' + escapeText(profile.id) + '">'
+        + '<span class="fallback-chip-label">' + escapeText(profile.label) + '</span>'
+        + '<span class="fallback-chip-provider">' + escapeText(profile.providerLabel) + '</span>'
+        + (isActive ? '<span class="fallback-chip-badge">' + escapeText(state.i18n.fallbackChipActive) + '</span>' : '')
+        + (!isActive ? '<button class="fallback-chip-btn" data-action="prioritizeFallback" data-profile-id="' + escapeText(profile.id) + '" title="' + escapeText(state.i18n.addToPriorityAction) + '">' + addIcon + '</button>' : '')
+        + '</div>';
     })
-    .join('');
+    .join('') + '</div>', { childrenOnly: true });
 
   activeZone.style.display = '';
   availableZone.style.display = defaultProfiles.length > 0 ? '' : 'none';
@@ -458,12 +413,10 @@ function initSortable(): void {
 function renderProfiles(): void {
   if (state.profiles.length === 0) {
     $('emptyState').classList.add('active');
-    $('profilesContainer').innerHTML = '';
-    renderFallbackPanel();
-    return;
+  } else {
+    $('emptyState').classList.remove('active');
   }
-  $('emptyState').classList.remove('active');
-  $('profilesContainer').innerHTML = state.profiles
+  morphdom($('profilesContainer'), '<div>' + state.profiles
     .map((profile) => {
       const isActive = state.activeProfileId === profile.id;
       const ts = testStates.get(profile.id) || { status: 'idle' };
@@ -473,113 +426,57 @@ function renderProfiles(): void {
           ? state.i18n.secretStoredStatus
           : state.i18n.secretMissingStatus;
       const pillIcon = isActive ? icons.check : '';
+      const testRow = ts.status === 'success' || ts.status === 'error'
+        ? '<div class="card-test-row"><div class="test-status ' + ts.status + '">'
+          + (ts.status === 'success' ? icons.checkSmall : icons.xSmall) + ' '
+          + escapeText(ts.status === 'success'
+            ? state.i18n.testConnectionSuccess + (ts.latencyMs ? ' - ' + (ts.latencyMs / 1000).toFixed(1) + 's' : '')
+            : state.i18n.testConnectionFailed)
+          + '</div></div>'
+        : '<div class="card-test-row"></div>';
 
-      return (
-        '<article class="card ' +
-        (isActive ? 'active' : '') +
-        '">' +
-        '<div class="card-header">' +
-        '<div class="card-title-group">' +
-        '<h3 class="name">' +
-        escapeText(profile.label) +
-        '</h3>' +
-        '<div class="provider-name">' +
-        escapeText(profile.providerLabel) +
-        '</div>' +
-        '</div>' +
-        '<div class="pill">' +
-        pillIcon +
-        escapeText(pillText) +
-        '</div>' +
-        '</div>' +
-        '<div class="desc">' +
-        escapeText(profile.providerDescription) +
-        '</div>' +
-        '<div class="meta-grid">' +
-        '<div class="label">' +
-        escapeText(state.i18n.model) +
-        '</div>' +
-        '<div class="value">' +
-        escapeText(profile.model) +
-        '</div>' +
-        (profile.baseUrl
-          ? '<div class="label">' +
-            escapeText(state.i18n.apiEndpoint) +
-            '</div><div class="value">' +
-            escapeText(profile.baseUrl) +
-            '</div>'
-          : '') +
-        '</div>' +
-        '<div class="card-actions">' +
-        (isActive
-          ? ''
-          : '<button class="btn primary" style="margin-right: auto" data-action="switch" data-profile-id="' +
-            escapeText(profile.id) +
-            '">' +
-            icons.star +
-            escapeText(state.i18n.useThisProfile) +
-            '</button>') +
-        '<button class="icon-btn' +
-        (ts.status === 'testing' ? ' testing' : '') +
-        '" title="' +
-        escapeText(state.i18n.testAction) +
-        '" data-action="test" data-profile-id="' +
-        escapeText(profile.id) +
-        '">' +
-        (ts.status === 'testing' ? '<span class="test-spinner"></span>' : icons.bolt) +
-        '</button>' +
-        '<button class="icon-btn" title="' +
-        escapeText(state.i18n.editAction) +
-        '" data-action="edit" data-profile-id="' +
-        escapeText(profile.id) +
-        '">' +
-        icons.edit +
-        '</button>' +
-        '<button class="icon-btn danger" title="' +
-        escapeText(state.i18n.deleteAction) +
-        '" data-action="delete" data-profile-id="' +
-        escapeText(profile.id) +
-        '">' +
-        icons.trash +
-        '</button>' +
-        '</div>' +
-        (ts.status === 'success' || ts.status === 'error'
-          ? '<div class="card-test-row"><div class="test-status ' +
-            ts.status +
-            '">' +
-            (ts.status === 'success' ? icons.checkSmall : icons.xSmall) +
-            ' ' +
-            escapeText(ts.status === 'success'
-              ? state.i18n.testConnectionSuccess + (ts.latencyMs ? ' - ' + (ts.latencyMs / 1000).toFixed(1) + 's' : '')
-              : state.i18n.testConnectionFailed) +
-            '</div></div>'
-          : '<div class="card-test-row"></div>') +
-        '</article>'
-      );
+      return '<article class="card' + (isActive ? ' active' : '') + '">'
+        + '<div class="card-header">'
+        + '<div class="card-title-group">'
+        + '<h3 class="name">' + escapeText(profile.label) + '</h3>'
+        + '<div class="provider-name">' + escapeText(profile.providerLabel) + '</div>'
+        + '</div>'
+        + '<div class="pill">' + pillIcon + escapeText(pillText) + '</div>'
+        + '</div>'
+        + '<div class="desc">' + escapeText(profile.providerDescription) + '</div>'
+        + '<div class="meta-grid">'
+        + '<div class="label">' + escapeText(state.i18n.model) + '</div>'
+        + '<div class="value">' + escapeText(profile.model) + '</div>'
+        + (profile.baseUrl
+          ? '<div class="label">' + escapeText(state.i18n.apiEndpoint) + '</div><div class="value">' + escapeText(profile.baseUrl) + '</div>'
+          : '')
+        + '</div>'
+        + '<div class="card-actions">'
+        + (isActive ? ''
+          : '<button class="btn primary" style="margin-right: auto" data-action="switch" data-profile-id="' + escapeText(profile.id) + '">'
+            + icons.star + escapeText(state.i18n.useThisProfile) + '</button>')
+        + '<button class="icon-btn' + (ts.status === 'testing' ? ' testing' : '') + '" title="' + escapeText(state.i18n.testAction) + '" data-action="test" data-profile-id="' + escapeText(profile.id) + '">'
+        + (ts.status === 'testing' ? '<span class="test-spinner"></span>' : icons.bolt) + '</button>'
+        + '<button class="icon-btn" title="' + escapeText(state.i18n.editAction) + '" data-action="edit" data-profile-id="' + escapeText(profile.id) + '">' + icons.edit + '</button>'
+        + '<button class="icon-btn danger" title="' + escapeText(state.i18n.deleteAction) + '" data-action="delete" data-profile-id="' + escapeText(profile.id) + '">' + icons.trash + '</button>'
+        + '</div>'
+        + testRow
+        + '</article>';
     })
-    .join('');
+    .join('') + '</div>', { childrenOnly: true });
   renderFallbackPanel();
 }
 
 function renderProviders(): void {
   const selected = getSelectedProvider();
-  $('providerPicker').innerHTML = state.providers
-    .map(
-      (provider) =>
-        '<button type="button" class="provider ' +
-        (provider.type === selected.type ? 'active' : '') +
-        '" data-provider-type="' +
-        escapeText(provider.type) +
-        '">' +
-        '<div class="provider-title">' +
-        escapeText(provider.label) +
-        '</div>' +
-        '<div class="provider-desc">' +
-        escapeText(provider.description) +
-        '</div>' +
-        '</button>'
+  morphdom($('providerPicker'), '<div>' + state.providers
+    .map((provider) =>
+      '<button type="button" class="provider ' + (provider.type === selected.type ? 'active' : '') + '" data-provider-type="' + escapeText(provider.type) + '">'
+      + '<div class="provider-title">' + escapeText(provider.label) + '</div>'
+      + '<div class="provider-desc">' + escapeText(provider.description) + '</div>'
+      + '</button>'
     )
-    .join('');
+    .join('') + '</div>', { childrenOnly: true });
 }
 
 function onProviderChange(resetFields: boolean): void {
