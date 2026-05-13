@@ -8,6 +8,7 @@ import {
   clearFallbackPriority,
   deleteProfile,
   getActiveProfile,
+  getProfileApiKey,
   getProfileConfig,
   getProfiles,
   hasProfileApiKey,
@@ -164,6 +165,11 @@ export class ProfileManagerPanel {
               await this.handleTestProfile(message.profileId);
             }
             break;
+          case 'copyProfile':
+            if (message.profileId) {
+              await this.handleCopyProfile(message.profileId);
+            }
+            break;
           case 'updateLanguage':
             if (message.language) {
               await this.handleUpdateLanguage(message.language);
@@ -268,6 +274,30 @@ export class ProfileManagerPanel {
 
     if (!result.success && result.errorMessage) {
       showTestErrorNotification(profile?.label || profileId, result.errorMessage);
+    }
+  }
+
+  private async handleCopyProfile(profileId: string): Promise<void> {
+    try {
+      const profiles = getProfiles();
+      const source = profiles.find(p => p.id === profileId);
+      if (!source) {
+        vscode.window.showErrorMessage('Profile not found');
+        return;
+      }
+      const apiKey = await getProfileApiKey(profileId);
+      void this.panel.webview.postMessage({
+        command: 'copyProfileData',
+        formData: {
+          provider: source.provider,
+          baseUrl: source.baseUrl || '',
+          apiKey: apiKey || ''
+        }
+      });
+    } catch (error: unknown) {
+      vscode.window.showErrorMessage(
+        `Failed to copy profile: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

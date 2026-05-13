@@ -91,6 +91,7 @@
   "providerSelectionHint": "Choose the provider that best matches how you bought or access the model. Each option explains who it is for and how the endpoint works.",
   "providerAudienceLabel": "Best For",
   "providerEndpointRuleLabel": "Endpoint Rule",
+  "copyAction": "Copy",
   "connectionDetailsSectionTitle": "Connection Details",
   "closeAction": "Close",
   "retryAction": "Retry",

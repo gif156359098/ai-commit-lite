@@ -54,6 +54,7 @@ const i18n: WebviewI18n = {
   providerAudienceLabel: 'Audience',
   providerEndpointRuleLabel: 'Endpoint rule',
   connectionDetailsSectionTitle: 'Connection details',
+  copyAction: 'Copy',
   closeAction: 'Close',
   secretStoredStatus: 'Stored',
   secretMissingStatus: 'Missing',

@@ -85,6 +85,7 @@
   "providerSelectionHint": "モデルの購入方法や利用方法に最も合うプロバイダーを選択してください。各項目には対象ユーザーとエンドポイントの仕組みが説明されています。",
   "providerAudienceLabel": "おすすめ対象",
   "providerEndpointRuleLabel": "エンドポイント規則",
+  "copyAction": "コピー",
   "connectionDetailsSectionTitle": "接続の詳細",
   "closeAction": "閉じる",
   "secretStoredStatus": "シークレット保存済み",

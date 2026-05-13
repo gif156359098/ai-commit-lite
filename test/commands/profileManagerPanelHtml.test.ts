@@ -90,6 +90,7 @@ function createWebviewHtmlData(): BuildWebviewHtmlData {
       providerAudienceLabel: 'Audience',
       providerEndpointRuleLabel: 'Endpoint rule',
       connectionDetailsSectionTitle: 'Connection details',
+      copyAction: 'Copy',
       closeAction: 'Close',
       secretStoredStatus: 'Stored',
       secretMissingStatus: 'Missing',

@@ -85,6 +85,7 @@
   "providerSelectionHint": "Выберите провайдера, который лучше всего соответствует тому, как вы купили модель или получаете к ней доступ. В каждом варианте поясняется, для кого он подходит и как работает эндпоинт.",
   "providerAudienceLabel": "Лучше всего для",
   "providerEndpointRuleLabel": "Правило эндпоинта",
+  "copyAction": "Копировать",
   "connectionDetailsSectionTitle": "Детали подключения",
   "closeAction": "Закрыть",
   "secretStoredStatus": "Секрет сохранён",

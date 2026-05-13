@@ -85,6 +85,7 @@
   "providerSelectionHint": "Scegli il provider più adatto a come hai acquistato o utilizzi il modello. Ogni opzione spiega per chi è indicata e come funziona l'endpoint.",
   "providerAudienceLabel": "Ideale per",
   "providerEndpointRuleLabel": "Regola dell'endpoint",
+  "copyAction": "Copia",
   "connectionDetailsSectionTitle": "Dettagli di connessione",
   "closeAction": "Chiudi",
   "secretStoredStatus": "Segreto salvato",

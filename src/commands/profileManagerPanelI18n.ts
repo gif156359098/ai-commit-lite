@@ -52,6 +52,7 @@ export function buildI18n(profileCount: number): WebviewI18n {
     providerSelectionHint: t('providerSelectionHint'),
     providerAudienceLabel: t('providerAudienceLabel'),
     providerEndpointRuleLabel: t('providerEndpointRuleLabel'),
+    copyAction: t('copyAction'),
     connectionDetailsSectionTitle: t('connectionDetailsSectionTitle'),
     closeAction: t('closeAction'),
     secretStoredStatus: t('secretStoredStatus'),

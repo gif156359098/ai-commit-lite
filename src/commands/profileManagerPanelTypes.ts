@@ -84,6 +84,7 @@ export interface WebviewI18n {
   providerSelectionHint: string;
   providerAudienceLabel: string;
   providerEndpointRuleLabel: string;
+  copyAction: string;
   connectionDetailsSectionTitle: string;
   closeAction: string;
   secretStoredStatus: string;

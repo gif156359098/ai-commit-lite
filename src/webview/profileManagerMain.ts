@@ -214,6 +214,8 @@ const icons = {
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
   bolt:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+  copy:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
   checkSmall:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
   xSmall:
@@ -457,6 +459,7 @@ function renderProfiles(): void {
             + icons.star + escapeText(state.i18n.useThisProfile) + '</button>')
         + '<button class="icon-btn' + (ts.status === 'testing' ? ' testing' : '') + '" title="' + escapeText(state.i18n.testAction) + '" data-action="test" data-profile-id="' + escapeText(profile.id) + '">'
         + (ts.status === 'testing' ? '<span class="test-spinner"></span>' : icons.bolt) + '</button>'
+        + '<button class="icon-btn" title="' + escapeText(state.i18n.copyAction) + '" data-action="copy" data-profile-id="' + escapeText(profile.id) + '">' + icons.copy + '</button>'
         + '<button class="icon-btn" title="' + escapeText(state.i18n.editAction) + '" data-action="edit" data-profile-id="' + escapeText(profile.id) + '">' + icons.edit + '</button>'
         + '<button class="icon-btn danger" title="' + escapeText(state.i18n.deleteAction) + '" data-action="delete" data-profile-id="' + escapeText(profile.id) + '">' + icons.trash + '</button>'
         + '</div>'
@@ -593,6 +596,22 @@ function showEditForm(profileId: string): void {
   openModal();
 }
 
+function showCopyForm(provider: string, baseUrl?: string, apiKey?: string): void {
+  showAddForm();
+  if (provider) {
+    selectProvider(provider, false);
+  }
+  ($('model') as HTMLInputElement).value = '';
+  if (baseUrl) {
+    ($('baseUrl') as HTMLInputElement).value = baseUrl;
+  }
+  if (apiKey) {
+    ($('apiKey') as HTMLInputElement).value = apiKey;
+  }
+  updateApiKeyFieldState();
+  ($('label') as HTMLInputElement).focus();
+}
+
 function saveProfile(): void {
   const provider = getSelectedProvider();
   const editingProfile = getEditingProfile();
@@ -656,6 +675,10 @@ $('profilesContainer').addEventListener('click', (event: MouseEvent) => {
   }
   if (action === 'switch') {
     vscode.postMessage({ command: 'switchProfile', profileId });
+    return;
+  }
+  if (action === 'copy') {
+    vscode.postMessage({ command: 'copyProfile', profileId });
     return;
   }
   if (action === 'edit') {
@@ -757,6 +780,11 @@ window.addEventListener('message', (event: MessageEvent) => {
   }
   if (event.data.command === 'fallbackActionSettled') {
     setFallbackBusy(false);
+  }
+  if (event.data.command === 'copyProfileData' && event.data.formData) {
+    const { provider, baseUrl, apiKey } = event.data.formData as { provider: string; baseUrl?: string; apiKey?: string };
+    showCopyForm(provider, baseUrl, apiKey);
+    return;
   }
   if (event.data.command === 'profileSaved') {
     hideForm();

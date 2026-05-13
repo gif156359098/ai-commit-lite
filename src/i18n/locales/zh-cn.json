@@ -91,6 +91,7 @@
   "providerSelectionHint": "根据你的购买或接入方式选择服务商。每个选项都会说明适合谁使用，以及 Endpoint 该怎么填写。",
   "providerAudienceLabel": "适合场景",
   "providerEndpointRuleLabel": "端点规则",
+  "copyAction": "复制",
   "connectionDetailsSectionTitle": "连接信息",
   "closeAction": "关闭",
   "retryAction": "重试",
