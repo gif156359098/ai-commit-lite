@@ -27,7 +27,7 @@ export function buildProfileManagerPanelStyles(): string {
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { min-height: 100vh; background: var(--bg); color: var(--fg); font-family: var(--vscode-font-family); }
-    body { padding: 32px; line-height: 1.5; }
+    body { padding: clamp(20px, 2.5vw, 32px); line-height: 1.5; }
     button, input, select { font: inherit; appearance: none; border: none; background: none; }
     button { cursor: pointer; transition: var(--transition); }
     button:disabled { cursor: not-allowed; opacity: 0.55; }
@@ -41,7 +41,7 @@ export function buildProfileManagerPanelStyles(): string {
     @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes modalScale { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-    .shell { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; animation: fadeIn 0.4s ease-out; }
+    .shell { max-width: max(1200px, 92vw); margin: 0 auto; display: flex; flex-direction: column; gap: 24px; animation: fadeIn 0.4s ease-out; }
     .hero {
       display: flex;
       justify-content: space-between;
@@ -52,15 +52,15 @@ export function buildProfileManagerPanelStyles(): string {
     }
     .hero-content { display: flex; flex-direction: column; gap: 8px; }
     .eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 600; }
-    .title { font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 700; line-height: 1.1; margin: 0; }
-    .subtitle { color: var(--muted); font-size: 1.05rem; max-width: 600px; }
+    .title { font-size: clamp(1.75rem, 3.5vw, 3rem); font-weight: 700; line-height: 1.1; margin: 0; }
+    .subtitle { color: var(--muted); font-size: 1.05rem; max-width: clamp(400px, 50%, 800px); }
     .stats { display: flex; gap: 16px; }
     .stat {
       background: var(--card-bg);
       padding: 16px 20px;
       border-radius: var(--radius-lg);
       border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-      min-width: 140px;
+      min-width: clamp(120px, 12vw, 180px);
     }
     .stat-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
     .stat-value { font-size: 1.25rem; font-weight: 600; }
