@@ -322,7 +322,6 @@
     "test": "npm run compile:test && node --test \"out-test/test/**/*.test.js\""
   },
   "devDependencies": {
-    "@types/morphdom": "^2.3.0",
     "@types/node": "^20.19.39",
     "@types/sortablejs": "^1.15.9",
     "@types/vscode": "^1.80.0",
