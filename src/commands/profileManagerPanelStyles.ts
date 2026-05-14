@@ -505,6 +505,8 @@ margin-left: 2px;
       .shell { max-width: min(92vw, 1500px); }
       body { padding: 32px; }
       .cards { gap: 24px; }
+      .modal { max-width: 1000px; }
+      .modal-body { grid-template-columns: 300px 1fr; }
     }
 
     @media (min-width: 1920px) and (max-width: 2799px) {
