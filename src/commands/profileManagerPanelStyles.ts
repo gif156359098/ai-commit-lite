@@ -501,6 +501,12 @@ margin-left: 2px;
     .error.active { display: block; animation: fadeIn 0.3s ease; }
     .form-actions { margin-top: auto; padding-top: 24px; display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
 
+    @media (min-width: 1440px) and (max-width: 1919px) {
+      .shell { max-width: min(92vw, 1500px); }
+      body { padding: 32px; }
+      .cards { gap: 24px; }
+    }
+
     @media (max-width: 900px) {
       .hero { flex-direction: column; align-items: stretch; }
       .toolbar { flex-direction: column; align-items: stretch; }
