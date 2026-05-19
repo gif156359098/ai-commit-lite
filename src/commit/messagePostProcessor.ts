@@ -9,9 +9,12 @@ export interface PostProcessCommitMessageOptions {
   commitMessage: string;
 }
 
+type LogFn = (message: string) => void;
+
 export async function postProcessCommitMessage(
   options: PostProcessCommitMessageOptions,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  onLog?: LogFn
 ): Promise<string> {
   const { provider, context, preparedDiff } = options;
   let commitMessage = options.commitMessage;
@@ -19,6 +22,7 @@ export async function postProcessCommitMessage(
   if (context.commitMessageStyle === 'concise') {
     commitMessage = normalizeConciseCommitMessage(commitMessage);
   } else if (!isDetailedCommitMessage(commitMessage)) {
+    onLog?.('Commit message format repair triggered, making additional API call...');
     const repairedCommitMessage = await provider.generateCommitMessage(
       buildRepairSummary(preparedDiff),
       {

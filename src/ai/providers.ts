@@ -25,6 +25,64 @@ export interface CommitContext {
   formatRepairDraft?: string;
 }
 
+// Client cache for OpenAI-compatible providers
+const clientCache = new Map<string, AxiosInstance>();
+
+function getOrCreateOpenAICompatibleClient(apiKey: string, apiEndpoint: string): AxiosInstance {
+  const cacheKey = `${apiEndpoint}:${apiKey.slice(0, 8)}`;
+  let client = clientCache.get(cacheKey);
+  if (client) {
+    return client;
+  }
+  client = axios.create({
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    timeout: 60_000
+  });
+  clientCache.set(cacheKey, client);
+  return client;
+}
+
+export function getOrCreateAnthropicClient(apiKey: string, apiEndpoint: string): AxiosInstance {
+  const cacheKey = `anthropic:${apiEndpoint}:${apiKey.slice(0, 8)}`;
+  let client = clientCache.get(cacheKey);
+  if (client) {
+    return client;
+  }
+  client = axios.create({
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json'
+    },
+    timeout: 60_000
+  });
+  clientCache.set(cacheKey, client);
+  return client;
+}
+
+export function getOrCreateGeminiClient(apiKey: string, apiEndpoint: string): AxiosInstance {
+  const cacheKey = `gemini:${apiEndpoint}`;
+  let client = clientCache.get(cacheKey);
+  if (client) {
+    return client;
+  }
+  client = axios.create({
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    timeout: 60_000
+  });
+  clientCache.set(cacheKey, client);
+  return client;
+}
+
+export function clearClientCache(): void {
+  clientCache.clear();
+}
+
 export abstract class BaseAIProvider implements AIProvider {
   protected client: AxiosInstance;
   protected apiKey: string;
@@ -36,12 +94,7 @@ export abstract class BaseAIProvider implements AIProvider {
     this.apiKey = apiKey;
     this.model = model;
     this.apiEndpoint = apiEndpoint;
-    this.client = axios.create({
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    this.client = getOrCreateOpenAICompatibleClient(apiKey, apiEndpoint);
   }
 
   abstract generateCommitMessage(

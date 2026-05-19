@@ -1,10 +1,14 @@
 import * as vscode from 'vscode';
 import { createAIProvider } from '../ai/providerFactory';
 import { CommitContext } from '../ai/providers';
+import { checkHasStagedChanges, getStagedDiff } from '../git/diff';
 import { getProviderDefinition } from '../ai/providerRegistry';
 import { getProfileApiKey, getProfiles } from '../config/profileManager';
 import { getConfig } from '../config/settings';
+import { appendInfo } from '../ui/output';
 import { t } from '../i18n';
+
+const testOutputChannel = vscode.window.createOutputChannel('AI Commit Lite (Connection Test)');
 
 export interface TestConnectionResult {
   success: boolean;
@@ -43,40 +47,71 @@ export async function testProfileConnection(profileId: string): Promise<TestConn
     const provider = createAIProvider(config);
 
     const testContext: CommitContext = {
-      language: 'en',
+      language: config.language,
       useGitmoji: false,
       conventionalCommits: false,
       commitMessageStyle: 'concise',
       temperature: 0,
-      maxTokens: 10,
+      maxTokens: config.maxTokens,
       customSystemPrompt: ''
     };
 
-    await provider.generateCommitMessage('test', testContext, controller.signal);
+    const realDiff = await getRealDiffForTest(controller.signal);
+    await provider.generateCommitMessage(realDiff, testContext, controller.signal);
 
-    return { success: true, latencyMs: Date.now() - start };
+    const latencyMs = Date.now() - start;
+    appendInfo(
+      `Connection test: ${profile.label} | ${providerDefinition.label}/${profile.model} | ${latencyMs}ms`
+    );
+    return { success: true, latencyMs };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    return { success: false, latencyMs: Date.now() - start, errorMessage: message };
+    const latencyMs = Date.now() - start;
+    return { success: false, latencyMs, errorMessage: message };
   } finally {
     clearTimeout(timeout);
   }
 }
 
-const outputChannel = vscode.window.createOutputChannel('AI Commit Lite (Connection Test)');
+async function getRealDiffForTest(abortSignal?: AbortSignal): Promise<string> {
+  const hasStaged = await checkHasStagedChanges(abortSignal);
+  if (!hasStaged) {
+    return `diff --git a/test.ts b/test.ts
+--- a/test.ts
++++ b/test.ts
+@@ -1,3 +1,4 @@
++// Test line for API validation`;
+  }
+
+  try {
+    const diff = await getStagedDiff();
+    const firstFile = diff.files[0];
+    if (firstFile) {
+      return `[Testing API with sample diff content for: ${firstFile.path}]
+File: ${firstFile.path}
+Status: ${firstFile.status}
+Changes: +${firstFile.additions} -${firstFile.deletions}
+This is a test request to validate the API connection.`;
+    }
+  } catch {
+    // Fall through to synthetic diff
+  }
+
+  return '[Test request to validate API connection]';
+}
 
 export function showTestErrorNotification(profileLabel: string, errorMessage: string): void {
-  outputChannel.clear();
-  outputChannel.appendLine(`Profile: ${profileLabel}`);
-  outputChannel.appendLine(`Error: ${errorMessage}`);
-  outputChannel.appendLine('---');
+  testOutputChannel.clear();
+  testOutputChannel.appendLine(`Profile: ${profileLabel}`);
+  testOutputChannel.appendLine(`Error: ${errorMessage}`);
+  testOutputChannel.appendLine('---');
 
   void vscode.window.showErrorMessage(
     t('testConnectionErrorTitle', { profile: profileLabel }),
     t('viewErrorDetailsAction')
   ).then((action) => {
     if (action === t('viewErrorDetailsAction')) {
-      outputChannel.show();
+      testOutputChannel.show();
     }
   });
 }

@@ -45,6 +45,7 @@ import {
   testProfileConnection,
   showTestErrorNotification
 } from './profileConnectionTester';
+import { appendInfo } from '../ui/output';
 import {
   ProfileFormData,
   ProfileManagerPanelAction,
@@ -197,6 +198,8 @@ export class ProfileManagerPanel {
     try {
       const successDescriptor = await saveProfileFromForm(data, profileManagerPanelOperationDeps);
       this.pendingAction = 'default';
+      const profileLabel = data.label;
+      appendInfo(`Profile saved: ${profileLabel}`);
       vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
       await this.pushStateUpdate();
       void this.panel.webview.postMessage({ command: 'profileSaved' });
@@ -210,9 +213,12 @@ export class ProfileManagerPanel {
   }
 
   private async handleDeleteProfile(profileId: string): Promise<void> {
+    const profiles = getProfiles();
+    const deletedLabel = profiles.find(p => p.id === profileId)?.label ?? profileId;
     try {
       const successDescriptor = await deleteProfileById(profileId, profileManagerPanelOperationDeps);
       this.pendingAction = 'default';
+      appendInfo(`Profile deleted: ${deletedLabel}`);
       vscode.window.showInformationMessage(t(successDescriptor.key, successDescriptor.params));
       await this.pushStateUpdate();
     } catch (error: unknown) {
@@ -225,9 +231,12 @@ export class ProfileManagerPanel {
   }
 
   private async handleSwitchProfile(profileId: string): Promise<void> {
+    const profiles = getProfiles();
+    const switchedLabel = profiles.find(p => p.id === profileId)?.label ?? profileId;
     try {
       await switchProfileById(profileId, profileManagerPanelOperationDeps);
       this.pendingAction = 'default';
+      appendInfo(`Profile switched to: ${switchedLabel}`);
       await this.pushStateUpdate();
     } catch (error: unknown) {
       const descriptor = getProfileManagerPanelOperationErrorDescriptor(

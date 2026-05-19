@@ -134,26 +134,32 @@ async function getSelectivePatchMap(
   abortSignal?: AbortSignal
 ): Promise<Map<string, string>> {
   const patchMap = new Map<string, string>();
-
-  // Fetch patches for each file that needs it
-  // We use individual file diffs to avoid fetching unneeded content
   const fileList = Array.from(filePaths);
 
-  for (const filePath of fileList) {
-    try {
-      const patchOutput = await runGit(
-        ['diff', '--cached', '--', filePath, `--unified=${DIFF_CONTEXT_LINES}`, '--no-color', '--no-renames'],
-        cwd,
-        abortSignal
-      );
-
-      if (patchOutput.trim()) {
-        patchMap.set(filePath, patchOutput.trim());
+  // Parallel fetch patches with controlled concurrency
+  // Process in batches to avoid overwhelming system
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < fileList.length; i += BATCH_SIZE) {
+    const batch = fileList.slice(i, i + BATCH_SIZE);
+    const promises = batch.map(async (filePath) => {
+      try {
+        const patchOutput = await runGit(
+          ['diff', '--cached', '--', filePath, `--unified=${DIFF_CONTEXT_LINES}`, '--no-color', '--no-renames'],
+          cwd,
+          abortSignal
+        );
+        return { filePath, patch: patchOutput.trim() || null };
+      } catch (error: any) {
+        console.warn(`Failed to get patch for ${filePath}: ${error.message}`);
+        return { filePath, patch: null };
       }
-    } catch (error: any) {
-      // Single file failure shouldn't stop the whole operation
-      // Log and continue with other files
-      console.warn(`Failed to get patch for ${filePath}: ${error.message}`);
+    });
+
+    const results = await Promise.all(promises);
+    for (const result of results) {
+      if (result.patch) {
+        patchMap.set(result.filePath, result.patch);
+      }
     }
   }
 
@@ -163,8 +169,10 @@ async function getSelectivePatchMap(
 export async function getStagedDiff(): Promise<GitDiff> {
   try {
     const cwd = await getGitRepositoryRoot();
-    const files = await getStagedFiles(cwd);
-    const diffOutput = await runGit(['diff', '--cached', '--no-color'], cwd);
+    const [files, diffOutput] = await Promise.all([
+      getStagedFiles(cwd),
+      runGit(['diff', '--cached', '--no-color'], cwd)
+    ]);
 
     return {
       raw: diffOutput,
@@ -217,16 +225,11 @@ export interface PreFilterResult {
 }
 
 async function getStagedFiles(cwd: string, abortSignal?: AbortSignal): Promise<GitFile[]> {
-  const nameStatusOutput = await runGit(
-    ['diff', '--cached', '--name-status', '--no-renames'],
-    cwd,
-    abortSignal
-  );
-  const numStatOutput = await runGit(
-    ['diff', '--cached', '--numstat', '--no-renames'],
-    cwd,
-    abortSignal
-  );
+  // Parallel fetch name-status and numstat for better performance
+  const [nameStatusOutput, numStatOutput] = await Promise.all([
+    runGit(['diff', '--cached', '--name-status', '--no-renames'], cwd, abortSignal),
+    runGit(['diff', '--cached', '--numstat', '--no-renames'], cwd, abortSignal)
+  ]);
 
   return parseStagedFiles(nameStatusOutput, numStatOutput);
 }

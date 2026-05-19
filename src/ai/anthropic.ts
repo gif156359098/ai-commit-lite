@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-import { BaseAIProvider, CommitContext } from './providers';
-import {
-  cleanCommitMessage,
-  extractOpenAICompatibleMessage,
-  getProviderErrorMessage
-} from './response';
+import { BaseAIProvider, CommitContext, getOrCreateAnthropicClient } from './providers';
+import { cleanCommitMessage, extractOpenAICompatibleMessage, getProviderErrorMessage } from './response';
 import { isCancellationError } from '../utils/cancellation';
 
 export class AnthropicProvider extends BaseAIProvider {
@@ -15,13 +11,7 @@ export class AnthropicProvider extends BaseAIProvider {
     apiEndpoint: string = 'https://api.anthropic.com'
   ) {
     super(apiKey, model, apiEndpoint);
-    this.client = axios.create({
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json'
-      }
-    });
+    this.client = getOrCreateAnthropicClient(apiKey, apiEndpoint);
   }
 
   async generateCommitMessage(diff: string, context: CommitContext, abortSignal?: AbortSignal): Promise<string> {

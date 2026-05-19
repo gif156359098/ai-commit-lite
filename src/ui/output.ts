@@ -52,7 +52,7 @@ export function appendSummary(summary: GenerationSummary): void {
 
   if (summary.tokenUsage) {
     channel.appendLine(
-      `Token usage: prompt=${summary.tokenUsage.prompt ?? '-'}, completion=${summary.tokenUsage.completion ?? '-'}, total=${summary.tokenUsage.total ?? '-'}`
+      `Token usage: prompt=${summary.tokenUsage.prompt ?? '[n/a]'}, completion=${summary.tokenUsage.completion ?? '[n/a]'}, total=${summary.tokenUsage.total ?? '[n/a]'}`
     );
   }
 

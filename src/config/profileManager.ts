@@ -117,13 +117,19 @@ export async function getEffectiveConfigForProfile(profileId: string): Promise<A
   };
 }
 
-export async function handleProfileFailure(currentProfileId: string): Promise<ModelProfile | null> {
+export async function handleProfileFailure(
+  currentProfileId: string,
+  isRetryable: boolean = true
+): Promise<ModelProfile | null> {
   const { profiles, enableAutoFallback, profileFallbackOrder } = getProfileConfig();
   if (!enableAutoFallback) {
     return null;
   }
 
-  await recordProfileFailure(currentProfileId);
+  // Only record failure for retryable errors
+  if (isRetryable) {
+    await recordProfileFailure(currentProfileId);
+  }
 
   const orderedIds = buildFallbackOrder(profiles, currentProfileId, profileFallbackOrder);
 

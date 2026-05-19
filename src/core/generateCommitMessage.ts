@@ -15,6 +15,7 @@ import { checkHasStagedChanges } from '../git/diff';
 import { t } from '../i18n';
 import { ModelProfile } from '../types/profile';
 import { getCancellationReason, isCancellationError } from '../utils/cancellation';
+import { getDetailedErrorInfo, isRetryableError } from '../utils/errors';
 
 export type GenerationSummary = {
   stagedCount: number;
@@ -134,7 +135,7 @@ async function generateWithAutoFallback(
     });
 
     try {
-      const result = await generateCommitMessageFromPrepared(preparedGeneration, abortSignal);
+      const result = await generateCommitMessageFromPrepared(preparedGeneration, abortSignal, onInfo);
 
       if (token.isCancellationRequested || abortSignal.aborted) {
         return createCancelledResult('Cancelled after the AI response was received.');
@@ -156,7 +157,11 @@ async function generateWithAutoFallback(
         );
       }
 
-      const nextProfile = await handleProfileFailure(currentProfile.id);
+      const errorDetail = getDetailedErrorInfo(error);
+      const retryable = isRetryableError(error);
+      onInfo?.(`Error with "${currentProfile.label}"${retryable ? '' : ' (not retryable)'}: ${errorDetail}`);
+
+      const nextProfile = await handleProfileFailure(currentProfile.id, retryable);
       if (!nextProfile || attemptedProfileIds.has(nextProfile.id)) {
         return { type: 'failure', error: error instanceof Error ? error : String(error) };
       }

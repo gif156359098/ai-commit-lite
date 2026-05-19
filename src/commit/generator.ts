@@ -55,9 +55,12 @@ export async function prepareCommitGeneration(
   };
 }
 
+type LogFn = (message: string) => void;
+
 export async function generateCommitMessageFromPrepared(
   preparedGeneration: PreparedCommitGeneration,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  onLog?: LogFn
 ): Promise<CommitGenerationResult> {
   const { context, preparedDiff, provider } = preparedGeneration;
   const initialCommitMessage = await provider.generateCommitMessage(preparedDiff.prompt, context, abortSignal);
@@ -66,7 +69,7 @@ export async function generateCommitMessageFromPrepared(
     context,
     preparedDiff,
     commitMessage: initialCommitMessage
-  }, abortSignal);
+  }, abortSignal, onLog);
 
   return {
     commitMessage,

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { BaseAIProvider, CommitContext } from './providers';
+import { BaseAIProvider, CommitContext, getOrCreateGeminiClient } from './providers';
 import { cleanCommitMessage, extractGeminiMessage, getProviderErrorMessage } from './response';
 import { isCancellationError } from '../utils/cancellation';
 
@@ -11,11 +11,7 @@ export class GeminiProvider extends BaseAIProvider {
     apiEndpoint: string = 'https://generativelanguage.googleapis.com/v1beta'
   ) {
     super(apiKey, model, apiEndpoint);
-    this.client = axios.create({
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    this.client = getOrCreateGeminiClient(apiKey, apiEndpoint);
   }
 
   async generateCommitMessage(diff: string, context: CommitContext, abortSignal?: AbortSignal): Promise<string> {
