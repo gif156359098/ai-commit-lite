@@ -206,19 +206,6 @@ export async function checkHasStagedChanges(abortSignal?: AbortSignal): Promise<
   }
 }
 
-export async function commit(message: string): Promise<void> {
-  try {
-    const cwd = await getGitRepositoryRoot();
-    await runGit(['commit', '-m', message], cwd);
-  } catch (error: any) {
-    if (isCancellationError(error)) {
-      throw error;
-    }
-
-    throw new Error(t('failedToCommit', { message: error.message }));
-  }
-}
-
 export interface PreFilterResult {
   needsPatch: Set<string>;
   noPatchReasons: Map<string, string>;
