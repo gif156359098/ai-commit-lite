@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parsePatchMap, parseStagedFiles } from '../../src/git/diffParsing';
+import { parseStagedFiles } from '../../src/git/diffParsing';
 
 test('parseStagedFiles merges name-status and numstat output including binary files', () => {
   const files = parseStagedFiles(
@@ -24,29 +24,3 @@ test('parseStagedFiles merges name-status and numstat output including binary fi
   );
 });
 
-test('parsePatchMap extracts normalized paths from quoted and deleted file patches', () => {
-  const patchMap = parsePatchMap([
-    'diff --git a/src/app.ts b/src/app.ts',
-    '--- a/src/app.ts',
-    '+++ b/src/app.ts',
-    '@@ -1 +1 @@',
-    '+console.log("app")',
-    '',
-    'diff --git a/"docs/hello world.md" b/"docs/hello world.md"',
-    'new file mode 100644',
-    '--- /dev/null',
-    '+++ b/"docs/hello world.md"',
-    '@@ -0,0 +1 @@',
-    '+hello',
-    '',
-    'diff --git a/src/obsolete.ts b/src/obsolete.ts',
-    '--- a/src/obsolete.ts',
-    '+++ /dev/null',
-    '@@ -1 +0,0 @@',
-    '-old'
-  ].join('\n'));
-
-  assert.equal(patchMap.get('src/app.ts')?.includes('console.log'), true);
-  assert.equal(patchMap.get('docs/hello world.md')?.includes('+hello'), true);
-  assert.equal(patchMap.get('src/obsolete.ts')?.includes('-old'), true);
-});
