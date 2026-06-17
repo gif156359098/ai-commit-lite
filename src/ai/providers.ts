@@ -28,8 +28,12 @@ export interface CommitContext {
 // Client cache for OpenAI-compatible providers
 const clientCache = new Map<string, AxiosInstance>();
 
+function buildClientCacheKey(prefix: string, apiEndpoint: string, apiKey: string): string {
+  return `${prefix}:${apiEndpoint}:${apiKey.length}:${apiKey.slice(-4)}`;
+}
+
 function getOrCreateOpenAICompatibleClient(apiKey: string, apiEndpoint: string): AxiosInstance {
-  const cacheKey = `${apiEndpoint}:${apiKey.slice(0, 8)}`;
+  const cacheKey = buildClientCacheKey('openai', apiEndpoint, apiKey);
   let client = clientCache.get(cacheKey);
   if (client) {
     return client;
@@ -46,7 +50,7 @@ function getOrCreateOpenAICompatibleClient(apiKey: string, apiEndpoint: string):
 }
 
 export function getOrCreateAnthropicClient(apiKey: string, apiEndpoint: string): AxiosInstance {
-  const cacheKey = `anthropic:${apiEndpoint}:${apiKey.slice(0, 8)}`;
+  const cacheKey = buildClientCacheKey('anthropic', apiEndpoint, apiKey);
   let client = clientCache.get(cacheKey);
   if (client) {
     return client;
