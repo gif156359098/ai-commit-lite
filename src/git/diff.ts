@@ -10,6 +10,10 @@ import { getGitRepositoryRoot } from './repository';
 
 const GIT_MAX_BUFFER = 20 * 1024 * 1024;
 const DIFF_CONTEXT_LINES = 1;
+// 与 diffContextBuilder.MIN_REMAINING_DIFF_CHARACTERS 对齐
+// 使 preFilterFiles 的预算估算与 buildPreparedDiffContext 的最终判定一致，
+// 避免 preFilter 乐观取回 patch 后又被降级为 summary 造成无谓的 git diff 调用。
+const DIFF_RESERVED_BUDGET_CHARS = 800;
 
 export type {
   DiffContextOptions,
@@ -70,9 +74,9 @@ export function preFilterFiles(
     return left.path.localeCompare(right.path);
   });
 
-  // Estimate available budget based on options
-  // We reserve some buffer for the overall prompt structure
-  const reservedBudgetChars = 500;
+    // Estimate available budget based on options
+    // We reserve some buffer for the overall prompt structure
+    const reservedBudgetChars = DIFF_RESERVED_BUDGET_CHARS;
   const effectiveMaxDiffChars = Math.max(0, options.maxDiffCharacters - reservedBudgetChars);
   let estimatedCharsUsed = 0;
 
