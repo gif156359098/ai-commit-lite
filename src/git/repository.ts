@@ -12,6 +12,8 @@ export interface GitAPI {
   repositories: GitRepository[];
 }
 
+let cachedGitApi: GitAPI | undefined;
+
 export interface GitRepository {
   rootUri: vscode.Uri;
   inputBox: {
@@ -67,6 +69,10 @@ export function isSamePath(left: string, right: string): boolean {
 }
 
 async function getGitApi(): Promise<GitAPI> {
+  if (cachedGitApi) {
+    return cachedGitApi;
+  }
+
   if ((vscode.workspace.workspaceFolders ?? []).length === 0) {
     throw new Error(t('openWorkspaceFolder'));
   }
@@ -76,7 +82,8 @@ async function getGitApi(): Promise<GitAPI> {
     throw new Error(t('builtInGitUnavailable'));
   }
 
-  return (await gitExtension.activate()).getAPI(1);
+  cachedGitApi = (await gitExtension.activate()).getAPI(1);
+  return cachedGitApi;
 }
 
 function findRepositoryContainingPath(
