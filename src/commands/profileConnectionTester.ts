@@ -8,7 +8,14 @@ import { getConfig } from '../config/settings';
 import { appendInfo } from '../ui/output';
 import { t } from '../i18n';
 
-const testOutputChannel = vscode.window.createOutputChannel('AI Commit Lite (Connection Test)');
+let testOutputChannel: vscode.OutputChannel | undefined;
+
+function getTestOutputChannel(): vscode.OutputChannel {
+  if (!testOutputChannel) {
+    testOutputChannel = vscode.window.createOutputChannel('AI Commit Lite (Connection Test)');
+  }
+  return testOutputChannel;
+}
 
 export interface TestConnectionResult {
   success: boolean;
@@ -101,17 +108,18 @@ This is a test request to validate the API connection.`;
 }
 
 export function showTestErrorNotification(profileLabel: string, errorMessage: string): void {
-  testOutputChannel.clear();
-  testOutputChannel.appendLine(`Profile: ${profileLabel}`);
-  testOutputChannel.appendLine(`Error: ${errorMessage}`);
-  testOutputChannel.appendLine('---');
+  const channel = getTestOutputChannel();
+  channel.clear();
+  channel.appendLine(`Profile: ${profileLabel}`);
+  channel.appendLine(`Error: ${errorMessage}`);
+  channel.appendLine('---');
 
   void vscode.window.showErrorMessage(
     t('testConnectionErrorTitle', { profile: profileLabel }),
     t('viewErrorDetailsAction')
   ).then((action) => {
     if (action === t('viewErrorDetailsAction')) {
-      testOutputChannel.show();
+      getTestOutputChannel().show();
     }
   });
 }
