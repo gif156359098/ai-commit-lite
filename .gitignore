@@ -11,5 +11,4 @@ dist
 coverage/
 .opencode/
 .claude/
-scripts/
 docs/superpowers/*
