@@ -2,7 +2,7 @@
   "name": "ai-commit-lite",
   "displayName": "%aiCommitLite.displayName%",
   "description": "%aiCommitLite.description%",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -18,7 +18,6 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
-  "l10n": "./package.nls",
   "contributes": {
     "icons": {
       "ai-commit-lite-status-bar": {
