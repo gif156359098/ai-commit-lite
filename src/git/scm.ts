@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 
-import { getGitRepository } from './repository';
+import { GitRepositoryContext } from './repositoryContext';
 
-export async function fillSourceControlInputBox(message: string): Promise<void> {
-  const repository = await getGitRepository();
-  repository.inputBox.value = message;
+export async function fillSourceControlInputBox(
+  repository: GitRepositoryContext,
+  message: string
+): Promise<void> {
+  repository.setCommitInput(message);
   await vscode.commands.executeCommand('workbench.view.scm');
 }

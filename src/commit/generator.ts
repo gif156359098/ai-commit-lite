@@ -17,14 +17,8 @@ export interface PreparedCommitGeneration {
   preparedDiff: PreparedGitDiff;
 }
 
-export async function generateCommitMessage(
-  config: AICommitConfigWithProfile
-): Promise<CommitGenerationResult> {
-  const preparedGeneration = await prepareCommitGeneration(config);
-  return generateCommitMessageFromPrepared(preparedGeneration);
-}
-
 export async function prepareCommitGeneration(
+  repositoryRoot: string,
   config: AICommitConfigWithProfile,
   abortSignal?: AbortSignal
 ): Promise<PreparedCommitGeneration> {
@@ -38,7 +32,7 @@ export async function prepareCommitGeneration(
     customSystemPrompt: config.customSystemPrompt
   };
 
-  const preparedDiff = await getPreparedStagedDiff({
+  const preparedDiff = await getPreparedStagedDiff(repositoryRoot, {
     excludePatterns: config.contextExcludePatterns,
     maxDiffCharacters: config.maxDiffCharacters,
     maxFileDiffCharacters: config.maxFileDiffCharacters

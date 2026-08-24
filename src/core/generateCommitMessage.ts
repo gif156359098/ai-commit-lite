@@ -12,12 +12,15 @@ import {
   handleProfileFailure
 } from '../config/profileManager';
 import { checkHasStagedChanges } from '../git/diff';
+import { GitRepositoryContext } from '../git/repositoryContext';
 import { t } from '../i18n';
 import { ModelProfile } from '../types/profile';
 import { getCancellationReason, isCancellationError } from '../utils/cancellation';
 import { getDetailedErrorInfo, isRetryableError } from '../utils/errors';
 
 export type GenerationSummary = {
+  repositoryLabel: string;
+  repositoryRoot: string;
   stagedCount: number;
   stagedFiles: string[];
   includedFiles: string[];
@@ -42,6 +45,8 @@ export type GenerateCommitResult =
   | { type: 'failure'; error: Error | string };
 
 export interface RunGenerateCommitMessageOptions {
+  /** 命令入口解析出的仓库上下文，贯穿暂存检查、diff 抓取与结果写回 */
+  repository: GitRepositoryContext;
   progress: vscode.Progress<{ increment: number; message: string }>;
   token: vscode.CancellationToken;
   onInfo?: (message: string) => void;
@@ -50,7 +55,7 @@ export interface RunGenerateCommitMessageOptions {
 export async function runGenerateCommitMessage(
   options: RunGenerateCommitMessageOptions
 ): Promise<GenerateCommitResult> {
-  const { progress, token, onInfo } = options;
+  const { progress, repository, token, onInfo } = options;
   const startedAt = Date.now();
   const abortController = new AbortController();
   const cancellationSubscription = token.onCancellationRequested(() => {
@@ -63,20 +68,24 @@ export async function runGenerateCommitMessage(
     }
 
     progress.report({ increment: 20, message: t('collectingStagedChanges') });
-    const hasStagedChanges = await checkHasStagedChanges(abortController.signal);
+    const hasStagedChanges = await checkHasStagedChanges(repository.root, abortController.signal);
 
     if (token.isCancellationRequested || abortController.signal.aborted) {
       return createCancelledResult('Cancelled while collecting staged changes.');
     }
 
     if (!hasStagedChanges) {
-      return { type: 'failure', error: new Error(t('noStagedChanges')) };
+      return {
+        type: 'failure',
+        error: new Error(t('noStagedChangesInRepository', { repository: repository.label }))
+      };
     }
 
     return await generateWithAutoFallback({
       abortSignal: abortController.signal,
       onInfo,
       progress,
+      repository,
       startedAt,
       token
     });
@@ -97,6 +106,7 @@ interface GenerateWithAutoFallbackOptions {
   abortSignal: AbortSignal;
   onInfo?: (message: string) => void;
   progress: vscode.Progress<{ increment: number; message: string }>;
+  repository: GitRepositoryContext;
   startedAt: number;
   token: vscode.CancellationToken;
 }
@@ -104,7 +114,7 @@ interface GenerateWithAutoFallbackOptions {
 async function generateWithAutoFallback(
   options: GenerateWithAutoFallbackOptions
 ): Promise<GenerateCommitResult> {
-  const { abortSignal, onInfo, progress, startedAt, token } = options;
+  const { abortSignal, onInfo, progress, repository, startedAt, token } = options;
   const attemptedProfileIds = new Set<string>();
   let fallbackProfileId: string | undefined;
 
@@ -119,7 +129,7 @@ async function generateWithAutoFallback(
     const currentProfile = config.profile;
     attemptedProfileIds.add(currentProfile.id);
 
-    const preparedGeneration = await prepareCommitGeneration(config, abortSignal);
+    const preparedGeneration = await prepareCommitGeneration(repository.root, config, abortSignal);
 
     if (token.isCancellationRequested || abortSignal.aborted) {
       return createCancelledResult('Cancelled before the AI request started.');
@@ -147,6 +157,7 @@ async function generateWithAutoFallback(
         summary: buildGenerationSummary(
           preparedGeneration,
           currentProfile,
+          repository,
           Date.now() - startedAt
         )
       };
@@ -181,12 +192,15 @@ async function generateWithAutoFallback(
 function buildGenerationSummary(
   preparedGeneration: PreparedCommitGeneration,
   profile: ModelProfile,
+  repository: GitRepositoryContext,
   durationMs: number
 ): GenerationSummary {
   const provider = getProviderDefinition(profile.provider).label;
   const { files, report } = preparedGeneration.preparedDiff;
 
   return {
+    repositoryLabel: repository.label,
+    repositoryRoot: repository.root,
     stagedCount: files.length,
     stagedFiles: files.map((file) => file.path),
     includedFiles: report.includedFiles,

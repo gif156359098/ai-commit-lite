@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gif156359098/ai-commit-lite.git"
+    "url": "https://github.com/HolyeTyrone/ai-commit-lite.git"
   },
   "engines": {
     "vscode": "^1.80.0"
@@ -307,7 +307,6 @@
     ]
   },
   "scripts": {
-    "install": "npm install",
     "watch": "node scripts/build.mjs --mode development --watch",
     "vscode:prepublish": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.webview.json --noEmit && tsc -p tsconfig.test.json && node --test \"out-test/test/**/*.test.js\" && node scripts/build.mjs --mode production",
     "typecheck:extension": "tsc -p tsconfig.json --noEmit",

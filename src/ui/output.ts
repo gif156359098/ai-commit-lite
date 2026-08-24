@@ -44,6 +44,7 @@ export function appendError(message: string, error?: unknown): void {
 export function appendSummary(summary: GenerationSummary): void {
   const channel = getOutputChannel();
   appendInfo('Generation summary');
+  channel.appendLine(`Repository: ${summary.repositoryLabel} (${summary.repositoryRoot})`);
   channel.appendLine(`Profile: ${summary.profileLabel}`);
   channel.appendLine(`Provider: ${summary.provider}`);
   channel.appendLine(`Model: ${summary.model}`);

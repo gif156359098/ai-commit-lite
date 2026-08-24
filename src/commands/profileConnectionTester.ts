@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { createAIProvider } from '../ai/providerFactory';
 import { CommitContext } from '../ai/providers';
 import { checkHasStagedChanges, getStagedDiff } from '../git/diff';
+import { resolveGitRepositoryContext } from '../git/repositoryContext';
 import { getProviderDefinition } from '../ai/providerRegistry';
 import { getProfileApiKey, getProfiles } from '../config/profileManager';
 import { getConfig } from '../config/settings';
@@ -80,18 +81,26 @@ export async function testProfileConnection(profileId: string): Promise<TestConn
   }
 }
 
-async function getRealDiffForTest(abortSignal?: AbortSignal): Promise<string> {
-  const hasStaged = await checkHasStagedChanges(abortSignal);
-  if (!hasStaged) {
-    return `diff --git a/test.ts b/test.ts
+const SYNTHETIC_TEST_DIFF = `diff --git a/test.ts b/test.ts
 --- a/test.ts
 +++ b/test.ts
 @@ -1,3 +1,4 @@
 +// Test line for API validation`;
+
+async function getRealDiffForTest(abortSignal?: AbortSignal): Promise<string> {
+  // 连通性测试不应打断用户，因此禁用仓库选择器；无法确定仓库时直接用合成 diff。
+  const repository = await resolveTestRepository();
+  if (!repository) {
+    return SYNTHETIC_TEST_DIFF;
+  }
+
+  const hasStaged = await checkHasStagedChanges(repository.root, abortSignal);
+  if (!hasStaged) {
+    return SYNTHETIC_TEST_DIFF;
   }
 
   try {
-    const diff = await getStagedDiff();
+    const diff = await getStagedDiff(repository.root);
     const firstFile = diff.files[0];
     if (firstFile) {
       return `[Testing API with sample diff content for: ${firstFile.path}]
@@ -105,6 +114,15 @@ This is a test request to validate the API connection.`;
   }
 
   return '[Test request to validate API connection]';
+}
+
+async function resolveTestRepository(): Promise<{ root: string } | undefined> {
+  try {
+    return await resolveGitRepositoryContext(undefined, { interactive: false });
+  } catch {
+    // 没有打开仓库不应导致连通性测试失败
+    return undefined;
+  }
 }
 
 export function showTestErrorNotification(profileLabel: string, errorMessage: string): void {

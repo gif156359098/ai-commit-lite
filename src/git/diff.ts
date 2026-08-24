@@ -6,7 +6,6 @@ import { matchesAnyGlob } from '../utils/glob';
 import { buildPreparedDiffContext, generateSummary, getFilePriority } from './diffContextBuilder';
 import { parseStagedFiles } from './diffParsing';
 import { DiffContextOptions, GitDiff, GitFile, PreparedGitDiff } from './diffTypes';
-import { getGitRepositoryRoot } from './repository';
 
 const GIT_MAX_BUFFER = 20 * 1024 * 1024;
 const DIFF_CONTEXT_LINES = 1;
@@ -25,12 +24,12 @@ export type {
 } from './diffTypes';
 
 export async function getPreparedStagedDiff(
+  repositoryRoot: string,
   options: DiffContextOptions,
   abortSignal?: AbortSignal
 ): Promise<PreparedGitDiff> {
   try {
-    const cwd = await getGitRepositoryRoot();
-    const files = await getStagedFiles(cwd, abortSignal);
+    const files = await getStagedFiles(repositoryRoot, abortSignal);
 
     // Pre-filter files based on metadata to optimize patch fetching
     const preFilterResult = preFilterFiles(files, options);
@@ -42,7 +41,7 @@ export async function getPreparedStagedDiff(
       return buildPreparedDiffContext(files, patchMap, options);
     }
 
-    const patchMap = await getSelectivePatchMap(cwd, needsPatch, abortSignal);
+    const patchMap = await getSelectivePatchMap(repositoryRoot, needsPatch, abortSignal);
     return buildPreparedDiffContext(files, patchMap, options);
   } catch (error: any) {
     if (isCancellationError(error)) {
@@ -170,12 +169,11 @@ async function getSelectivePatchMap(
   return patchMap;
 }
 
-export async function getStagedDiff(): Promise<GitDiff> {
+export async function getStagedDiff(repositoryRoot: string): Promise<GitDiff> {
   try {
-    const cwd = await getGitRepositoryRoot();
     const [files, diffOutput] = await Promise.all([
-      getStagedFiles(cwd),
-      runGit(['diff', '--cached', '--no-color'], cwd)
+      getStagedFiles(repositoryRoot),
+      runGit(['diff', '--cached', '--no-color'], repositoryRoot)
     ]);
 
     return {
@@ -192,10 +190,12 @@ export async function getStagedDiff(): Promise<GitDiff> {
   }
 }
 
-export async function checkHasStagedChanges(abortSignal?: AbortSignal): Promise<boolean> {
+export async function checkHasStagedChanges(
+  repositoryRoot: string,
+  abortSignal?: AbortSignal
+): Promise<boolean> {
   try {
-    const cwd = await getGitRepositoryRoot();
-    await runGit(['diff', '--cached', '--quiet'], cwd, abortSignal);
+    await runGit(['diff', '--cached', '--quiet'], repositoryRoot, abortSignal);
     return false;
   } catch (error: any) {
     if (isCancellationError(error)) {

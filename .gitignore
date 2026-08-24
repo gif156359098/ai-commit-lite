@@ -12,3 +12,4 @@ coverage/
 .opencode/
 .claude/
 docs/superpowers/*
+.serena/

@@ -12,13 +12,19 @@ import { EXTENSION_COMMAND_IDS } from './extensionManifest';
 
 interface RuntimeCommandDefinition {
   id: string;
-  handler: () => unknown;
+  /**
+   * 必须透传实参：VS Code 在点击 `scm/title` 按钮时会把对应的 SourceControl
+   * 作为第一个实参传入，这是多仓库场景下定位目标仓库的唯一依据。
+   */
+  handler: (...args: unknown[]) => unknown;
 }
 
 export function registerExtensionCommands(context: vscode.ExtensionContext): void {
   const commandDefinitions = getRuntimeCommandDefinitions(context.extensionUri);
   const disposables = commandDefinitions.map((definition) =>
-    vscode.commands.registerCommand(definition.id, definition.handler)
+    vscode.commands.registerCommand(definition.id, (...args: unknown[]) =>
+      definition.handler(...args)
+    )
   );
 
   context.subscriptions.push(...disposables);

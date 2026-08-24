@@ -9,6 +9,7 @@ import {
   runGenerateCommitMessage
 } from '../core/generateCommitMessage';
 import { fillSourceControlInputBox } from '../git/scm';
+import { GitRepositoryContext, resolveGitRepositoryContext } from '../git/repositoryContext';
 import { t } from '../i18n';
 import { showGenerationFailed } from '../ui/notifications';
 import { appendError, appendInfo, appendSummary, showLog } from '../ui/output';
@@ -23,8 +24,10 @@ import { ensureProfilesForCommand } from './profileCommandGate';
 
 type SuccessfulGenerateCommitResult = Extract<GenerateCommitResult, { type: 'success' }>;
 
-export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<void> {
-  return async (): Promise<void> => {
+export function generateCommitCommand(
+  extensionUri: vscode.Uri
+): (hint?: unknown) => Promise<void> {
+  return async (hint?: unknown): Promise<void> => {
     try {
       const hasProfiles = await ensureProfilesForCommand(extensionUri);
       if (!hasProfiles) {
@@ -42,6 +45,14 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
         return;
       }
 
+      // 在启动生成前解析一次仓库，后续所有环节复用，避免中途活动编辑器变化导致
+      // diff 来源仓库与写回目标仓库不一致。
+      const repository = await resolveGitRepositoryContext(hint);
+      if (!repository) {
+        appendInfo('Commit generation skipped: repository selection was dismissed.');
+        return;
+      }
+
       const runId = generationController.tryStart();
       if (runId === null) {
         showAlreadyRunningStatus(2500);
@@ -56,7 +67,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
         }
       };
 
-      appendInfo('Commit generation started.');
+      appendInfo(`Commit generation started for repository: ${repository.root}`);
 
       let progressToken: vscode.CancellationToken | undefined;
       let result: GenerateCommitResult;
@@ -74,13 +85,14 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
 
           return await runGenerateCommitMessage({
             progress,
+            repository,
             token,
             onInfo: appendInfo
           });
         });
       } catch (error: unknown) {
         finish();
-        await handleFailureResult(error);
+        await handleFailureResult(error, repository);
         return;
       }
 
@@ -90,7 +102,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
       }
 
       if (result.type === 'success') {
-        await handleSuccessResult(result, progressToken, runId, finish);
+        await handleSuccessResult(result, repository, progressToken, runId, finish);
         return;
       }
 
@@ -101,7 +113,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
         return;
       }
 
-      await handleFailureResult(result.error);
+      await handleFailureResult(result.error, repository);
     } catch (error: unknown) {
       const message = getErrorMessage(error);
       appendError(`Unexpected command error: ${message}`, error);
@@ -112,6 +124,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
 
 async function handleSuccessResult(
   result: SuccessfulGenerateCommitResult,
+  repository: GitRepositoryContext,
   token: vscode.CancellationToken,
   runId: number,
   finish: () => void
@@ -123,7 +136,7 @@ async function handleSuccessResult(
   }
 
   try {
-    await fillSourceControlInputBox(result.message);
+    await fillSourceControlInputBox(repository, result.message);
     appendInfo('Commit message written to the Source Control input box.');
     appendSummary(result.summary);
     showSuccessStatus(getSuccessStatusMessage(result.summary));
@@ -131,7 +144,11 @@ async function handleSuccessResult(
   } catch (error: unknown) {
     appendSummary(result.summary);
     finish();
-    await handleFailureResult(error, 'Failed to update the Source Control input box');
+    await handleFailureResult(
+      error,
+      repository,
+      'Failed to update the Source Control input box'
+    );
   }
 }
 
@@ -147,10 +164,11 @@ function handleCancelledResult(reason?: string): void {
 
 async function handleFailureResult(
   error: unknown,
+  repository: GitRepositoryContext,
   context: string = 'Commit generation failed'
 ): Promise<void> {
   const message = getErrorMessage(error);
-  appendError(`${context}: ${message}`, error);
+  appendError(`${context} (${repository.root}): ${message}`, error);
 
   const action = await showGenerationFailed(message);
   if (action === 'viewLog') {
@@ -159,6 +177,7 @@ async function handleFailureResult(
   }
 
   if (action === 'retry') {
-    await vscode.commands.executeCommand(EXTENSION_COMMAND_IDS.generateCommit);
+    // 传入仓库根路径，避免重试时重新推断甚至再次弹出仓库选择器。
+    await vscode.commands.executeCommand(EXTENSION_COMMAND_IDS.generateCommit, repository.root);
   }
 }
