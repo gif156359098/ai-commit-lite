@@ -293,7 +293,21 @@
             "**/build/**",
             "**/coverage/**",
             "**/.next/**",
-            "**/.nuxt/**"
+            "**/.nuxt/**",
+            "**/.env*",
+            "**/*.pem",
+            "**/*.p12",
+            "**/*.pfx",
+            "**/*.key",
+            "**/id_rsa*",
+            "**/id_ed25519*",
+            "**/id_ecdsa*",
+            "**/.ssh/**",
+            "**/.aws/credentials*",
+            "**/credentials*.json",
+            "**/.git-credentials",
+            "**/*.keystore",
+            "**/*.jks"
           ],
           "items": {
             "type": "string"
@@ -336,7 +350,7 @@
     "vsce": "^2.15.0"
   },
   "dependencies": {
-    "axios": "^1.6.0"
+    "axios": "^1.18.0"
   },
   "license": "MIT",
   "publisher": "shibiao"

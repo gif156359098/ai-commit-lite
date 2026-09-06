@@ -6,10 +6,9 @@ import { t } from '../i18n';
 import { checkHasStagedChanges } from './diff';
 import { GitRepository, listGitRepositories } from './repository';
 import {
+  decideRepositorySelection,
   extractRepositoryRootHint,
   findRepositoryByRoot,
-  findRepositoryContainingPath,
-  findRepositoryForWorkspaceFolder,
   isSamePath
 } from './repositoryMatching';
 
@@ -60,60 +59,32 @@ export async function resolveGitRepositoryContext(
   options: ResolveGitRepositoryOptions = {}
 ): Promise<GitRepositoryContext | undefined> {
   const candidates = (await listGitRepositories()).map(toCandidate);
-
   const hintResult = extractRepositoryRootHint(hint);
-  if (hintResult) {
-    const hinted = findRepositoryByRoot(candidates, hintResult.root);
-    if (hinted) {
-      return toContext(hinted);
+
+  // 决策逻辑（优先级与回退规则）抽离为纯函数，便于单元测试。
+  const decision = decideRepositorySelection({
+    candidates,
+    hint: hintResult,
+    activeDocumentPath: vscode.window.activeTextEditor?.document.uri.fsPath,
+    workspaceFolderPaths: (vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath),
+    interactive: options.interactive !== false
+  });
+
+  if (decision.kind === 'select') {
+    const candidate = findRepositoryByRoot(candidates, decision.root);
+    if (candidate) {
+      return toContext(candidate);
     }
 
-    // SCM 按钮 / Uri 是唯一能确定用户意图的输入；匹配失败说明生成前仓库已被
-    // 关闭、重命名或存在 symlink/junction/UNC 路径差异。此时绝不能静默推断到
-    // 其他仓库（会把提交信息写进用户没点的仓库），直接弹选择器让用户确认。
-    // 字符串 hint（失败重试内部路径）保持原有回退逻辑。
-    if (hintResult.source !== 'path-string') {
-      if (options.interactive === false) {
-        return undefined;
-      }
-
-      const picked = await pickRepository(candidates);
-      return picked ? toContext(picked) : undefined;
-    }
-  }
-
-  if (candidates.length === 1) {
-    return toContext(candidates[0]);
-  }
-
-  // 不限制 scheme：SCM 面板打开的 diff 视图使用 git scheme，但 fsPath 仍指向真实文件。
-  // 匹配不上的虚拟文档会自然落到后续回退分支。
-  const activeDocumentPath = vscode.window.activeTextEditor?.document.uri.fsPath;
-  if (activeDocumentPath) {
-    const containing = findRepositoryContainingPath(candidates, activeDocumentPath);
-    if (containing) {
-      return toContext(containing);
-    }
-  }
-
-  const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
-  if (workspaceFolders.length === 1) {
-    const withinWorkspace = findRepositoryForWorkspaceFolder(
-      candidates,
-      workspaceFolders[0].uri.fsPath
-    );
-
-    if (withinWorkspace) {
-      return toContext(withinWorkspace);
-    }
-  }
-
-  if (options.interactive === false) {
     return undefined;
   }
 
-  const picked = await pickRepository(candidates);
-  return picked ? toContext(picked) : undefined;
+  if (decision.kind === 'picker') {
+    const picked = await pickRepository(candidates);
+    return picked ? toContext(picked) : undefined;
+  }
+
+  return undefined;
 }
 
 interface RepositoryQuickPickItem extends vscode.QuickPickItem {

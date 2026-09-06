@@ -62,7 +62,22 @@ export const DEFAULT_CONTEXT_EXCLUDE_PATTERNS: string[] = [
   '**/build/**',
   '**/coverage/**',
   '**/.next/**',
-  '**/.nuxt/**'
+  '**/.nuxt/**',
+  // 密钥与凭据文件：误暂存时不应把内容发给第三方 AI
+  '**/.env*',
+  '**/*.pem',
+  '**/*.p12',
+  '**/*.pfx',
+  '**/*.key',
+  '**/id_rsa*',
+  '**/id_ed25519*',
+  '**/id_ecdsa*',
+  '**/.ssh/**',
+  '**/.aws/credentials*',
+  '**/credentials*.json',
+  '**/.git-credentials',
+  '**/*.keystore',
+  '**/*.jks'
 ];
 
 export const DEFAULT_MAX_DIFF_CHARACTERS = 24000;

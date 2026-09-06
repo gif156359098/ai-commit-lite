@@ -136,3 +136,67 @@ function readFsPath(value: unknown): string | undefined {
   const fsPath = (value as { fsPath?: unknown }).fsPath;
   return typeof fsPath === 'string' && fsPath.trim().length > 0 ? fsPath : undefined;
 }
+
+export type RepositorySelectionDecision =
+  | { readonly kind: 'select'; readonly root: string }
+  | { readonly kind: 'picker' }
+  | { readonly kind: 'none' };
+
+export interface RepositorySelectionInput<T extends RepositoryLike> {
+  readonly candidates: readonly T[];
+  readonly hint?: RepositoryRootHint;
+  readonly activeDocumentPath?: string;
+  readonly workspaceFolderPaths: readonly string[];
+  /** true = 允许弹出仓库选择器；false = 非交互（如连通性测试） */
+  readonly interactive: boolean;
+}
+
+/**
+ * 纯函数：决定仓库解析的下一步动作。
+ *
+ * 规则（优先级从高到低）：
+ * 1. hinit 命中的仓库；
+ * 2. 「用户显式提示」（SourceControl / Uri）未命中时直接让用户确认（picker/none），
+ *    绝不静默推断到其他仓库 —— 提交信息写错仓库比一次额外点击严重得多；
+ * 3. 仅有一个仓库；
+ * 4. 活动编辑器所在仓库（嵌套仓库取最内层）；
+ * 5. 仅有一个工作区文件夹时取该文件夹首选仓库；
+ * 6. 仍有歧义时交互模式弹选择器，非交互模式返回 none。
+ */
+export function decideRepositorySelection<T extends RepositoryLike>(
+  input: RepositorySelectionInput<T>
+): RepositorySelectionDecision {
+  const { candidates, hint, activeDocumentPath, workspaceFolderPaths, interactive } = input;
+
+  if (hint) {
+    const hinted = findRepositoryByRoot(candidates, hint.root);
+    if (hinted) {
+      return { kind: 'select', root: hinted.root };
+    }
+
+    if (hint.source !== 'path-string') {
+      return interactive ? { kind: 'picker' } : { kind: 'none' };
+    }
+  }
+
+  if (candidates.length === 1) {
+    return { kind: 'select', root: candidates[0].root };
+  }
+
+  if (activeDocumentPath && activeDocumentPath.trim().length > 0) {
+    const containing = findRepositoryContainingPath(candidates, activeDocumentPath);
+    if (containing) {
+      return { kind: 'select', root: containing.root };
+    }
+  }
+
+  const workspacePaths = workspaceFolderPaths.filter((p) => p.trim().length > 0);
+  if (workspacePaths.length === 1) {
+    const within = findRepositoryForWorkspaceFolder(candidates, workspacePaths[0]);
+    if (within) {
+      return { kind: 'select', root: within.root };
+    }
+  }
+
+  return interactive ? { kind: 'picker' } : { kind: 'none' };
+}
