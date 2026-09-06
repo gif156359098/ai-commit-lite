@@ -64,14 +64,14 @@ export async function runGenerateCommitMessage(
 
   try {
     if (token.isCancellationRequested) {
-      return createCancelledResult('Cancelled before staged changes were collected.');
+      return createCancelledResult(t('cancelledBeforeCollecting'));
     }
 
     progress.report({ increment: 20, message: t('collectingStagedChanges') });
     const hasStagedChanges = await checkHasStagedChanges(repository.root, abortController.signal);
 
     if (token.isCancellationRequested || abortController.signal.aborted) {
-      return createCancelledResult('Cancelled while collecting staged changes.');
+      return createCancelledResult(t('cancelledWhileCollecting'));
     }
 
     if (!hasStagedChanges) {
@@ -92,7 +92,7 @@ export async function runGenerateCommitMessage(
   } catch (error: unknown) {
     if (token.isCancellationRequested || isCancellationError(error) || abortController.signal.aborted) {
       return createCancelledResult(
-        getCancellationReason(error, 'Cancelled while collecting staged changes.')
+        getCancellationReason(error, t('cancelledWhileCollecting'))
       );
     }
 
@@ -120,7 +120,7 @@ async function generateWithAutoFallback(
 
   while (true) {
     if (token.isCancellationRequested || abortSignal.aborted) {
-      return createCancelledResult('Cancelled before the AI request started.');
+      return createCancelledResult(t('cancelledBeforeAiRequest'));
     }
 
     const config = fallbackProfileId
@@ -132,7 +132,7 @@ async function generateWithAutoFallback(
     const preparedGeneration = await prepareCommitGeneration(repository.root, config, abortSignal);
 
     if (token.isCancellationRequested || abortSignal.aborted) {
-      return createCancelledResult('Cancelled before the AI request started.');
+      return createCancelledResult(t('cancelledBeforeAiRequest'));
     }
 
     progress.report({
@@ -148,7 +148,7 @@ async function generateWithAutoFallback(
       const result = await generateCommitMessageFromPrepared(preparedGeneration, abortSignal, onInfo);
 
       if (token.isCancellationRequested || abortSignal.aborted) {
-        return createCancelledResult('Cancelled after the AI response was received.');
+        return createCancelledResult(t('cancelledAfterAiResponse'));
       }
 
       return {
@@ -164,13 +164,17 @@ async function generateWithAutoFallback(
     } catch (error: unknown) {
       if (token.isCancellationRequested || abortSignal.aborted || isCancellationError(error)) {
         return createCancelledResult(
-          getCancellationReason(error, 'Cancelled while generating the commit message.')
+          getCancellationReason(error, t('cancelledWhileGenerating'))
         );
       }
 
       const errorDetail = getDetailedErrorInfo(error);
       const retryable = isRetryableError(error);
-      onInfo?.(`Error with "${currentProfile.label}"${retryable ? '' : ' (not retryable)'}: ${errorDetail}`);
+      onInfo?.(t('errorWithProfile', {
+        profile: currentProfile.label,
+        note: retryable ? '' : t('errorNotRetryableNote'),
+        detail: errorDetail
+      }));
 
       const nextProfile = await handleProfileFailure(currentProfile.id, retryable);
       if (!nextProfile || attemptedProfileIds.has(nextProfile.id)) {
@@ -182,7 +186,7 @@ async function generateWithAutoFallback(
         increment: 0,
         message: t('retryingWithProfile', { profile: nextProfile.label })
       });
-      onInfo?.(`Auto fallback: "${currentProfile.label}" -> "${nextProfile.label}"`);
+      onInfo?.(t('autoFallbackInfo', { oldProfile: currentProfile.label, newProfile: nextProfile.label }));
     } finally {
       providerCancellationSubscription.dispose();
     }

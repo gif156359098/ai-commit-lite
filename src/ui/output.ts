@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { GenerationSummary } from '../core/generateCommitMessage';
+import { t } from '../i18n';
 import { getErrorMessage } from '../utils/errors';
 
 const OUTPUT_CHANNEL_NAME = 'AI Commit Lite';
@@ -43,25 +44,29 @@ export function appendError(message: string, error?: unknown): void {
 
 export function appendSummary(summary: GenerationSummary): void {
   const channel = getOutputChannel();
-  appendInfo('Generation summary');
-  channel.appendLine(`Repository: ${summary.repositoryLabel} (${summary.repositoryRoot})`);
-  channel.appendLine(`Profile: ${summary.profileLabel}`);
-  channel.appendLine(`Provider: ${summary.provider}`);
-  channel.appendLine(`Model: ${summary.model}`);
-  channel.appendLine(`Duration: ${summary.durationMs}ms`);
-  channel.appendLine(`Prompt characters: ${summary.promptCharacters}`);
+  appendInfo(t('generationSummaryTitle'));
+  channel.appendLine(t('summaryRepositoryLine', { label: summary.repositoryLabel, root: summary.repositoryRoot }));
+  channel.appendLine(t('summaryProfileLine', { profile: summary.profileLabel }));
+  channel.appendLine(t('summaryProviderLine', { provider: summary.provider }));
+  channel.appendLine(t('summaryModelLine', { model: summary.model }));
+  channel.appendLine(t('summaryDurationLine', { duration: summary.durationMs }));
+  channel.appendLine(t('summaryPromptCharactersLine', { count: summary.promptCharacters }));
 
   if (summary.tokenUsage) {
     channel.appendLine(
-      `Token usage: prompt=${summary.tokenUsage.prompt ?? '[n/a]'}, completion=${summary.tokenUsage.completion ?? '[n/a]'}, total=${summary.tokenUsage.total ?? '[n/a]'}`
+      t('summaryTokenUsageLine', {
+        prompt: summary.tokenUsage.prompt ?? '[n/a]',
+        completion: summary.tokenUsage.completion ?? '[n/a]',
+        total: summary.tokenUsage.total ?? '[n/a]'
+      })
     );
   }
 
-  appendList(channel, `Staged files (${summary.stagedCount})`, summary.stagedFiles);
-  appendList(channel, `Included files (${summary.includedFiles.length})`, summary.includedFiles);
+  appendList(channel, t('summaryStagedFilesLine', { count: summary.stagedCount }), summary.stagedFiles);
+  appendList(channel, t('summaryIncludedFilesLine', { count: summary.includedFiles.length }), summary.includedFiles);
   appendFilteredList(channel, summary.filteredFiles);
-  appendList(channel, `Summarized files (${summary.summarizedFiles.length})`, summary.summarizedFiles);
-  appendList(channel, `Truncated files (${summary.truncatedFiles.length})`, summary.truncatedFiles);
+  appendList(channel, t('summarySummarizedFilesLine', { count: summary.summarizedFiles.length }), summary.summarizedFiles);
+  appendList(channel, t('summaryTruncatedFilesLine', { count: summary.truncatedFiles.length }), summary.truncatedFiles);
   channel.appendLine('');
 }
 
@@ -77,7 +82,7 @@ function appendList(
   channel.appendLine(title);
 
   if (items.length === 0) {
-    channel.appendLine('- none');
+    channel.appendLine(`- ${t('summaryNoneItem')}`);
     return;
   }
 
@@ -90,10 +95,10 @@ function appendFilteredList(
   channel: vscode.OutputChannel,
   items: Array<{ file: string; reason: string }>
 ): void {
-  channel.appendLine(`Filtered files (${items.length})`);
+  channel.appendLine(t('summaryFilteredFilesLine', { count: items.length }));
 
   if (items.length === 0) {
-    channel.appendLine('- none');
+    channel.appendLine(`- ${t('summaryNoneItem')}`);
     return;
   }
 
