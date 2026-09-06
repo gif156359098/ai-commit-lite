@@ -68,12 +68,28 @@ test('findRepositoryForWorkspaceFolder prefers an exact match, then the outermos
 
 test('extractRepositoryRootHint reads the SourceControl passed by the SCM title button', () => {
   const sourceControl = { id: 'git', label: 'Git', rootUri: { fsPath: SIBLING } };
-  assert.equal(extractRepositoryRootHint(sourceControl), SIBLING);
+  assert.deepEqual(extractRepositoryRootHint(sourceControl), {
+    root: SIBLING,
+    source: 'source-control'
+  });
 });
 
 test('extractRepositoryRootHint accepts a Uri-like value or a plain path', () => {
-  assert.equal(extractRepositoryRootHint({ fsPath: OUTER }), OUTER);
-  assert.equal(extractRepositoryRootHint(OUTER), OUTER);
+  assert.deepEqual(extractRepositoryRootHint({ fsPath: OUTER }), {
+    root: OUTER,
+    source: 'uri'
+  });
+  assert.deepEqual(extractRepositoryRootHint(OUTER), {
+    root: OUTER,
+    source: 'path-string'
+  });
+});
+
+test('extractRepositoryRootHint trims whitespace from string hints', () => {
+  assert.deepEqual(extractRepositoryRootHint(`  ${SIBLING}  `), {
+    root: SIBLING,
+    source: 'path-string'
+  });
 });
 
 test('extractRepositoryRootHint ignores argument shapes that carry no repository root', () => {

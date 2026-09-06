@@ -27,6 +27,18 @@ export function readAICommitConfigValue<T>(key: string, defaultValue: T): T {
   return currentConfig.get(key, defaultValue);
 }
 
+/**
+ * 仅读取应用全局（user settings）层的配置值，忽略 workspace / workspace folder 覆盖。
+ *
+ * profile 相关的敏感配置（profiles/activeProfile/profileFallbackOrder 等）必须通过此
+ * 函数读取：API key 由 profile id 关联全局 SecretStorage，若允许恶意仓库通过
+ * .vscode/settings.json 覆盖 baseUrl 或 profile id，会形成"密钥重定向"攻击通道。
+ */
+export function readGlobalAICommitConfigValue<T>(key: string, defaultValue: T): T {
+  const globalValue = getAICommitWorkspaceConfig().inspect(key)?.globalValue;
+  return globalValue === undefined ? defaultValue : (globalValue as T);
+}
+
 export async function updateAICommitConfigValue<T>(
   key: string,
   value: T,

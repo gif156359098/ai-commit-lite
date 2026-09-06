@@ -136,6 +136,8 @@
   "defaultFallbackOrder": "デフォルト順",
   "skippedWhileActive": "アクティブ中はスキップ",
   "prioritizeFallbackAction": "優先対象に追加",
+  "moveFallbackEarlierAction": "上へ移動",
+  "moveFallbackLaterAction": "下へ移動",
   "useDefaultFallbackOrderAction": "デフォルト順を使用",
   "autoFallbackDisabledNotice": "自動フォールバックはオフです。優先度は保存されますが、アクティブなプロファイルのリクエストが失敗しても、設定で有効にするまで予備プロファイルへは自動切り替えされません。",
   "failedToUpdateFallbackOrder": "フォールバック順序の更新に失敗しました: {message}",

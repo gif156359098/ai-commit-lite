@@ -8,6 +8,15 @@ export interface RepositoryLike {
   readonly root: string;
 }
 
+/** 仓库根提示的来源：决定其权威性 */
+export type RepositoryHintSource = 'source-control' | 'uri' | 'path-string';
+
+/** 从命令实参中提取到的仓库根路径提示及其来源 */
+export interface RepositoryRootHint {
+  readonly root: string;
+  readonly source: RepositoryHintSource;
+}
+
 /**
  * 从命令实参中提取仓库根路径提示。
  *
@@ -16,10 +25,13 @@ export interface RepositoryLike {
  * 其余入口（命令面板、快捷键）不携带实参，返回 undefined 由调用方回退。
  *
  * 采用结构化判断而非 instanceof，以同时兼容 SourceControl、Uri 与纯路径字符串。
+ * 返回来源标签：调用方必须区分「用户明确点击的仓库」（匹配失败时应让用户确认，
+ * 绝不能静默推断）与「内部重试传入的根路径字符串」（可安全回退）。
  */
-export function extractRepositoryRootHint(hint: unknown): string | undefined {
+export function extractRepositoryRootHint(hint: unknown): RepositoryRootHint | undefined {
   if (typeof hint === 'string') {
-    return hint.trim().length > 0 ? hint : undefined;
+    const root = hint.trim();
+    return root.length > 0 ? { root, source: 'path-string' } : undefined;
   }
 
   if (typeof hint !== 'object' || hint === null) {
@@ -30,11 +42,16 @@ export function extractRepositoryRootHint(hint: unknown): string | undefined {
   const rootUri = (hint as { rootUri?: unknown }).rootUri;
   const rootUriPath = readFsPath(rootUri);
   if (rootUriPath) {
-    return rootUriPath;
+    return { root: rootUriPath, source: 'source-control' };
   }
 
   // Uri：{ fsPath: string }
-  return readFsPath(hint);
+  const uriPath = readFsPath(hint);
+  if (uriPath) {
+    return { root: uriPath, source: 'uri' };
+  }
+
+  return undefined;
 }
 
 export function isSamePath(left: string, right: string): boolean {

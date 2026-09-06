@@ -136,6 +136,8 @@
   "defaultFallbackOrder": "Ordine predefinito",
   "skippedWhileActive": "Saltato mentre è attivo",
   "prioritizeFallbackAction": "Dai priorità",
+  "moveFallbackEarlierAction": "Sposta prima",
+  "moveFallbackLaterAction": "Sposta dopo",
   "useDefaultFallbackOrderAction": "Usa l'ordine predefinito",
   "autoFallbackDisabledNotice": "Il fallback automatico è disattivato. Le priorità vengono salvate, ma se la richiesta del profilo attivo non riesce, nessun profilo di riserva verrà usato finché non lo abiliti nelle impostazioni.",
   "failedToUpdateFallbackOrder": "Impossibile aggiornare l'ordine di fallback: {message}",

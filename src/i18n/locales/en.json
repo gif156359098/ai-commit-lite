@@ -136,6 +136,8 @@
   "defaultFallbackOrder": "Default order",
   "skippedWhileActive": "Skipped while active",
   "prioritizeFallbackAction": "Prioritize",
+  "moveFallbackEarlierAction": "Move earlier",
+  "moveFallbackLaterAction": "Move later",
   "useDefaultFallbackOrderAction": "Use default order",
   "autoFallbackDisabledNotice": "Automatic fallback is off. Priorities are saved, but if the active profile request fails, no backup profile will be used until you enable it in Settings.",
   "failedToUpdateFallbackOrder": "Failed to update fallback order: {message}",

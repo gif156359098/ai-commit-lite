@@ -136,6 +136,8 @@
   "defaultFallbackOrder": "Standardreihenfolge",
   "skippedWhileActive": "Beim aktiven Profil übersprungen",
   "prioritizeFallbackAction": "Priorisieren",
+  "moveFallbackEarlierAction": "Nach oben verschieben",
+  "moveFallbackLaterAction": "Nach unten verschieben",
   "useDefaultFallbackOrderAction": "Standardreihenfolge verwenden",
   "autoFallbackDisabledNotice": "Automatischer Fallback ist deaktiviert. Die Prioritäten werden gespeichert, aber wenn die Anfrage des aktiven Profils fehlschlägt, wird kein Ersatzprofil verwendet, bis Sie ihn in den Einstellungen aktivieren.",
   "failedToUpdateFallbackOrder": "Fallback-Reihenfolge konnte nicht aktualisiert werden: {message}",

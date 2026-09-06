@@ -2,7 +2,7 @@
   "name": "ai-commit-lite",
   "displayName": "%aiCommitLite.displayName%",
   "description": "%aiCommitLite.description%",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "icon": "icon.png",
   "repository": {
     "type": "git",
@@ -158,6 +158,7 @@
           "type": "array",
           "default": [],
           "order": 10,
+          "scope": "application",
           "description": "%aiCommitLite.profiles%",
           "items": {
             "type": "object",
@@ -207,18 +208,21 @@
           "type": "string",
           "default": "",
           "order": 11,
+          "scope": "application",
           "description": "%aiCommitLite.activeProfile%"
         },
         "aiCommitLite.enableAutoFallback": {
           "type": "boolean",
           "default": true,
           "order": 12,
+          "scope": "application",
           "description": "%aiCommitLite.enableAutoFallback%"
         },
         "aiCommitLite.profileFallbackOrder": {
           "type": "array",
           "default": [],
           "order": 13,
+          "scope": "application",
           "description": "%aiCommitLite.profileFallbackOrder%",
           "items": {
             "type": "string"
