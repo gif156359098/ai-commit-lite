@@ -21,7 +21,7 @@ export class GeminiProvider extends BaseAIProvider {
 
     try {
       const response = await this.client.post(
-        `${this.apiEndpoint}/models/${this.model}:generateContent?key=${this.apiKey}`,
+        `${this.apiEndpoint}/models/${this.model}:generateContent`,
         {
           contents: [
             {
@@ -37,6 +37,9 @@ export class GeminiProvider extends BaseAIProvider {
           }
         },
         {
+          // 官方推荐使用 x-goog-api-key 请求头而非 URL query：避免 key 被
+          // 代理/访问日志/诊断链路记录，也避免 axios 跨域重定向转发 query。
+          headers: { 'x-goog-api-key': this.apiKey },
           cancelToken: cancelTokenSource.token,
           signal: abortSignal
         }

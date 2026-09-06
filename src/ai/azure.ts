@@ -22,7 +22,13 @@ export class AzureOpenAIProvider extends BaseAIProvider {
     const cancelTokenSource = this.createCancelToken();
 
     try {
-      const requestUrl = `${this.apiEndpoint}/openai/deployments/${this.model}/chat/completions?api-version=${AZURE_API_VERSION}`;
+      // 兼容两种端点风格：用户的 apiEndpoint 可已通过 query 指定 api-version
+      //（新式部署），此时不再强制附加旧版本号。
+      const endpointUrl = new URL(`${this.apiEndpoint.replace(/\/+$/, '')}/openai/deployments/${encodeURIComponent(this.model)}/chat/completions`);
+      if (!endpointUrl.searchParams.has('api-version')) {
+        endpointUrl.searchParams.set('api-version', AZURE_API_VERSION);
+      }
+      const requestUrl = endpointUrl.toString();
       const requestConfig = {
         headers: {
           'api-key': this.apiKey

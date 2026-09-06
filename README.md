@@ -68,6 +68,10 @@ git add .
 
 *需要自定义 Endpoint：Azure OpenAI、OpenAI-Compatible*
 
+> 各供应商默认模型（在 Profile 管理中可修改）：OpenAI `gpt-5.6-terra`、DeepSeek `deepseek-v4-flash`、Gemini `gemini-3.8-flash`、Anthropic `claude-sonnet-4-6`、Cohere `command-a-plus-05-2026`、Mistral `mistral-small-latest`、DashScope `qwen-plus`。
+>
+> ⚠️ 旧模型退役提示：DeepSeek `deepseek-chat`/`deepseek-reasoner`（2026-07-24 已退役）与 Anthropic `claude-sonnet-4-20250514`（2026-06-15 已退役）已在官方下线，请勿继续在 Profile 中使用；OpenAI 新一代模型（GPT-5+ 系列）由扩展自动适配参数。
+
 ### 常用命令
 
 | 命令 | 说明 |
@@ -114,6 +118,11 @@ git add .
 
 **推理模型返回格式不对？**
 保持 `commitMessageStyle = detailed`，扩展会自动修正格式。
+
+**多仓库（Multi-root）场景怎么工作？**
+- 点击 SCM 标题栏按钮会精确作用于你点击的那个仓库；
+- 命令面板 / 快捷键触发时按「活动编辑器 → 单工作区文件夹 → 弹选择器」的顺序定位；
+- 默认排除列表已包含 .env、私钥（*.pem/*.key）、AWS/SSH 凭据等敏感文件，避免误暂存时外送；你也可以在 `contextExcludePatterns` 中追加。
 
 ---
 
@@ -208,6 +217,10 @@ Yes, 10 languages: English, Simplified Chinese, Japanese, Korean, Spanish, Frenc
 
 *Custom endpoint required: Azure OpenAI, OpenAI-Compatible*
 
+> Default models (changeable in Profile Manager): OpenAI `gpt-5.6-terra`, DeepSeek `deepseek-v4-flash`, Gemini `gemini-3.8-flash`, Anthropic `claude-sonnet-4-6`, Cohere `command-a-plus-05-2026`, Mistral `mistral-small-latest`, DashScope `qwen-plus`.
+>
+> ⚠️ Retired model names: DeepSeek `deepseek-chat`/`deepseek-reasoner` (retired 2026-07-24) and Anthropic `claude-sonnet-4-20250514` (retired 2026-06-15) are no longer available; remove them from your profiles. OpenAI's next-generation models (GPT-5+) are handled automatically by the extension.
+
 ### Commands
 
 | Command | Description |
@@ -251,6 +264,11 @@ Run `git add .` to stage files first.
 **Hit rate limit or quota?**
 1. Make sure `enableAutoFallback` is enabled
 2. Set fallback priority on profile cards in Profile Manager
+
+**Multi-root workspaces?**
+- Clicking the SCM title button targets exactly the repository you clicked;
+- Command Palette / shortcut resolve by "active editor → single workspace folder → picker" in that order;
+- The default exclude list already covers `.env`, private keys (`*.pem`/`*.key`), AWS/SSH credentials and similar sensitive files so they are never sent to third-party AI.
 
 **Reasoning model returns wrong format?**
 Keep `commitMessageStyle = detailed`, the extension will auto-fix the format.
