@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HolyeTyrone/ai-commit-lite.git"
+    "url": "https://github.com/gif156359098/ai-commit-lite.git"
   },
   "engines": {
     "vscode": "^1.80.0"

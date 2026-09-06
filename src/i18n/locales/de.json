@@ -20,7 +20,7 @@
   "openGitRepository": "Bitte öffnen Sie ein Git-Repository in VS Code.",
   "builtInGitUnavailable": "Die integrierte Git-Erweiterung ist nicht verfügbar.",
   "repositoryNotFoundInSourceControl": "Das Git-Repository konnte in der Quellcodeverwaltung nicht gefunden werden.",
-  "noStagedChangesInRepository": "Keine bereitgestellten Änderungen im Repository „{repository}“ gefunden. Bitte stelle deine Änderungen zuerst bereit.",
+  "noStagedChangesInRepository": "Keine bereitgestellten Änderungen im Repository „{repository}“ gefunden. Bitte stellen Sie Ihre Änderungen zuerst bereit.",
   "selectGitRepository": "Git-Repository für die Commit-Nachricht auswählen",
   "repositoryHasStagedChanges": "Hat bereitgestellte Änderungen",
   "repositoryNoStagedChanges": "Keine bereitgestellten Änderungen",

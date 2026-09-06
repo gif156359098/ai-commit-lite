@@ -6,6 +6,6 @@ export async function fillSourceControlInputBox(
   repository: GitRepositoryContext,
   message: string
 ): Promise<void> {
-  repository.setCommitInput(message);
+  await repository.setCommitInput(message);
   await vscode.commands.executeCommand('workbench.view.scm');
 }

@@ -9,7 +9,8 @@ import {
   extractRepositoryRootHint,
   findRepositoryByRoot,
   findRepositoryContainingPath,
-  findRepositoryForWorkspaceFolder
+  findRepositoryForWorkspaceFolder,
+  isSamePath
 } from './repositoryMatching';
 
 /**
@@ -24,7 +25,7 @@ export interface GitRepositoryContext {
   /** 仓库显示名，用于日志与错误提示 */
   readonly label: string;
   /** 写回该仓库的“源代码管理”输入框 */
-  setCommitInput(value: string): void;
+  setCommitInput(value: string): Promise<void>;
 }
 
 interface RepositoryCandidate {
@@ -63,11 +64,11 @@ export async function resolveGitRepositoryContext(
   const hintedRoot = extractRepositoryRootHint(hint);
   if (hintedRoot) {
     const hinted = findRepositoryByRoot(candidates, hintedRoot);
-    if (!hinted) {
-      throw new Error(t('repositoryNotFoundInSourceControl'));
+    // hint 未匹配（符号链接/junction/UNC 等路径差异）时回退到下面的消歧流程，
+    // 而不是直接报错，避免合法的 SCM 按钮操作因此失败。
+    if (hinted) {
+      return toContext(hinted);
     }
-
-    return toContext(hinted);
   }
 
   if (candidates.length === 1) {
@@ -169,8 +170,19 @@ function toContext(candidate: RepositoryCandidate): GitRepositoryContext {
   return {
     root: candidate.root,
     label: candidate.label,
-    setCommitInput: (value: string): void => {
-      candidate.repository.inputBox.value = value;
+    setCommitInput: async (value: string): Promise<void> => {
+      // 生成期间仓库可能被关闭、重命名或重新打开，vscode.git 的运行时对象会失效；
+      // 写回时按 root 从最新仓库列表中重新查找，避免写入陈旧对象。
+      const repositories = await listGitRepositories();
+      const current = repositories.find((repository) =>
+        isSamePath(repository.rootUri.fsPath, candidate.root)
+      );
+
+      if (!current) {
+        throw new Error(t('repositoryNotFoundInSourceControl'));
+      }
+
+      current.inputBox.value = value;
     }
   };
 }

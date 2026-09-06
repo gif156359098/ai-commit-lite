@@ -45,14 +45,8 @@ export function generateCommitCommand(
         return;
       }
 
-      // 在启动生成前解析一次仓库，后续所有环节复用，避免中途活动编辑器变化导致
-      // diff 来源仓库与写回目标仓库不一致。
-      const repository = await resolveGitRepositoryContext(hint);
-      if (!repository) {
-        appendInfo('Commit generation skipped: repository selection was dismissed.');
-        return;
-      }
-
+      // 先占用生成锁再解析仓库：并发触发时第二次调用立即提示"正在运行"，
+      // 而不是重复弹出仓库选择器。
       const runId = generationController.tryStart();
       if (runId === null) {
         showAlreadyRunningStatus(2500);
@@ -66,6 +60,25 @@ export function generateCommitCommand(
           finished = true;
         }
       };
+
+      // 在启动生成前解析一次仓库，后续所有环节复用，避免中途活动编辑器变化导致
+      // diff 来源仓库与写回目标仓库不一致。
+      let repository: GitRepositoryContext | undefined;
+      try {
+        repository = await resolveGitRepositoryContext(hint);
+      } catch (error: unknown) {
+        finish();
+        const message = getErrorMessage(error);
+        appendError(`Unexpected command error: ${message}`, error);
+        vscode.window.showErrorMessage(t('errorPrefix', { message }));
+        return;
+      }
+
+      if (!repository) {
+        finish();
+        appendInfo('Commit generation skipped: repository selection was dismissed.');
+        return;
+      }
 
       appendInfo(`Commit generation started for repository: ${repository.root}`);
 
