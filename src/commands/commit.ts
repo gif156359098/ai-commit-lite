@@ -69,18 +69,18 @@ export function generateCommitCommand(
       } catch (error: unknown) {
         finish();
         const message = getErrorMessage(error);
-        appendError(`Unexpected command error: ${message}`, error);
+        appendError(t('unexpectedCommandError', { message }), error);
         vscode.window.showErrorMessage(t('errorPrefix', { message }));
         return;
       }
 
       if (!repository) {
         finish();
-        appendInfo('Commit generation skipped: repository selection was dismissed.');
+        appendInfo(t('commitGenerationSkippedNoRepository'));
         return;
       }
 
-      appendInfo(`Commit generation started for repository: ${repository.root}`);
+      appendInfo(t('commitGenerationStartedForRepository', { repository: repository.root }));
 
       let progressToken: vscode.CancellationToken | undefined;
       let result: GenerateCommitResult;
@@ -129,7 +129,7 @@ export function generateCommitCommand(
       await handleFailureResult(result.error, repository);
     } catch (error: unknown) {
       const message = getErrorMessage(error);
-      appendError(`Unexpected command error: ${message}`, error);
+      appendError(t('unexpectedCommandError', { message }), error);
       vscode.window.showErrorMessage(t('errorPrefix', { message }));
     }
   };
@@ -144,13 +144,13 @@ async function handleSuccessResult(
 ): Promise<void> {
   if (token.isCancellationRequested || !generationController.isActive(runId)) {
     finish();
-    handleCancelledResult('Cancelled before updating the Source Control input box.');
+    handleCancelledResult(t('cancelledBeforeUpdatingInputBox'));
     return;
   }
 
   try {
     await fillSourceControlInputBox(repository, result.message);
-    appendInfo('Commit message written to the Source Control input box.');
+    appendInfo(t('commitMessageWrittenToInputBox'));
     appendSummary(result.summary);
     showSuccessStatus(getSuccessStatusMessage(result.summary));
     finish();
@@ -160,16 +160,16 @@ async function handleSuccessResult(
     await handleFailureResult(
       error,
       repository,
-      'Failed to update the Source Control input box'
+      t('failedToUpdateInputBox')
     );
   }
 }
 
 function handleCancelledResult(reason?: string): void {
   if (reason) {
-    appendInfo(`Commit generation cancelled: ${reason}`);
+    appendInfo(t('commitGenerationCancelledWithReason', { reason }));
   } else {
-    appendInfo('Commit generation cancelled.');
+    appendInfo(t('commitGenerationCancelled'));
   }
 
   showCancelledStatus();
@@ -178,7 +178,7 @@ function handleCancelledResult(reason?: string): void {
 async function handleFailureResult(
   error: unknown,
   repository: GitRepositoryContext,
-  context: string = 'Commit generation failed'
+  context: string = t('commitGenerationFailed')
 ): Promise<void> {
   const message = getErrorMessage(error);
   appendError(`${context} (${repository.root}): ${message}`, error);

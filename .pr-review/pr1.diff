@@ -1,0 +1,1247 @@
+diff --git a/.gitignore b/.gitignore
+index 9cd1293..b6df7e3 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,4 +11,5 @@ dist
+ coverage/
+ .opencode/
+ .claude/
+-docs/superpowers/*
+\ No newline at end of file
++docs/superpowers/*
++.serena/
+\ No newline at end of file
+diff --git a/.vscodeignore b/.vscodeignore
+index eed9f6e..8a91467 100644
+--- a/.vscodeignore
++++ b/.vscodeignore
+@@ -3,6 +3,7 @@
+ .vscode/**
+ .claude/**
+ .opencode/**
++.serena/**
+ docs/**
+ scripts/**
+ src/**
+@@ -18,4 +19,6 @@ tsconfig*.json
+ !README*.md
+ logs
+ coverage
+-pnpm-lock.yaml
+\ No newline at end of file
++pnpm-lock.yaml
++.gitignore
++.gitattributes
+\ No newline at end of file
+diff --git a/package-lock.json b/package-lock.json
+index e308207..b51dd11 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,13 +1,12 @@
+ {
+   "name": "ai-commit-lite",
+-  "version": "1.3.3",
++  "version": "1.3.6",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ai-commit-lite",
+-      "version": "1.3.3",
+-      "hasInstallScript": true,
++      "version": "1.3.6",
+       "license": "MIT",
+       "dependencies": {
+         "axios": "^1.6.0"
+diff --git a/package.json b/package.json
+index 55fa0f0..4685eeb 100644
+--- a/package.json
++++ b/package.json
+@@ -6,7 +6,7 @@
+   "icon": "icon.png",
+   "repository": {
+     "type": "git",
+-    "url": "https://github.com/gif156359098/ai-commit-lite.git"
++    "url": "https://github.com/HolyeTyrone/ai-commit-lite.git"
+   },
+   "engines": {
+     "vscode": "^1.80.0"
+@@ -307,7 +307,6 @@
+     ]
+   },
+   "scripts": {
+-    "install": "npm install",
+     "watch": "node scripts/build.mjs --mode development --watch",
+     "vscode:prepublish": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.webview.json --noEmit && tsc -p tsconfig.test.json && node --test \"out-test/test/**/*.test.js\" && node scripts/build.mjs --mode production",
+     "typecheck:extension": "tsc -p tsconfig.json --noEmit",
+diff --git a/src/activation/commandRegistration.ts b/src/activation/commandRegistration.ts
+index 982c121..0b1cbe5 100644
+--- a/src/activation/commandRegistration.ts
++++ b/src/activation/commandRegistration.ts
+@@ -12,13 +12,19 @@ import { EXTENSION_COMMAND_IDS } from './extensionManifest';
+ 
+ interface RuntimeCommandDefinition {
+   id: string;
+-  handler: () => unknown;
++  /**
++   * 必须透传实参：VS Code 在点击 `scm/title` 按钮时会把对应的 SourceControl
++   * 作为第一个实参传入，这是多仓库场景下定位目标仓库的唯一依据。
++   */
++  handler: (...args: unknown[]) => unknown;
+ }
+ 
+ export function registerExtensionCommands(context: vscode.ExtensionContext): void {
+   const commandDefinitions = getRuntimeCommandDefinitions(context.extensionUri);
+   const disposables = commandDefinitions.map((definition) =>
+-    vscode.commands.registerCommand(definition.id, definition.handler)
++    vscode.commands.registerCommand(definition.id, (...args: unknown[]) =>
++      definition.handler(...args)
++    )
+   );
+ 
+   context.subscriptions.push(...disposables);
+diff --git a/src/commands/commit.ts b/src/commands/commit.ts
+index 33c65e5..b671316 100644
+--- a/src/commands/commit.ts
++++ b/src/commands/commit.ts
+@@ -9,6 +9,7 @@ import {
+   runGenerateCommitMessage
+ } from '../core/generateCommitMessage';
+ import { fillSourceControlInputBox } from '../git/scm';
++import { GitRepositoryContext, resolveGitRepositoryContext } from '../git/repositoryContext';
+ import { t } from '../i18n';
+ import { showGenerationFailed } from '../ui/notifications';
+ import { appendError, appendInfo, appendSummary, showLog } from '../ui/output';
+@@ -23,8 +24,10 @@ import { ensureProfilesForCommand } from './profileCommandGate';
+ 
+ type SuccessfulGenerateCommitResult = Extract<GenerateCommitResult, { type: 'success' }>;
+ 
+-export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<void> {
+-  return async (): Promise<void> => {
++export function generateCommitCommand(
++  extensionUri: vscode.Uri
++): (hint?: unknown) => Promise<void> {
++  return async (hint?: unknown): Promise<void> => {
+     try {
+       const hasProfiles = await ensureProfilesForCommand(extensionUri);
+       if (!hasProfiles) {
+@@ -42,6 +45,14 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
+         return;
+       }
+ 
++      // 在启动生成前解析一次仓库，后续所有环节复用，避免中途活动编辑器变化导致
++      // diff 来源仓库与写回目标仓库不一致。
++      const repository = await resolveGitRepositoryContext(hint);
++      if (!repository) {
++        appendInfo('Commit generation skipped: repository selection was dismissed.');
++        return;
++      }
++
+       const runId = generationController.tryStart();
+       if (runId === null) {
+         showAlreadyRunningStatus(2500);
+@@ -56,7 +67,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
+         }
+       };
+ 
+-      appendInfo('Commit generation started.');
++      appendInfo(`Commit generation started for repository: ${repository.root}`);
+ 
+       let progressToken: vscode.CancellationToken | undefined;
+       let result: GenerateCommitResult;
+@@ -74,13 +85,14 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
+ 
+           return await runGenerateCommitMessage({
+             progress,
++            repository,
+             token,
+             onInfo: appendInfo
+           });
+         });
+       } catch (error: unknown) {
+         finish();
+-        await handleFailureResult(error);
++        await handleFailureResult(error, repository);
+         return;
+       }
+ 
+@@ -90,7 +102,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
+       }
+ 
+       if (result.type === 'success') {
+-        await handleSuccessResult(result, progressToken, runId, finish);
++        await handleSuccessResult(result, repository, progressToken, runId, finish);
+         return;
+       }
+ 
+@@ -101,7 +113,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
+         return;
+       }
+ 
+-      await handleFailureResult(result.error);
++      await handleFailureResult(result.error, repository);
+     } catch (error: unknown) {
+       const message = getErrorMessage(error);
+       appendError(`Unexpected command error: ${message}`, error);
+@@ -112,6 +124,7 @@ export function generateCommitCommand(extensionUri: vscode.Uri): () => Promise<v
+ 
+ async function handleSuccessResult(
+   result: SuccessfulGenerateCommitResult,
++  repository: GitRepositoryContext,
+   token: vscode.CancellationToken,
+   runId: number,
+   finish: () => void
+@@ -123,7 +136,7 @@ async function handleSuccessResult(
+   }
+ 
+   try {
+-    await fillSourceControlInputBox(result.message);
++    await fillSourceControlInputBox(repository, result.message);
+     appendInfo('Commit message written to the Source Control input box.');
+     appendSummary(result.summary);
+     showSuccessStatus(getSuccessStatusMessage(result.summary));
+@@ -131,7 +144,11 @@ async function handleSuccessResult(
+   } catch (error: unknown) {
+     appendSummary(result.summary);
+     finish();
+-    await handleFailureResult(error, 'Failed to update the Source Control input box');
++    await handleFailureResult(
++      error,
++      repository,
++      'Failed to update the Source Control input box'
++    );
+   }
+ }
+ 
+@@ -147,10 +164,11 @@ function handleCancelledResult(reason?: string): void {
+ 
+ async function handleFailureResult(
+   error: unknown,
++  repository: GitRepositoryContext,
+   context: string = 'Commit generation failed'
+ ): Promise<void> {
+   const message = getErrorMessage(error);
+-  appendError(`${context}: ${message}`, error);
++  appendError(`${context} (${repository.root}): ${message}`, error);
+ 
+   const action = await showGenerationFailed(message);
+   if (action === 'viewLog') {
+@@ -159,6 +177,7 @@ async function handleFailureResult(
+   }
+ 
+   if (action === 'retry') {
+-    await vscode.commands.executeCommand(EXTENSION_COMMAND_IDS.generateCommit);
++    // 传入仓库根路径，避免重试时重新推断甚至再次弹出仓库选择器。
++    await vscode.commands.executeCommand(EXTENSION_COMMAND_IDS.generateCommit, repository.root);
+   }
+ }
+diff --git a/src/commands/profileConnectionTester.ts b/src/commands/profileConnectionTester.ts
+index e3053f9..a2e5675 100644
+--- a/src/commands/profileConnectionTester.ts
++++ b/src/commands/profileConnectionTester.ts
+@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
+ import { createAIProvider } from '../ai/providerFactory';
+ import { CommitContext } from '../ai/providers';
+ import { checkHasStagedChanges, getStagedDiff } from '../git/diff';
++import { resolveGitRepositoryContext } from '../git/repositoryContext';
+ import { getProviderDefinition } from '../ai/providerRegistry';
+ import { getProfileApiKey, getProfiles } from '../config/profileManager';
+ import { getConfig } from '../config/settings';
+@@ -80,18 +81,26 @@ export async function testProfileConnection(profileId: string): Promise<TestConn
+   }
+ }
+ 
+-async function getRealDiffForTest(abortSignal?: AbortSignal): Promise<string> {
+-  const hasStaged = await checkHasStagedChanges(abortSignal);
+-  if (!hasStaged) {
+-    return `diff --git a/test.ts b/test.ts
++const SYNTHETIC_TEST_DIFF = `diff --git a/test.ts b/test.ts
+ --- a/test.ts
+ +++ b/test.ts
+ @@ -1,3 +1,4 @@
+ +// Test line for API validation`;
++
++async function getRealDiffForTest(abortSignal?: AbortSignal): Promise<string> {
++  // 连通性测试不应打断用户，因此禁用仓库选择器；无法确定仓库时直接用合成 diff。
++  const repository = await resolveTestRepository();
++  if (!repository) {
++    return SYNTHETIC_TEST_DIFF;
++  }
++
++  const hasStaged = await checkHasStagedChanges(repository.root, abortSignal);
++  if (!hasStaged) {
++    return SYNTHETIC_TEST_DIFF;
+   }
+ 
+   try {
+-    const diff = await getStagedDiff();
++    const diff = await getStagedDiff(repository.root);
+     const firstFile = diff.files[0];
+     if (firstFile) {
+       return `[Testing API with sample diff content for: ${firstFile.path}]
+@@ -107,6 +116,15 @@ This is a test request to validate the API connection.`;
+   return '[Test request to validate API connection]';
+ }
+ 
++async function resolveTestRepository(): Promise<{ root: string } | undefined> {
++  try {
++    return await resolveGitRepositoryContext(undefined, { interactive: false });
++  } catch {
++    // 没有打开仓库不应导致连通性测试失败
++    return undefined;
++  }
++}
++
+ export function showTestErrorNotification(profileLabel: string, errorMessage: string): void {
+   const channel = getTestOutputChannel();
+   channel.clear();
+diff --git a/src/commit/generator.ts b/src/commit/generator.ts
+index 10f4b74..bf37b93 100644
+--- a/src/commit/generator.ts
++++ b/src/commit/generator.ts
+@@ -17,14 +17,8 @@ export interface PreparedCommitGeneration {
+   preparedDiff: PreparedGitDiff;
+ }
+ 
+-export async function generateCommitMessage(
+-  config: AICommitConfigWithProfile
+-): Promise<CommitGenerationResult> {
+-  const preparedGeneration = await prepareCommitGeneration(config);
+-  return generateCommitMessageFromPrepared(preparedGeneration);
+-}
+-
+ export async function prepareCommitGeneration(
++  repositoryRoot: string,
+   config: AICommitConfigWithProfile,
+   abortSignal?: AbortSignal
+ ): Promise<PreparedCommitGeneration> {
+@@ -38,7 +32,7 @@ export async function prepareCommitGeneration(
+     customSystemPrompt: config.customSystemPrompt
+   };
+ 
+-  const preparedDiff = await getPreparedStagedDiff({
++  const preparedDiff = await getPreparedStagedDiff(repositoryRoot, {
+     excludePatterns: config.contextExcludePatterns,
+     maxDiffCharacters: config.maxDiffCharacters,
+     maxFileDiffCharacters: config.maxFileDiffCharacters
+diff --git a/src/core/generateCommitMessage.ts b/src/core/generateCommitMessage.ts
+index 129a3b8..4e3f6c6 100644
+--- a/src/core/generateCommitMessage.ts
++++ b/src/core/generateCommitMessage.ts
+@@ -12,12 +12,15 @@ import {
+   handleProfileFailure
+ } from '../config/profileManager';
+ import { checkHasStagedChanges } from '../git/diff';
++import { GitRepositoryContext } from '../git/repositoryContext';
+ import { t } from '../i18n';
+ import { ModelProfile } from '../types/profile';
+ import { getCancellationReason, isCancellationError } from '../utils/cancellation';
+ import { getDetailedErrorInfo, isRetryableError } from '../utils/errors';
+ 
+ export type GenerationSummary = {
++  repositoryLabel: string;
++  repositoryRoot: string;
+   stagedCount: number;
+   stagedFiles: string[];
+   includedFiles: string[];
+@@ -42,6 +45,8 @@ export type GenerateCommitResult =
+   | { type: 'failure'; error: Error | string };
+ 
+ export interface RunGenerateCommitMessageOptions {
++  /** 命令入口解析出的仓库上下文，贯穿暂存检查、diff 抓取与结果写回 */
++  repository: GitRepositoryContext;
+   progress: vscode.Progress<{ increment: number; message: string }>;
+   token: vscode.CancellationToken;
+   onInfo?: (message: string) => void;
+@@ -50,7 +55,7 @@ export interface RunGenerateCommitMessageOptions {
+ export async function runGenerateCommitMessage(
+   options: RunGenerateCommitMessageOptions
+ ): Promise<GenerateCommitResult> {
+-  const { progress, token, onInfo } = options;
++  const { progress, repository, token, onInfo } = options;
+   const startedAt = Date.now();
+   const abortController = new AbortController();
+   const cancellationSubscription = token.onCancellationRequested(() => {
+@@ -63,20 +68,24 @@ export async function runGenerateCommitMessage(
+     }
+ 
+     progress.report({ increment: 20, message: t('collectingStagedChanges') });
+-    const hasStagedChanges = await checkHasStagedChanges(abortController.signal);
++    const hasStagedChanges = await checkHasStagedChanges(repository.root, abortController.signal);
+ 
+     if (token.isCancellationRequested || abortController.signal.aborted) {
+       return createCancelledResult('Cancelled while collecting staged changes.');
+     }
+ 
+     if (!hasStagedChanges) {
+-      return { type: 'failure', error: new Error(t('noStagedChanges')) };
++      return {
++        type: 'failure',
++        error: new Error(t('noStagedChangesInRepository', { repository: repository.label }))
++      };
+     }
+ 
+     return await generateWithAutoFallback({
+       abortSignal: abortController.signal,
+       onInfo,
+       progress,
++      repository,
+       startedAt,
+       token
+     });
+@@ -97,6 +106,7 @@ interface GenerateWithAutoFallbackOptions {
+   abortSignal: AbortSignal;
+   onInfo?: (message: string) => void;
+   progress: vscode.Progress<{ increment: number; message: string }>;
++  repository: GitRepositoryContext;
+   startedAt: number;
+   token: vscode.CancellationToken;
+ }
+@@ -104,7 +114,7 @@ interface GenerateWithAutoFallbackOptions {
+ async function generateWithAutoFallback(
+   options: GenerateWithAutoFallbackOptions
+ ): Promise<GenerateCommitResult> {
+-  const { abortSignal, onInfo, progress, startedAt, token } = options;
++  const { abortSignal, onInfo, progress, repository, startedAt, token } = options;
+   const attemptedProfileIds = new Set<string>();
+   let fallbackProfileId: string | undefined;
+ 
+@@ -119,7 +129,7 @@ async function generateWithAutoFallback(
+     const currentProfile = config.profile;
+     attemptedProfileIds.add(currentProfile.id);
+ 
+-    const preparedGeneration = await prepareCommitGeneration(config, abortSignal);
++    const preparedGeneration = await prepareCommitGeneration(repository.root, config, abortSignal);
+ 
+     if (token.isCancellationRequested || abortSignal.aborted) {
+       return createCancelledResult('Cancelled before the AI request started.');
+@@ -147,6 +157,7 @@ async function generateWithAutoFallback(
+         summary: buildGenerationSummary(
+           preparedGeneration,
+           currentProfile,
++          repository,
+           Date.now() - startedAt
+         )
+       };
+@@ -181,12 +192,15 @@ async function generateWithAutoFallback(
+ function buildGenerationSummary(
+   preparedGeneration: PreparedCommitGeneration,
+   profile: ModelProfile,
++  repository: GitRepositoryContext,
+   durationMs: number
+ ): GenerationSummary {
+   const provider = getProviderDefinition(profile.provider).label;
+   const { files, report } = preparedGeneration.preparedDiff;
+ 
+   return {
++    repositoryLabel: repository.label,
++    repositoryRoot: repository.root,
+     stagedCount: files.length,
+     stagedFiles: files.map((file) => file.path),
+     includedFiles: report.includedFiles,
+diff --git a/src/git/diff.ts b/src/git/diff.ts
+index 160fdad..da1316c 100644
+--- a/src/git/diff.ts
++++ b/src/git/diff.ts
+@@ -6,7 +6,6 @@ import { matchesAnyGlob } from '../utils/glob';
+ import { buildPreparedDiffContext, generateSummary, getFilePriority } from './diffContextBuilder';
+ import { parseStagedFiles } from './diffParsing';
+ import { DiffContextOptions, GitDiff, GitFile, PreparedGitDiff } from './diffTypes';
+-import { getGitRepositoryRoot } from './repository';
+ 
+ const GIT_MAX_BUFFER = 20 * 1024 * 1024;
+ const DIFF_CONTEXT_LINES = 1;
+@@ -25,12 +24,12 @@ export type {
+ } from './diffTypes';
+ 
+ export async function getPreparedStagedDiff(
++  repositoryRoot: string,
+   options: DiffContextOptions,
+   abortSignal?: AbortSignal
+ ): Promise<PreparedGitDiff> {
+   try {
+-    const cwd = await getGitRepositoryRoot();
+-    const files = await getStagedFiles(cwd, abortSignal);
++    const files = await getStagedFiles(repositoryRoot, abortSignal);
+ 
+     // Pre-filter files based on metadata to optimize patch fetching
+     const preFilterResult = preFilterFiles(files, options);
+@@ -42,7 +41,7 @@ export async function getPreparedStagedDiff(
+       return buildPreparedDiffContext(files, patchMap, options);
+     }
+ 
+-    const patchMap = await getSelectivePatchMap(cwd, needsPatch, abortSignal);
++    const patchMap = await getSelectivePatchMap(repositoryRoot, needsPatch, abortSignal);
+     return buildPreparedDiffContext(files, patchMap, options);
+   } catch (error: any) {
+     if (isCancellationError(error)) {
+@@ -170,12 +169,11 @@ async function getSelectivePatchMap(
+   return patchMap;
+ }
+ 
+-export async function getStagedDiff(): Promise<GitDiff> {
++export async function getStagedDiff(repositoryRoot: string): Promise<GitDiff> {
+   try {
+-    const cwd = await getGitRepositoryRoot();
+     const [files, diffOutput] = await Promise.all([
+-      getStagedFiles(cwd),
+-      runGit(['diff', '--cached', '--no-color'], cwd)
++      getStagedFiles(repositoryRoot),
++      runGit(['diff', '--cached', '--no-color'], repositoryRoot)
+     ]);
+ 
+     return {
+@@ -192,10 +190,12 @@ export async function getStagedDiff(): Promise<GitDiff> {
+   }
+ }
+ 
+-export async function checkHasStagedChanges(abortSignal?: AbortSignal): Promise<boolean> {
++export async function checkHasStagedChanges(
++  repositoryRoot: string,
++  abortSignal?: AbortSignal
++): Promise<boolean> {
+   try {
+-    const cwd = await getGitRepositoryRoot();
+-    await runGit(['diff', '--cached', '--quiet'], cwd, abortSignal);
++    await runGit(['diff', '--cached', '--quiet'], repositoryRoot, abortSignal);
+     return false;
+   } catch (error: any) {
+     if (isCancellationError(error)) {
+diff --git a/src/git/repository.ts b/src/git/repository.ts
+index 039417c..7039676 100644
+--- a/src/git/repository.ts
++++ b/src/git/repository.ts
+@@ -1,7 +1,5 @@
+ import * as vscode from 'vscode';
+ 
+-import * as path from 'path';
+-
+ import { t } from '../i18n';
+ 
+ export interface GitExtensionExports {
+@@ -9,63 +7,30 @@ export interface GitExtensionExports {
+ }
+ 
+ export interface GitAPI {
+-  repositories: GitRepository[];
++  readonly repositories: GitRepository[];
+ }
+ 
+-let cachedGitApi: GitAPI | undefined;
+-
+ export interface GitRepository {
+-  rootUri: vscode.Uri;
+-  inputBox: {
++  readonly rootUri: vscode.Uri;
++  readonly inputBox: {
+     value: string;
+   };
+ }
+ 
+-export async function getGitRepository(): Promise<GitRepository> {
+-  const gitApi = await getGitApi();
+-  const repositories = gitApi.repositories;
++let cachedGitApi: GitAPI | undefined;
++
++/**
++ * 列出 vscode.git 当前已打开的全部仓库。
++ * 仅负责枚举，不做任何选择决策 —— 选择策略见 ./repositoryContext。
++ */
++export async function listGitRepositories(): Promise<GitRepository[]> {
++  const repositories = (await getGitApi()).repositories;
+ 
+   if (repositories.length === 0) {
+     throw new Error(t('openGitRepository'));
+   }
+ 
+-  const activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
+-  if (activeDocumentUri?.scheme === 'file') {
+-    const repositoryForDocument = findRepositoryContainingPath(
+-      repositories,
+-      activeDocumentUri.fsPath
+-    );
+-
+-    if (repositoryForDocument) {
+-      return repositoryForDocument;
+-    }
+-  }
+-
+-  for (const workspaceFolder of vscode.workspace.workspaceFolders ?? []) {
+-    const repositoryForWorkspace = findRepositoryForWorkspaceFolder(
+-      repositories,
+-      workspaceFolder.uri.fsPath
+-    );
+-
+-    if (repositoryForWorkspace) {
+-      return repositoryForWorkspace;
+-    }
+-  }
+-
+-  return repositories[0];
+-}
+-
+-export async function getGitRepositoryRoot(): Promise<string> {
+-  return (await getGitRepository()).rootUri.fsPath;
+-}
+-
+-export function isSamePath(left: string, right: string): boolean {
+-  const normalizedLeft = path.normalize(left);
+-  const normalizedRight = path.normalize(right);
+-
+-  return process.platform === 'win32'
+-    ? normalizedLeft.toLowerCase() === normalizedRight.toLowerCase()
+-    : normalizedLeft === normalizedRight;
++  return repositories;
+ }
+ 
+ async function getGitApi(): Promise<GitAPI> {
+@@ -85,63 +50,3 @@ async function getGitApi(): Promise<GitAPI> {
+   cachedGitApi = (await gitExtension.activate()).getAPI(1);
+   return cachedGitApi;
+ }
+-
+-function findRepositoryContainingPath(
+-  repositories: GitRepository[],
+-  targetPath: string
+-): GitRepository | undefined {
+-  const normalizedTarget = normalizePath(targetPath);
+-
+-  return [...repositories]
+-    .filter((repository) => isPathInside(normalizedTarget, normalizePath(repository.rootUri.fsPath)))
+-    .sort((left, right) => right.rootUri.fsPath.length - left.rootUri.fsPath.length)[0];
+-}
+-
+-function findRepositoryForWorkspaceFolder(
+-  repositories: GitRepository[],
+-  workspaceFolderPath: string
+-): GitRepository | undefined {
+-  const normalizedWorkspace = normalizePath(workspaceFolderPath);
+-  const repositoriesInWorkspace = repositories.filter((repository) => {
+-    const repositoryRoot = normalizePath(repository.rootUri.fsPath);
+-    return isSamePath(repositoryRoot, normalizedWorkspace)
+-      || isPathInside(repositoryRoot, normalizedWorkspace);
+-  });
+-
+-  if (repositoriesInWorkspace.length === 0) {
+-    return undefined;
+-  }
+-
+-  return repositoriesInWorkspace.sort((left, right) => {
+-    const leftRoot = normalizePath(left.rootUri.fsPath);
+-    const rightRoot = normalizePath(right.rootUri.fsPath);
+-    const leftExact = isSamePath(leftRoot, normalizedWorkspace) ? 0 : 1;
+-    const rightExact = isSamePath(rightRoot, normalizedWorkspace) ? 0 : 1;
+-
+-    if (leftExact !== rightExact) {
+-      return leftExact - rightExact;
+-    }
+-
+-    return leftRoot.length - rightRoot.length;
+-  })[0];
+-}
+-
+-function isPathInside(targetPath: string, parentPath: string): boolean {
+-  if (isSamePath(targetPath, parentPath)) {
+-    return true;
+-  }
+-
+-  const normalizedTarget = normalizePath(targetPath);
+-  const normalizedParent = normalizePath(parentPath);
+-  const parentWithSeparator = normalizedParent.endsWith(path.sep)
+-    ? normalizedParent
+-    : `${normalizedParent}${path.sep}`;
+-
+-  return process.platform === 'win32'
+-    ? normalizedTarget.toLowerCase().startsWith(parentWithSeparator.toLowerCase())
+-    : normalizedTarget.startsWith(parentWithSeparator);
+-}
+-
+-function normalizePath(value: string): string {
+-  return path.normalize(value);
+-}
+diff --git a/src/git/repositoryContext.ts b/src/git/repositoryContext.ts
+new file mode 100644
+index 0000000..9843358
+--- /dev/null
++++ b/src/git/repositoryContext.ts
+@@ -0,0 +1,176 @@
++import * as path from 'path';
++
++import * as vscode from 'vscode';
++
++import { t } from '../i18n';
++import { checkHasStagedChanges } from './diff';
++import { GitRepository, listGitRepositories } from './repository';
++import {
++  extractRepositoryRootHint,
++  findRepositoryByRoot,
++  findRepositoryContainingPath,
++  findRepositoryForWorkspaceFolder
++} from './repositoryMatching';
++
++/**
++ * 一次解析、全链路复用的仓库上下文。
++ *
++ * 生成流程中的暂存检查、diff 抓取与写回输入框必须作用于同一个仓库，
++ * 因此仓库只在命令入口解析一次并注入下游，而不是在每个环节各自推断。
++ */
++export interface GitRepositoryContext {
++  /** 仓库根目录绝对路径，用作 git 子进程的 cwd */
++  readonly root: string;
++  /** 仓库显示名，用于日志与错误提示 */
++  readonly label: string;
++  /** 写回该仓库的“源代码管理”输入框 */
++  setCommitInput(value: string): void;
++}
++
++interface RepositoryCandidate {
++  readonly root: string;
++  readonly label: string;
++  readonly repository: GitRepository;
++}
++
++export interface ResolveGitRepositoryOptions {
++  /**
++   * 存在歧义时是否允许弹出仓库选择器。
++   * 非交互场景（如 Profile 连通性测试）应设为 false，避免打断用户。
++   */
++  readonly interactive?: boolean;
++}
++
++/**
++ * 解析本次操作应作用的 Git 仓库。
++ *
++ * 优先级：
++ * 1. SCM 标题栏按钮传入的 SourceControl（唯一能确定用户意图的信息源）
++ * 2. 仅有一个仓库时无歧义
++ * 3. 活动编辑器所属仓库（嵌套仓库取最内层）
++ * 4. 仅有一个工作区文件夹时取该文件夹的首选仓库
++ * 5. 仍有歧义则让用户选择
++ *
++ * @returns 用户在仓库选择器中取消、或非交互模式下无法消歧时返回 undefined；
++ *          找不到任何仓库时抛错。
++ */
++export async function resolveGitRepositoryContext(
++  hint?: unknown,
++  options: ResolveGitRepositoryOptions = {}
++): Promise<GitRepositoryContext | undefined> {
++  const candidates = (await listGitRepositories()).map(toCandidate);
++
++  const hintedRoot = extractRepositoryRootHint(hint);
++  if (hintedRoot) {
++    const hinted = findRepositoryByRoot(candidates, hintedRoot);
++    if (!hinted) {
++      throw new Error(t('repositoryNotFoundInSourceControl'));
++    }
++
++    return toContext(hinted);
++  }
++
++  if (candidates.length === 1) {
++    return toContext(candidates[0]);
++  }
++
++  // 不限制 scheme：SCM 面板打开的 diff 视图使用 git scheme，但 fsPath 仍指向真实文件。
++  // 匹配不上的虚拟文档会自然落到后续回退分支。
++  const activeDocumentPath = vscode.window.activeTextEditor?.document.uri.fsPath;
++  if (activeDocumentPath) {
++    const containing = findRepositoryContainingPath(candidates, activeDocumentPath);
++    if (containing) {
++      return toContext(containing);
++    }
++  }
++
++  const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
++  if (workspaceFolders.length === 1) {
++    const withinWorkspace = findRepositoryForWorkspaceFolder(
++      candidates,
++      workspaceFolders[0].uri.fsPath
++    );
++
++    if (withinWorkspace) {
++      return toContext(withinWorkspace);
++    }
++  }
++
++  if (options.interactive === false) {
++    return undefined;
++  }
++
++  const picked = await pickRepository(candidates);
++  return picked ? toContext(picked) : undefined;
++}
++
++interface RepositoryQuickPickItem extends vscode.QuickPickItem {
++  readonly candidate: RepositoryCandidate;
++}
++
++async function pickRepository(
++  candidates: RepositoryCandidate[]
++): Promise<RepositoryCandidate | undefined> {
++  const items = await Promise.all(candidates.map(toQuickPickItem));
++
++  // 有暂存变更的仓库排在前面：多仓库场景下用户要生成的几乎总是刚暂存过的那个。
++  const sortedItems = [...items].sort((left, right) => {
++    if (left.hasStagedChanges !== right.hasStagedChanges) {
++      return left.hasStagedChanges ? -1 : 1;
++    }
++
++    return left.label.localeCompare(right.label);
++  });
++
++  const selection = await vscode.window.showQuickPick<RepositoryQuickPickItem>(sortedItems, {
++    placeHolder: t('selectGitRepository'),
++    matchOnDescription: true
++  });
++
++  return selection?.candidate;
++}
++
++async function toQuickPickItem(
++  candidate: RepositoryCandidate
++): Promise<RepositoryQuickPickItem & { hasStagedChanges: boolean }> {
++  const hasStagedChanges = await hasStagedChangesSafely(candidate.root);
++
++  return {
++    candidate,
++    hasStagedChanges,
++    label: candidate.label,
++    description: candidate.root,
++    detail: hasStagedChanges ? t('repositoryHasStagedChanges') : t('repositoryNoStagedChanges')
++  };
++}
++
++/**
++ * 选择器里的暂存状态只是辅助信息，单个仓库探测失败不应阻断整个选择流程。
++ */
++async function hasStagedChangesSafely(repositoryRoot: string): Promise<boolean> {
++  try {
++    return await checkHasStagedChanges(repositoryRoot);
++  } catch {
++    return false;
++  }
++}
++
++function toCandidate(repository: GitRepository): RepositoryCandidate {
++  const root = repository.rootUri.fsPath;
++
++  return {
++    repository,
++    root,
++    label: path.basename(root) || root
++  };
++}
++
++function toContext(candidate: RepositoryCandidate): GitRepositoryContext {
++  return {
++    root: candidate.root,
++    label: candidate.label,
++    setCommitInput: (value: string): void => {
++      candidate.repository.inputBox.value = value;
++    }
++  };
++}
+diff --git a/src/git/repositoryMatching.ts b/src/git/repositoryMatching.ts
+new file mode 100644
+index 0000000..ada17fd
+--- /dev/null
++++ b/src/git/repositoryMatching.ts
+@@ -0,0 +1,121 @@
++import * as path from 'path';
++
++/**
++ * 参与路径匹配的最小仓库形状。
++ * 刻意不依赖 vscode 类型，使匹配逻辑可在无 vscode 运行时的测试中直接覆盖。
++ */
++export interface RepositoryLike {
++  readonly root: string;
++}
++
++/**
++ * 从命令实参中提取仓库根路径提示。
++ *
++ * VS Code 在点击 `scm/title` 菜单按钮时，会把该分组对应的 SourceControl 对象
++ * 作为第一个实参传入命令。这是唯一能确定「用户点的是哪个仓库」的信息来源，
++ * 其余入口（命令面板、快捷键）不携带实参，返回 undefined 由调用方回退。
++ *
++ * 采用结构化判断而非 instanceof，以同时兼容 SourceControl、Uri 与纯路径字符串。
++ */
++export function extractRepositoryRootHint(hint: unknown): string | undefined {
++  if (typeof hint === 'string') {
++    return hint.trim().length > 0 ? hint : undefined;
++  }
++
++  if (typeof hint !== 'object' || hint === null) {
++    return undefined;
++  }
++
++  // SourceControl / ApiRepository：{ rootUri: Uri }
++  const rootUri = (hint as { rootUri?: unknown }).rootUri;
++  const rootUriPath = readFsPath(rootUri);
++  if (rootUriPath) {
++    return rootUriPath;
++  }
++
++  // Uri：{ fsPath: string }
++  return readFsPath(hint);
++}
++
++export function isSamePath(left: string, right: string): boolean {
++  const normalizedLeft = path.normalize(left);
++  const normalizedRight = path.normalize(right);
++
++  return process.platform === 'win32'
++    ? normalizedLeft.toLowerCase() === normalizedRight.toLowerCase()
++    : normalizedLeft === normalizedRight;
++}
++
++export function isPathInside(targetPath: string, parentPath: string): boolean {
++  if (isSamePath(targetPath, parentPath)) {
++    return true;
++  }
++
++  const normalizedTarget = path.normalize(targetPath);
++  const normalizedParent = path.normalize(parentPath);
++  const parentWithSeparator = normalizedParent.endsWith(path.sep)
++    ? normalizedParent
++    : `${normalizedParent}${path.sep}`;
++
++  return process.platform === 'win32'
++    ? normalizedTarget.toLowerCase().startsWith(parentWithSeparator.toLowerCase())
++    : normalizedTarget.startsWith(parentWithSeparator);
++}
++
++/**
++ * 按仓库根目录精确匹配。用于消费 SourceControl 提示，要求完全一致以避免误选。
++ */
++export function findRepositoryByRoot<T extends RepositoryLike>(
++  repositories: readonly T[],
++  root: string
++): T | undefined {
++  return repositories.find((repository) => isSamePath(repository.root, root));
++}
++
++/**
++ * 查找包含目标路径的仓库。嵌套仓库/子模块场景取最内层（根路径最长）。
++ */
++export function findRepositoryContainingPath<T extends RepositoryLike>(
++  repositories: readonly T[],
++  targetPath: string
++): T | undefined {
++  return [...repositories]
++    .filter((repository) => isPathInside(targetPath, repository.root))
++    .sort((left, right) => right.root.length - left.root.length)[0];
++}
++
++/**
++ * 查找归属于指定工作区文件夹的仓库。优先与文件夹根完全一致，其次取最外层。
++ */
++export function findRepositoryForWorkspaceFolder<T extends RepositoryLike>(
++  repositories: readonly T[],
++  workspaceFolderPath: string
++): T | undefined {
++  const repositoriesInWorkspace = repositories.filter((repository) =>
++    isPathInside(repository.root, workspaceFolderPath)
++  );
++
++  if (repositoriesInWorkspace.length === 0) {
++    return undefined;
++  }
++
++  return [...repositoriesInWorkspace].sort((left, right) => {
++    const leftExact = isSamePath(left.root, workspaceFolderPath) ? 0 : 1;
++    const rightExact = isSamePath(right.root, workspaceFolderPath) ? 0 : 1;
++
++    if (leftExact !== rightExact) {
++      return leftExact - rightExact;
++    }
++
++    return left.root.length - right.root.length;
++  })[0];
++}
++
++function readFsPath(value: unknown): string | undefined {
++  if (typeof value !== 'object' || value === null) {
++    return undefined;
++  }
++
++  const fsPath = (value as { fsPath?: unknown }).fsPath;
++  return typeof fsPath === 'string' && fsPath.trim().length > 0 ? fsPath : undefined;
++}
+diff --git a/src/git/scm.ts b/src/git/scm.ts
+index 12928de..2f077d9 100644
+--- a/src/git/scm.ts
++++ b/src/git/scm.ts
+@@ -1,9 +1,11 @@
+ import * as vscode from 'vscode';
+ 
+-import { getGitRepository } from './repository';
++import { GitRepositoryContext } from './repositoryContext';
+ 
+-export async function fillSourceControlInputBox(message: string): Promise<void> {
+-  const repository = await getGitRepository();
+-  repository.inputBox.value = message;
++export async function fillSourceControlInputBox(
++  repository: GitRepositoryContext,
++  message: string
++): Promise<void> {
++  repository.setCommitInput(message);
+   await vscode.commands.executeCommand('workbench.view.scm');
+ }
+diff --git a/src/i18n/locales/de.json b/src/i18n/locales/de.json
+index 1e68a79..6050b5e 100644
+--- a/src/i18n/locales/de.json
++++ b/src/i18n/locales/de.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "Bitte öffnen Sie ein Git-Repository in VS Code.",
+   "builtInGitUnavailable": "Die integrierte Git-Erweiterung ist nicht verfügbar.",
+   "repositoryNotFoundInSourceControl": "Das Git-Repository konnte in der Quellcodeverwaltung nicht gefunden werden.",
++  "noStagedChangesInRepository": "Keine bereitgestellten Änderungen im Repository „{repository}“ gefunden. Bitte stelle deine Änderungen zuerst bereit.",
++  "selectGitRepository": "Git-Repository für die Commit-Nachricht auswählen",
++  "repositoryHasStagedChanges": "Hat bereitgestellte Änderungen",
++  "repositoryNoStagedChanges": "Keine bereitgestellten Änderungen",
+   "failedToGetGitDiff": "Git-Diff konnte nicht gelesen werden: {message}",
+   "failedToCheckStagedChanges": "Gestagte Änderungen konnten nicht geprüft werden: {message}",
+   "failedToCommit": "Commit fehlgeschlagen: {message}",
+diff --git a/src/i18n/locales/en.json b/src/i18n/locales/en.json
+index ae7f74f..5b9b3af 100644
+--- a/src/i18n/locales/en.json
++++ b/src/i18n/locales/en.json
+@@ -26,6 +26,10 @@
+   "openGitRepository": "Please open a git repository in VS Code.",
+   "builtInGitUnavailable": "The built-in Git extension is not available.",
+   "repositoryNotFoundInSourceControl": "Unable to locate the Git repository in Source Control.",
++  "noStagedChangesInRepository": "No staged changes found in repository \"{repository}\". Please stage your changes first.",
++  "selectGitRepository": "Select the Git repository to generate a commit message for",
++  "repositoryHasStagedChanges": "Has staged changes",
++  "repositoryNoStagedChanges": "No staged changes",
+   "failedToGetGitDiff": "Failed to get git diff: {message}",
+   "failedToCheckStagedChanges": "Failed to check staged changes: {message}",
+   "failedToCommit": "Failed to commit: {message}",
+diff --git a/src/i18n/locales/es.json b/src/i18n/locales/es.json
+index 4823e78..a5dad6a 100644
+--- a/src/i18n/locales/es.json
++++ b/src/i18n/locales/es.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "Abre un repositorio Git en VS Code.",
+   "builtInGitUnavailable": "La extensión Git integrada no está disponible.",
+   "repositoryNotFoundInSourceControl": "No se pudo localizar el repositorio Git en Control de código fuente.",
++  "noStagedChangesInRepository": "No se encontraron cambios preparados en el repositorio \"{repository}\". Prepara tus cambios primero.",
++  "selectGitRepository": "Selecciona el repositorio Git para generar el mensaje de commit",
++  "repositoryHasStagedChanges": "Tiene cambios preparados",
++  "repositoryNoStagedChanges": "Sin cambios preparados",
+   "failedToGetGitDiff": "No se pudo obtener el diff de Git: {message}",
+   "failedToCheckStagedChanges": "No se pudieron comprobar los cambios en stage: {message}",
+   "failedToCommit": "No se pudo hacer commit: {message}",
+diff --git a/src/i18n/locales/fr.json b/src/i18n/locales/fr.json
+index 2ab1e41..3a21ceb 100644
+--- a/src/i18n/locales/fr.json
++++ b/src/i18n/locales/fr.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "Veuillez ouvrir un dépôt Git dans VS Code.",
+   "builtInGitUnavailable": "L'extension Git intégrée n'est pas disponible.",
+   "repositoryNotFoundInSourceControl": "Impossible de localiser le dépôt Git dans le contrôle de code source.",
++  "noStagedChangesInRepository": "Aucune modification indexée trouvée dans le dépôt « {repository} ». Indexez d’abord vos modifications.",
++  "selectGitRepository": "Sélectionnez le dépôt Git pour générer le message de commit",
++  "repositoryHasStagedChanges": "Contient des modifications indexées",
++  "repositoryNoStagedChanges": "Aucune modification indexée",
+   "failedToGetGitDiff": "Impossible de récupérer le diff Git : {message}",
+   "failedToCheckStagedChanges": "Impossible de vérifier les changements indexés : {message}",
+   "failedToCommit": "Échec du commit : {message}",
+diff --git a/src/i18n/locales/it.json b/src/i18n/locales/it.json
+index 658e432..6e4dc90 100644
+--- a/src/i18n/locales/it.json
++++ b/src/i18n/locales/it.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "Apri un repository Git in VS Code.",
+   "builtInGitUnavailable": "L'estensione Git integrata non è disponibile.",
+   "repositoryNotFoundInSourceControl": "Impossibile trovare il repository Git nel Controllo del codice sorgente.",
++  "noStagedChangesInRepository": "Nessuna modifica in staging trovata nel repository \"{repository}\". Metti prima in staging le modifiche.",
++  "selectGitRepository": "Seleziona il repository Git per generare il messaggio di commit",
++  "repositoryHasStagedChanges": "Ha modifiche in staging",
++  "repositoryNoStagedChanges": "Nessuna modifica in staging",
+   "failedToGetGitDiff": "Impossibile ottenere il diff Git: {message}",
+   "failedToCheckStagedChanges": "Impossibile controllare le modifiche in stage: {message}",
+   "failedToCommit": "Commit non riuscito: {message}",
+diff --git a/src/i18n/locales/ja.json b/src/i18n/locales/ja.json
+index 85b5e08..2332484 100644
+--- a/src/i18n/locales/ja.json
++++ b/src/i18n/locales/ja.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "VS Code で Git リポジトリを開いてください。",
+   "builtInGitUnavailable": "組み込みの Git 拡張機能を利用できません。",
+   "repositoryNotFoundInSourceControl": "ソース管理で Git リポジトリを見つけられませんでした。",
++  "noStagedChangesInRepository": "リポジトリ「{repository}」にステージされた変更が見つかりません。先に git add を実行してください。",
++  "selectGitRepository": "コミットメッセージを生成する Git リポジトリを選択",
++  "repositoryHasStagedChanges": "ステージされた変更あり",
++  "repositoryNoStagedChanges": "ステージされた変更なし",
+   "failedToGetGitDiff": "Git diff の取得に失敗しました: {message}",
+   "failedToCheckStagedChanges": "ステージ済み変更の確認に失敗しました: {message}",
+   "failedToCommit": "コミットに失敗しました: {message}",
+diff --git a/src/i18n/locales/ko.json b/src/i18n/locales/ko.json
+index 16047eb..f976f15 100644
+--- a/src/i18n/locales/ko.json
++++ b/src/i18n/locales/ko.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "VS Code에서 Git 저장소를 먼저 여세요.",
+   "builtInGitUnavailable": "내장 Git 확장을 사용할 수 없습니다.",
+   "repositoryNotFoundInSourceControl": "소스 제어에서 현재 Git 저장소를 찾을 수 없습니다.",
++  "noStagedChangesInRepository": "저장소 \"{repository}\"에 스테이징된 변경 사항이 없습니다. 먼저 git add를 실행하세요.",
++  "selectGitRepository": "커밋 메시지를 생성할 Git 저장소 선택",
++  "repositoryHasStagedChanges": "스테이징된 변경 사항 있음",
++  "repositoryNoStagedChanges": "스테이징된 변경 사항 없음",
+   "failedToGetGitDiff": "Git diff를 가져오지 못했습니다: {message}",
+   "failedToCheckStagedChanges": "스테이징된 변경 사항을 확인하지 못했습니다: {message}",
+   "failedToCommit": "커밋 실패: {message}",
+diff --git a/src/i18n/locales/pt.json b/src/i18n/locales/pt.json
+index 650d6ba..c0e24af 100644
+--- a/src/i18n/locales/pt.json
++++ b/src/i18n/locales/pt.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "Abra um repositório Git no VS Code.",
+   "builtInGitUnavailable": "A extensão Git integrada não está disponível.",
+   "repositoryNotFoundInSourceControl": "Não foi possível localizar o repositório Git no Controle de Código-Fonte.",
++  "noStagedChangesInRepository": "Nenhuma alteração preparada encontrada no repositório \"{repository}\". Prepare suas alterações primeiro.",
++  "selectGitRepository": "Selecione o repositório Git para gerar a mensagem de commit",
++  "repositoryHasStagedChanges": "Tem alterações preparadas",
++  "repositoryNoStagedChanges": "Sem alterações preparadas",
+   "failedToGetGitDiff": "Falha ao obter o diff do Git: {message}",
+   "failedToCheckStagedChanges": "Falha ao verificar as alterações em stage: {message}",
+   "failedToCommit": "Falha no commit: {message}",
+diff --git a/src/i18n/locales/ru.json b/src/i18n/locales/ru.json
+index 8f98035..ea9d19a 100644
+--- a/src/i18n/locales/ru.json
++++ b/src/i18n/locales/ru.json
+@@ -20,6 +20,10 @@
+   "openGitRepository": "Сначала откройте Git-репозиторий в VS Code.",
+   "builtInGitUnavailable": "Встроенное расширение Git недоступно.",
+   "repositoryNotFoundInSourceControl": "Не удалось найти Git-репозиторий в панели управления исходным кодом.",
++  "noStagedChangesInRepository": "В репозитории «{repository}» нет проиндексированных изменений. Сначала выполните git add.",
++  "selectGitRepository": "Выберите Git-репозиторий для генерации сообщения коммита",
++  "repositoryHasStagedChanges": "Есть проиндексированные изменения",
++  "repositoryNoStagedChanges": "Нет проиндексированных изменений",
+   "failedToGetGitDiff": "Не удалось получить Git diff: {message}",
+   "failedToCheckStagedChanges": "Не удалось проверить подготовленные изменения: {message}",
+   "failedToCommit": "Не удалось выполнить коммит: {message}",
+diff --git a/src/i18n/locales/zh-cn.json b/src/i18n/locales/zh-cn.json
+index 8ee612a..b4d910c 100644
+--- a/src/i18n/locales/zh-cn.json
++++ b/src/i18n/locales/zh-cn.json
+@@ -26,6 +26,10 @@
+   "openGitRepository": "请先在 VS Code 中打开一个 Git 仓库。",
+   "builtInGitUnavailable": "VS Code 内置 Git 扩展不可用。",
+   "repositoryNotFoundInSourceControl": "无法在“源代码管理”中定位当前 Git 仓库。",
++  "noStagedChangesInRepository": "仓库“{repository}”中未发现已暂存的更改，请先执行 git add。",
++  "selectGitRepository": "选择要生成提交信息的 Git 仓库",
++  "repositoryHasStagedChanges": "有已暂存的更改",
++  "repositoryNoStagedChanges": "无已暂存的更改",
+   "failedToGetGitDiff": "获取 Git diff 失败：{message}",
+   "failedToCheckStagedChanges": "检查已暂存更改失败：{message}",
+   "failedToCommit": "Git 提交失败：{message}",
+diff --git a/src/ui/output.ts b/src/ui/output.ts
+index 0eca71c..28a83b2 100644
+--- a/src/ui/output.ts
++++ b/src/ui/output.ts
+@@ -44,6 +44,7 @@ export function appendError(message: string, error?: unknown): void {
+ export function appendSummary(summary: GenerationSummary): void {
+   const channel = getOutputChannel();
+   appendInfo('Generation summary');
++  channel.appendLine(`Repository: ${summary.repositoryLabel} (${summary.repositoryRoot})`);
+   channel.appendLine(`Profile: ${summary.profileLabel}`);
+   channel.appendLine(`Provider: ${summary.provider}`);
+   channel.appendLine(`Model: ${summary.model}`);
+diff --git a/test/git/repositoryMatching.test.ts b/test/git/repositoryMatching.test.ts
+new file mode 100644
+index 0000000..98a12d5
+--- /dev/null
++++ b/test/git/repositoryMatching.test.ts
+@@ -0,0 +1,89 @@
++import assert from 'node:assert/strict';
++import * as path from 'node:path';
++import { test } from 'node:test';
++
++import {
++  extractRepositoryRootHint,
++  findRepositoryByRoot,
++  findRepositoryContainingPath,
++  findRepositoryForWorkspaceFolder,
++  isPathInside,
++  isSamePath
++} from '../../src/git/repositoryMatching';
++
++const WORKSPACE = path.join(path.sep, 'workspace');
++const OUTER = path.join(WORKSPACE, 'outer');
++const INNER = path.join(OUTER, 'vendor', 'inner');
++const SIBLING = path.join(WORKSPACE, 'sibling');
++
++const REPOSITORIES = [
++  { root: OUTER },
++  { root: INNER },
++  { root: SIBLING }
++];
++
++test('isSamePath normalizes redundant segments', () => {
++  assert.equal(isSamePath(OUTER, path.join(OUTER, '.', '')), true);
++  assert.equal(isSamePath(OUTER, path.join(OUTER, 'nested', '..')), true);
++  assert.equal(isSamePath(OUTER, SIBLING), false);
++});
++
++test('isPathInside treats identical paths as inside but rejects sibling prefixes', () => {
++  assert.equal(isPathInside(OUTER, OUTER), true);
++  assert.equal(isPathInside(path.join(OUTER, 'src', 'index.ts'), OUTER), true);
++  // "outer-extra" 与 "outer" 共享前缀但不是子路径，必须靠分隔符区分
++  assert.equal(isPathInside(`${OUTER}-extra`, OUTER), false);
++  assert.equal(isPathInside(SIBLING, OUTER), false);
++});
++
++test('findRepositoryByRoot matches only on exact root', () => {
++  assert.equal(findRepositoryByRoot(REPOSITORIES, INNER)?.root, INNER);
++  assert.equal(findRepositoryByRoot(REPOSITORIES, path.join(INNER, 'src')), undefined);
++  assert.equal(findRepositoryByRoot(REPOSITORIES, path.join(WORKSPACE, 'unknown')), undefined);
++});
++
++test('findRepositoryContainingPath prefers the innermost nested repository', () => {
++  const filePath = path.join(INNER, 'src', 'index.ts');
++  assert.equal(findRepositoryContainingPath(REPOSITORIES, filePath)?.root, INNER);
++
++  const outerFilePath = path.join(OUTER, 'src', 'index.ts');
++  assert.equal(findRepositoryContainingPath(REPOSITORIES, outerFilePath)?.root, OUTER);
++
++  assert.equal(
++    findRepositoryContainingPath(REPOSITORIES, path.join(WORKSPACE, 'elsewhere', 'a.ts')),
++    undefined
++  );
++});
++
++test('findRepositoryForWorkspaceFolder prefers an exact match, then the outermost repository', () => {
++  // 工作区文件夹自身就是仓库根时精确命中
++  assert.equal(findRepositoryForWorkspaceFolder(REPOSITORIES, OUTER)?.root, OUTER);
++  // 工作区文件夹包含多个仓库时取最外层，避免误选子模块
++  assert.equal(findRepositoryForWorkspaceFolder(REPOSITORIES, WORKSPACE)?.root, OUTER);
++  assert.equal(
++    findRepositoryForWorkspaceFolder(REPOSITORIES, path.join(path.sep, 'other')),
++    undefined
++  );
++});
++
++test('extractRepositoryRootHint reads the SourceControl passed by the SCM title button', () => {
++  const sourceControl = { id: 'git', label: 'Git', rootUri: { fsPath: SIBLING } };
++  assert.equal(extractRepositoryRootHint(sourceControl), SIBLING);
++});
++
++test('extractRepositoryRootHint accepts a Uri-like value or a plain path', () => {
++  assert.equal(extractRepositoryRootHint({ fsPath: OUTER }), OUTER);
++  assert.equal(extractRepositoryRootHint(OUTER), OUTER);
++});
++
++test('extractRepositoryRootHint ignores argument shapes that carry no repository root', () => {
++  // 命令面板与快捷键入口不传实参，必须回退而不是误判
++  assert.equal(extractRepositoryRootHint(undefined), undefined);
++  assert.equal(extractRepositoryRootHint(null), undefined);
++  assert.equal(extractRepositoryRootHint(''), undefined);
++  assert.equal(extractRepositoryRootHint('   '), undefined);
++  assert.equal(extractRepositoryRootHint(42), undefined);
++  assert.equal(extractRepositoryRootHint({}), undefined);
++  assert.equal(extractRepositoryRootHint({ rootUri: undefined }), undefined);
++  assert.equal(extractRepositoryRootHint({ rootUri: { fsPath: '' } }), undefined);
++});
