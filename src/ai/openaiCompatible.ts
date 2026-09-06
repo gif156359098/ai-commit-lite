@@ -54,7 +54,7 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
       const chatPayloadOptions = this.getChatPayloadOptions();
 
       const response = await this.client.post(
-        `${endpoint}/chat/completions`,
+        buildChatCompletionsUrl(endpoint),
         this.buildOpenAICompatibleChatPayload(
           systemPrompt,
           userPrompt,
@@ -80,7 +80,7 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
         }
 
         const retryResponse = await this.client.post(
-          `${endpoint}/chat/completions`,
+          buildChatCompletionsUrl(endpoint),
           this.buildOpenAICompatibleChatPayload(
             systemPrompt,
             userPrompt,
@@ -112,4 +112,14 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
       throw new Error(`${this.getProviderName()} API error: ${getProviderErrorMessage(error, endpoint)}`);
     }
   }
+}
+
+/**
+ * 在端点基础上拼接 /chat/completions，并保留端点自带的 query 参数
+ * （部分中转/代理服务把密钥放在 query 中，直接字符串拼接会生成非法 URL）。
+ */
+function buildChatCompletionsUrl(endpoint: string): string {
+  const url = new URL(endpoint);
+  url.pathname = url.pathname.replace(/\/+$/, '') + '/chat/completions';
+  return url.toString();
 }

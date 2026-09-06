@@ -152,8 +152,9 @@ async function getSelectivePatchMap(
           abortSignal
         );
         return { filePath, patch: patchOutput.trim() || null };
-      } catch (error: any) {
-        console.warn(`Failed to get patch for ${filePath}: ${error.message}`);
+      } catch {
+        // 单个文件 patch 抓取失败不阻断整体流程：该文件降级为 "summary only"，
+        // 由 buildPreparedDiffContext 的汇总条目体现，不向控制台输出噪音。
         return { filePath, patch: null };
       }
     });

@@ -15,7 +15,7 @@ npm run package     # Package into .vsix
 ```
 
 ### Test Suite
-- Test files exist in `test/` directory (21 .test.ts files)
+- Test files exist in `test/` directory (25 .test.ts files)
 - Tests use Node's built-in test runner (`node --test`)
 - Run `npm test` to compile and execute tests
 
@@ -105,10 +105,9 @@ export async function getStagedDiffRaw(): Promise<string> {
 ## Multilingual Support
 
 ### Language Configuration
-- **Configuration schema**: `en`, `zh`, `ja`, `ko`, `es`, `fr`, `de`, `ru`
+- **Configuration schema**: `en`, `zh-cn`, `ja`, `ko`, `es`, `fr`, `de`, `ru`, `pt`, `it`
 - **AI Providers**: Use `config.language` to generate commit messages in the selected language
-- **UI Localization**: Currently supports English (`en`) and Simplified Chinese (`zh-cn`) only
-- **Inconsistency**: Configuration uses `zh` while i18n and VS Code localization use `zh-cn`
+- **UI Localization**: `package.nls.*.json` for VS Code chrome; `src/i18n/locales/*.json` for in-extension messages (10 locales)
 
 ### Adding New Languages
 1. Add translation file: `package.nls.{locale}.json`
@@ -141,6 +140,12 @@ vscode.window.withProgress({
 ```
 
 ## Development Workflow
+
+### Git Commit Discipline（重要）
+- 提交前必须运行 `git status --short` 并逐项确认：只包含预期文件，绝不批量 `git add .`
+- **禁止提交任何评审/临时产物**：`.pr-review/`、`.memsearch/`、`.claude/`、`.opencode/`、`.serena/` 等目录已被 `.gitignore` 排除；commit message 等中间文件也不得 add（先 add 再写临时文件，或用 `git commit -m` 多段落）
+- 提交历史是公开且几乎不可逆的：任何含会话日志、diff 副本、账号信息的内容一旦 push 将永久可见
+- 发布前运行 `npx vsce ls` 抽查打包清单是否包含意外文件
 
 ### Adding AI Provider
 1. Create class in `src/ai/`

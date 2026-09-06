@@ -8,7 +8,6 @@ import {
   clearFallbackPriority,
   deleteProfile,
   getActiveProfile,
-  getProfileApiKey,
   getProfileConfig,
   getProfiles,
   hasProfileApiKey,
@@ -294,13 +293,14 @@ export class ProfileManagerPanel {
         vscode.window.showErrorMessage('Profile not found');
         return;
       }
-      const apiKey = await getProfileApiKey(profileId);
+      // 安全约束：绝不把 SecretStorage 中的 API key 回传 webview（最小暴露原则）。
+      // 副本只继承供应商与端点，密钥置空，由用户保存时重新输入。
       void this.panel.webview.postMessage({
         command: 'copyProfileData',
         formData: {
           provider: source.provider,
           baseUrl: source.baseUrl || '',
-          apiKey: apiKey || ''
+          apiKey: ''
         }
       });
     } catch (error: unknown) {
