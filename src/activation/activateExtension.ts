@@ -1,19 +1,15 @@
 /**
  * AI Commit Lite Extension Activation
  *
- * DESIGN DECISION: This extension uses "onCommand:ai-commit-lite.generateCommit" activation
- * instead of "onStartupFinished" to reduce VS Code startup time impact.
- *
- * Why now command-based activation:
- * 1. The primary user action is generating commits via SCM menu button or keyboard shortcut
- * 2. Status bar and other UI elements are lazily initialized on first use
- * 3. Onboarding prompts are deferred until user actually tries to use the extension
- * 4. Most users don't need the extension activated when opening VS Code just for reading code
+ * DESIGN DECISION: The extension activates on "onStartupFinished" (see package.json):
+ * - The status bar entry is shown immediately so users always know the extension is installed
+ * - The onboarding prompt for empty profile lists appears right after startup
+ * - VS Code (>= 1.74) also auto-generates activation events for commands declared in
+ *   contributes.commands, so "onCommand:..." declarations are no longer required
  *
  * Tradeoffs:
- * - Status bar only appears after first command usage (acceptable UX tradeoff)
- * - New users onboarding is delayed until they use generateCommit
- *   (handled by ensureProfilesOrPrompt which prompts before running)
+ * - A small amount of memory/time is used on every VS Code start (lightweight extension)
+ * - The profile manager panel itself is still created lazily on first command use
  */
 import * as vscode from 'vscode';
 

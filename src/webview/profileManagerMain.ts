@@ -762,6 +762,11 @@ $('languageSelect').addEventListener('change', (event: Event) => {
 });
 
 window.addEventListener('message', (event: MessageEvent) => {
+  // 只接受本 webview 主进程的消息：校验 event.origin 即 VS Code webview
+  // 沙箱 origin（'vscode-webview:'），防止其他窗口/脚本伪造消息注入。
+  if (event.origin !== 'vscode-webview:') {
+    return;
+  }
   if (!event.data || !event.data.command) {
     return;
   }

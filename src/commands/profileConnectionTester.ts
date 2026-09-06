@@ -4,6 +4,7 @@ import { CommitContext } from '../ai/providers';
 import { checkHasStagedChanges, getStagedDiff } from '../git/diff';
 import { resolveGitRepositoryContext } from '../git/repositoryContext';
 import { getProviderDefinition } from '../ai/providerRegistry';
+import { CONNECTION_TEST_CONFIG } from '../ai/constants';
 import { getProfileApiKey, getProfiles } from '../config/profileManager';
 import { getConfig } from '../config/settings';
 import { appendInfo } from '../ui/output';
@@ -49,7 +50,10 @@ export async function testProfileConnection(profileId: string): Promise<TestConn
 
   const start = Date.now();
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(new Error('Request timed out')), 30_000);
+  const timeout = setTimeout(
+    () => controller.abort(new Error('Request timed out')),
+    CONNECTION_TEST_CONFIG.timeoutMs
+  );
 
   try {
     const provider = createAIProvider(config);
@@ -60,7 +64,8 @@ export async function testProfileConnection(profileId: string): Promise<TestConn
       conventionalCommits: false,
       commitMessageStyle: 'concise',
       temperature: 0,
-      maxTokens: config.maxTokens,
+      // 连接测试只需确认 API 可用：按固定的小额 token 上限请求，避免消耗配额。
+      maxTokens: CONNECTION_TEST_CONFIG.maxTokens,
       customSystemPrompt: ''
     };
 
