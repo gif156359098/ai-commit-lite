@@ -1,4 +1,4 @@
-import { BaseAIProvider, CommitContext } from './providers';
+import { BaseAIProvider, ChatPayloadOptions, CommitContext } from './providers';
 import {
   cleanCommitMessage,
   extractOpenAICompatibleMessage,
@@ -27,6 +27,15 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
     this.defaultEndpoint = options.defaultEndpoint;
   }
 
+  /**
+   * 采样参数策略。默认使用传统 max_tokens + temperature；
+   * OpenAI 官方新一代模型（GPT-5/5.6）覆写为
+   * max_completion_tokens 且不带 temperature。
+   */
+  protected getChatPayloadOptions(): ChatPayloadOptions {
+    return {};
+  }
+
   protected getProviderName(): string {
     return this.providerName;
   }
@@ -42,13 +51,16 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
     const cancelTokenSource = this.createCancelToken();
 
     try {
+      const chatPayloadOptions = this.getChatPayloadOptions();
+
       const response = await this.client.post(
         `${endpoint}/chat/completions`,
         this.buildOpenAICompatibleChatPayload(
           systemPrompt,
           userPrompt,
           context,
-          context.maxTokens
+          context.maxTokens,
+          chatPayloadOptions
         ),
         {
           cancelToken: cancelTokenSource.token,
@@ -73,7 +85,8 @@ export class OpenAICompatibleProvider extends BaseAIProvider {
             systemPrompt,
             userPrompt,
             context,
-            retryMaxTokens
+            retryMaxTokens,
+            chatPayloadOptions
           ),
           {
             cancelToken: cancelTokenSource.token,

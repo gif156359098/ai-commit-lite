@@ -18,7 +18,7 @@ import {
   sanitizeProfileFallbackOrder
 } from './profileManagerHelpers';
 import {
-  readAICommitConfigValue,
+  readGlobalAICommitConfigValue,
   updateAICommitConfigValue
 } from './workspaceConfig';
 import { t } from '../i18n';
@@ -49,14 +49,16 @@ function getGlobalState(): vscode.Memento {
 }
 
 export function getProfiles(): ModelProfile[] {
-  const profiles = readAICommitConfigValue<ModelProfile[]>('profiles', []);
+  // 仅读取全局配置：profile 定义关联 SecretStorage 中的 API key，
+  // 绝不允许 workspace / workspace folder 覆盖（详见 readGlobalAICommitConfigValue）。
+  const profiles = readGlobalAICommitConfigValue<ModelProfile[]>('profiles', []);
   return profiles
     .map((profile) => normalizeProfile(profile))
     .filter((profile): profile is ModelProfile => profile !== null);
 }
 
 export function getProfileConfig(): ProfileConfig {
-  return resolveProfileConfig(getProfiles(), readAICommitConfigValue);
+  return resolveProfileConfig(getProfiles(), readGlobalAICommitConfigValue);
 }
 
 export function getActiveProfile(): ModelProfile | null {
@@ -73,7 +75,7 @@ export async function switchProfile(profileId: string): Promise<void> {
 
   await updateAICommitConfigValue('activeProfile', profileId);
 
-  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readGlobalAICommitConfigValue);
   const updatedOrder = ensureProfileFirstInFallbackOrder(profiles, profileFallbackOrder, profileId);
   await updateProfileFallbackOrder(profiles, updatedOrder);
 }
@@ -151,7 +153,7 @@ export async function handleProfileFailure(
 export async function prioritizeFallbackProfile(profileId: string): Promise<void> {
   const profiles = getProfiles();
   assertProfileExists(profileId, profiles);
-  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readGlobalAICommitConfigValue);
 
   await updateProfileFallbackOrder(
     profiles,
@@ -165,7 +167,7 @@ export async function moveFallbackProfile(
 ): Promise<void> {
   const profiles = getProfiles();
   assertProfileExists(profileId, profiles);
-  const { profileFallbackOrder } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const { profileFallbackOrder } = resolveProfileConfig(profiles, readGlobalAICommitConfigValue);
 
   await updateProfileFallbackOrder(
     profiles,
@@ -176,7 +178,7 @@ export async function moveFallbackProfile(
 export async function clearFallbackPriority(profileId: string): Promise<void> {
   const profiles = getProfiles();
   assertProfileExists(profileId, profiles);
-  const { profileFallbackOrder, activeProfile } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const { profileFallbackOrder, activeProfile } = resolveProfileConfig(profiles, readGlobalAICommitConfigValue);
 
   if (activeProfile && profileId === activeProfile) {
     return;
@@ -190,7 +192,7 @@ export async function clearFallbackPriority(profileId: string): Promise<void> {
 
 export async function reorderFallbackProfiles(newOrder: string[]): Promise<void> {
   const profiles = getProfiles();
-  const { profileFallbackOrder, activeProfile } = resolveProfileConfig(profiles, readAICommitConfigValue);
+  const { profileFallbackOrder, activeProfile } = resolveProfileConfig(profiles, readGlobalAICommitConfigValue);
 
   let updatedOrder = reorderFallbackProfilesHelper(profiles, profileFallbackOrder, newOrder);
 

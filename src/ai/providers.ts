@@ -25,6 +25,19 @@ export interface CommitContext {
   formatRepairDraft?: string;
 }
 
+/**
+ * OpenAI 兼容 chat/completions 请求体的采样参数策略。
+ * 不同"模型代际"的参数要求不同：
+ * - 传统模型（gpt-4/4o/4.1、DeepSeek、Mistral、Qwen 等）：max_tokens + temperature；
+ * - OpenAI 新一代推理模型（GPT-5/5.6 系列）：max_completion_tokens，且不支持 temperature。
+ */
+export interface ChatPayloadOptions {
+  /** 使用 max_completion_tokens（OpenAI 新一代模型），而非 max_tokens */
+  useMaxCompletionTokens?: boolean;
+  /** 是否包含 temperature（推理模型不支持该参数时传 false） */
+  includeTemperature?: boolean;
+}
+
 // Client cache for OpenAI-compatible providers
 const clientCache = new Map<string, AxiosInstance>();
 
@@ -127,17 +140,30 @@ export abstract class BaseAIProvider implements AIProvider {
     systemPrompt: string,
     userPrompt: string,
     context: CommitContext,
-    maxTokens: number
+    maxTokens: number,
+    options: ChatPayloadOptions = {}
   ): Record<string, unknown> {
-    return {
+    const payload: Record<string, unknown> = {
       model: this.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
-      ],
-      temperature: context.temperature,
-      max_tokens: maxTokens
+      ]
     };
+
+    // OpenAI 新一代模型（GPT-5/5.6 系列）要求 max_completion_tokens 且拒绝 temperature，
+    // 其余 OpenAI 兼容服务使用传统的 max_tokens + temperature。
+    if (options.useMaxCompletionTokens) {
+      payload['max_completion_tokens'] = maxTokens;
+    } else {
+      payload['max_tokens'] = maxTokens;
+    }
+
+    if (options.includeTemperature !== false) {
+      payload['temperature'] = context.temperature;
+    }
+
+    return payload;
   }
 
   protected getRetryMaxTokens(maxTokens: number): number | undefined {

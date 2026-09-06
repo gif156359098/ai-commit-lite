@@ -89,12 +89,11 @@ export function isRetryableError(error: unknown): boolean {
   if (error instanceof Error) {
     const axiosError = error as unknown as AxiosLikeError & { message?: string };
 
-    // Auth errors - not retryable, user needs to fix API key/permissions
-    if (isAuthError(error)) {
-      return false;
-    }
-
-    // Server errors and rate limits are retryable
+    // Any 4xx client error (except 429 rate limit) is NOT retryable:
+    // it indicates a configuration/model/endpoint problem that a different
+    // profile would almost certainly reproduce, and treating unknown 4xx as
+    // retryable would let a hostile endpoint trigger fallback requests to
+    // more profiles (amplifying the EXFILTRATION surface).
     if (axiosError.response?.status) {
       const status = axiosError.response.status;
       return status >= 500 || status === 429;

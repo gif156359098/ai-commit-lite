@@ -22,3 +22,8 @@ coverage
 pnpm-lock.yaml
 .gitignore
 .gitattributes
+.pr-review/
+.memsearch/
+.claude/
+.opencode/
+.serena/

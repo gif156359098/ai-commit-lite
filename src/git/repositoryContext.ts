@@ -61,13 +61,24 @@ export async function resolveGitRepositoryContext(
 ): Promise<GitRepositoryContext | undefined> {
   const candidates = (await listGitRepositories()).map(toCandidate);
 
-  const hintedRoot = extractRepositoryRootHint(hint);
-  if (hintedRoot) {
-    const hinted = findRepositoryByRoot(candidates, hintedRoot);
-    // hint 未匹配（符号链接/junction/UNC 等路径差异）时回退到下面的消歧流程，
-    // 而不是直接报错，避免合法的 SCM 按钮操作因此失败。
+  const hintResult = extractRepositoryRootHint(hint);
+  if (hintResult) {
+    const hinted = findRepositoryByRoot(candidates, hintResult.root);
     if (hinted) {
       return toContext(hinted);
+    }
+
+    // SCM 按钮 / Uri 是唯一能确定用户意图的输入；匹配失败说明生成前仓库已被
+    // 关闭、重命名或存在 symlink/junction/UNC 路径差异。此时绝不能静默推断到
+    // 其他仓库（会把提交信息写进用户没点的仓库），直接弹选择器让用户确认。
+    // 字符串 hint（失败重试内部路径）保持原有回退逻辑。
+    if (hintResult.source !== 'path-string') {
+      if (options.interactive === false) {
+        return undefined;
+      }
+
+      const picked = await pickRepository(candidates);
+      return picked ? toContext(picked) : undefined;
     }
   }
 
