@@ -13,3 +13,5 @@ coverage/
 .claude/
 docs/superpowers/*
 .serena/
+.memsearch/
+.pr-review/
